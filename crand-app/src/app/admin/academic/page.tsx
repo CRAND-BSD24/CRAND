@@ -26,64 +26,45 @@ const AcademicPage = () => {
   }, []);
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <h1 className="text-2xl font-bold mb-4">Akademik Santri</h1>
-      <div className="bg-white shadow rounded-lg p-4">
-        <h2 className="text-lg font-semibold mb-4">Daftar Nilai</h2>
-        <table className="w-full border-collapse border border-gray-300">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="border border-gray-300 px-4 py-2 text-left">#</th>
-              <th className="border border-gray-300 px-4 py-2 text-left">
-                Student ID
-              </th>
-              <th className="border border-gray-300 px-4 py-2 text-left">
-                Subject ID
-              </th>
-              <th className="border border-gray-300 px-4 py-2 text-left">
-                Semester
-              </th>
-              <th className="border border-gray-300 px-4 py-2 text-left">
-                Tahun Ajaran
-              </th>
-              <th className="border border-gray-300 px-4 py-2 text-left">
-                Nilai
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {grades.map((grade, index) => (
-              <tr key={grade._id}>
-                <td className="border border-gray-300 px-4 py-2">
-                  {index + 1}
-                </td>
-                <td className="border border-gray-300 px-4 py-2">
-                  {grade.student_name}
-                </td>
-                <td className="border border-gray-300 px-4 py-2">
-                  {grade.subject_name}
-                </td>
+    <div className="min-h-screen bg-[#9ACBD0] p-6 md:p-10">
+      <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl p-6 md:p-10">
+        <h1 className="text-3xl font-bold text-[#006A71] mb-6 text-center">
+          Akademik Santri
+        </h1>
 
-                <td className="border border-gray-300 px-4 py-2">
-                  {grade.semester}
-                </td>
-                <td className="border border-gray-300 px-4 py-2">
-                  {grade.academic_year}
-                </td>
-                <td className="border border-gray-300 px-4 py-2">
-                  {grade.score}
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse rounded-xl overflow-hidden shadow-md">
+            <thead>
+              <tr className="bg-[#B5DAD6] text-[#004D4D]">
+                <th className="px-4 py-3 text-left">#</th>
+                <th className="px-4 py-3 text-left">Nama Santri</th>
+                <th className="px-4 py-3 text-left">Mata Pelajaran</th>
+                <th className="px-4 py-3 text-left">Semester</th>
+                <th className="px-4 py-3 text-left">Tahun Ajaran</th>
+                <th className="px-4 py-3 text-left">Nilai</th>
               </tr>
-            ))}
-            {grades.length === 0 && (
-              <tr>
-                <td colSpan={6} className="text-center py-4 text-gray-500">
-                  Tidak ada data nilai.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {grades.map((grade, index) => (
+                <tr key={grade._id} className="odd:bg-white even:bg-[#F1F9F9]">
+                  <td className="px-4 py-3">{index + 1}</td>
+                  <td className="px-4 py-3">{grade.student_name}</td>
+                  <td className="px-4 py-3">{grade.subject_name}</td>
+                  <td className="px-4 py-3">{grade.semester}</td>
+                  <td className="px-4 py-3">{grade.academic_year}</td>
+                  <td className="px-4 py-3">{grade.score}</td>
+                </tr>
+              ))}
+              {grades.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="text-center py-6 text-gray-500">
+                    Tidak ada data nilai.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

@@ -25,23 +25,29 @@ export default function AbsensiPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center px-4">
-      <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-md border border-blue-200">
-        <h2 className="text-3xl text-black text-center mb-6">Absensi</h2>
+    <div className="min-h-screen bg-[#9ACBD0] flex items-center justify-center px-4 py-10">
+      <div className="bg-white shadow-2xl rounded-2xl p-8 w-full max-w-lg border border-[#48A6A7]">
+        <h2 className="text-3xl font-bold text-[#006A71] text-center mb-6">
+          Absensi Santri
+        </h2>
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-gray-700 font-semibold mb-2">Upload Foto Wajah</label>
+            <label className="block text-gray-700 font-semibold mb-2">
+              Upload Foto Wajah
+            </label>
             <input
               type="file"
               accept="image/*"
               onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-              className="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full border-2 border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#48A6A7] focus:border-transparent"
               required
             />
           </div>
+
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-all duration-300"
+            className="w-full bg-[#48A6A7] text-white py-3 px-4 rounded-xl font-semibold hover:bg-[#3d9395] transition-all duration-300"
           >
             Submit Absensi
           </button>
@@ -49,7 +55,7 @@ export default function AbsensiPage() {
 
         {message && (
           <div
-            className={`mt-6 text-center text-sm font-medium ${
+            className={`mt-6 text-center text-sm font-semibold ${
               isSuccess ? 'text-green-600' : 'text-red-500'
             }`}
           >

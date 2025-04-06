@@ -11,45 +11,45 @@ const dummyUser = {
 
 export default function ProfilePage() {
   const handleLogout = () => {
-    // Tambahkan logika logout di sini
     console.log('Logout clicked');
-    // Contoh: hapus cookie, redirect, dll.
+    // Tambahkan aksi logout seperti menghapus cookie/token dan redirect
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-white p-6 flex flex-col items-center">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
-        <div className="flex items-center justify-center mb-6">
-          <UserCircle2 className="w-20 h-20 text-blue-500" />
+    <div className="min-h-screen bg-gradient-to-br from-[#E0F4F5] to-[#B1E3E5] flex items-center justify-center px-4 py-10">
+      <div className="bg-white rounded-3xl shadow-2xl border border-[#B8E2E4] p-8 max-w-md w-full">
+        <div className="flex flex-col items-center">
+          <div className="relative mb-4">
+            <div className="bg-blue-100 p-2 rounded-full shadow-inner">
+              <UserCircle2 className="w-24 h-24 text-blue-500" />
+            </div>
+            <div className="absolute bottom-1 right-1 bg-white rounded-full shadow p-1 text-green-500 text-xs font-bold">
+              ●
+            </div>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-700">{dummyUser.name}</h2>
+          <p className="text-sm text-gray-500 mb-6">{dummyUser.email}</p>
         </div>
-        <div className="space-y-4 text-gray-600">
+
+        <div className="grid gap-4 text-sm text-gray-600">
           <div className="flex justify-between">
-            <span className="font-medium">Nama</span>
-            <span>{dummyUser.name}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-medium">Email</span>
-            <span>{dummyUser.email}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-medium">Peran</span>
+            <span className="font-medium text-gray-700">Peran</span>
             <span className="text-blue-600 font-semibold">{dummyUser.role}</span>
           </div>
           <div className="flex justify-between">
-            <span className="font-medium">Bergabung</span>
+            <span className="font-medium text-gray-700">Tanggal Bergabung</span>
             <span>{dummyUser.joinedAt}</span>
           </div>
         </div>
-      </div>
 
-      {/* Tombol Logout */}
-      <button
-        onClick={handleLogout}
-        className="mt-6 flex items-center gap-2 px-6 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl shadow transition duration-300"
-      >
-        <LogOut size={18} />
-        Logout
-      </button>
+        <button
+          onClick={handleLogout}
+          className="mt-8 w-full flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl font-semibold shadow-md transition-all duration-300"
+        >
+          <LogOut size={18} />
+          Logout
+        </button>
+      </div>
     </div>
   );
 }

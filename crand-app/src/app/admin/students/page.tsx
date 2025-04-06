@@ -24,48 +24,85 @@ const StudentsPage = () => {
     fetchStudents();
   }, []);
 
+  const handleAccept = (id: string) => {
+    console.log(`Santri ${id} diterima`);
+    // Tambahkan logic "accept" di sini
+  };
+
+  const handleReject = (id: string) => {
+    console.log(`Santri ${id} ditolak`);
+    // Tambahkan logic "reject" di sini
+  };
+
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <h1 className="text-2xl font-bold mb-4">Santri Management</h1>
-      <div className="bg-white shadow rounded-lg p-4">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">Daftar Santri</h2>
+    <div className="p-8 bg-[#9ACBD0] min-h-screen">
+      <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-xl p-8 mt-12">
+        <h1 className="text-3xl font-bold text-[#006A71] mb-8 text-center">
+          Manajemen Data Santri
+        </h1>
+
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-semibold text-[#006A71]">Daftar Santri</h2>
           <AddStudentModal onStudentAdded={fetchStudents} />
         </div>
-        <table className="w-full border-collapse border border-gray-300">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="border border-gray-300 px-4 py-2 text-left">#</th>
-              <th className="border border-gray-300 px-4 py-2 text-left">Nama</th>
-              <th className="border border-gray-300 px-4 py-2 text-left">Level</th>
-              <th className="border border-gray-300 px-4 py-2 text-left">Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {students.map((student, index) => (
-              <tr key={student._id}>
-                <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
-                <td className="border border-gray-300 px-4 py-2">{student.name}</td>
-                <td className="border border-gray-300 px-4 py-2">{student.level}</td>
-                <td className="border border-gray-300 px-4 py-2 space-x-2">
-                  <Link
-                    href={`/admin/students/${student._id}`}
-                    className="text-blue-500 hover:underline"
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-separate border-spacing-y-2">
+            <thead>
+              <tr className="bg-[#48A6A7] text-white">
+                <th className="px-4 py-3 rounded-l-md">#</th>
+                <th className="px-4 py-3">Nama</th>
+                <th className="px-4 py-3">Level</th>
+                <th className="px-4 py-3">Aksi</th>
+                <th className="px-4 py-3 rounded-r-md">Verifikasi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {students.map((student, index) => (
+                <tr
+                  key={student._id}
+                  className="bg-[#f9fdfd] hover:bg-[#e0f4f4] transition-colors rounded-md shadow-sm"
+                >
+                  <td className="px-4 py-3">{index + 1}</td>
+                  <td className="px-4 py-3">{student.name}</td>
+                  <td className="px-4 py-3">{student.level}</td>
+                  <td className="px-4 py-3">
+                    <Link
+                      href={`/admin/students/${student._id}`}
+                      className="text-[#006A71] font-semibold hover:underline transition-all"
+                    >
+                      Detail
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3 space-x-2 flex flex-wrap">
+                    <button
+                      onClick={() => handleAccept(student._id)}
+                      className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg text-sm font-semibold shadow transition-transform transform hover:scale-105"
+                    >
+                      Accept
+                    </button>
+                    <button
+                      onClick={() => handleReject(student._id)}
+                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-sm font-semibold shadow transition-transform transform hover:scale-105"
+                    >
+                      Reject
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {students.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="text-center py-6 text-[#006A71] italic bg-[#f0fafa] rounded-md"
                   >
-                    Detail
-                  </Link>
-                </td>
-              </tr>
-            ))}
-            {students.length === 0 && (
-              <tr>
-                <td colSpan={4} className="text-center py-4 text-gray-500">
-                  Tidak ada data santri.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                    Tidak ada data santri.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import { getStudentById } from "./action";
 import { notFound } from "next/navigation";
-import DeleteButton from "./DeleteButton"; // Komponen delete terpisah (lihat di bawah)
+import DeleteButton from "./DeleteButton";
 import EditStudentModal from "./EditStudentModal";
 
 interface SantriDetailPageProps {
@@ -9,88 +9,63 @@ interface SantriDetailPageProps {
   };
 }
 
-export default async function SantriDetailPage({
-  params,
-}: SantriDetailPageProps) {
+export default async function SantriDetailPage({ params }: SantriDetailPageProps) {
   const data = await getStudentById(params.id);
-
-  if (!data) {
-    notFound();
-  }
+  if (!data) notFound();
 
   const student = JSON.parse(data);
-
-  // Pisahkan tempat & tanggal lahir
-  const [birthPlace, birthDate] = student.birth_place_date?.split(", ") ?? [
-    "-",
-    "-",
-  ];
+  const [birthPlace, birthDate] = student.birth_place_date?.split(", ") ?? ["-", "-"];
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Detail Santri</h1>
+    <div className="min-h-screen bg-[#9ACBD0] p-6 md:p-10">
+      <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-2xl p-6 md:p-10">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+          <h1 className="text-3xl font-bold text-[#006A71]">Detail Santri</h1>
+          <div className="flex space-x-2">
+            <EditStudentModal student={student} />
+            <DeleteButton id={params.id} />
+          </div>
+        </div>
 
-      <div className="flex justify-end space-x-2 mb-4">
-        <EditStudentModal student={student} />
-        <DeleteButton id={params.id} />
-      </div>
+        {/* Content Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Image */}
+          <div className="flex justify-center md:justify-start">
+            <img
+              src={student.profile_picture}
+              alt={student.name}
+              className="w-44 h-44 object-cover rounded-full border-4 border-[#48A6A7] shadow-lg"
+            />
+          </div>
 
-      <div className="bg-white shadow-md rounded-lg p-6 space-y-4">
-        <div>
-          <img
-            src={student.profile_picture}
-            alt={student.name}
-            className="w-32 h-32 object-cover rounded-full border"
-          />
-        </div>
-        <div>
-          <strong>ID:</strong> {student.id}
-        </div>
-        <div>
-          <strong>Nama:</strong> {student.name}
-        </div>
-        <div>
-          <strong>Email:</strong> {student.email}
-        </div>
-        <div>
-          <strong>Nomor HP:</strong> {student.phone_number}
-        </div>
-        <div>
-          <strong>Program:</strong> {student.program}
-        </div>
-        <div>
-          <strong>Jenis Kelamin:</strong> {student.gender}
-        </div>
-        <div>
-          <strong>Alamat:</strong> {student.address}
-        </div>
-        <div>
-          <strong>Level:</strong> {student.level}
-        </div>
-        <div>
-          <strong>Tahun Ajaran:</strong> {student.academic_year}
-        </div>
-        <div>
-          <strong>Tempat Lahir:</strong> {birthPlace}
-        </div>
-        <div>
-          <strong>Tanggal Lahir:</strong> {birthDate}
-        </div>
-        <div>
-          <strong>Status Kelulusan:</strong> {student.graduation_status}
-        </div>
-        <div>
-          <strong>Status Pembayaran:</strong> {student.payment_status}
-        </div>
-        <div>
-          <strong>Dibuat:</strong>{" "}
-          {new Date(student.created_at).toLocaleString()}
-        </div>
-        <div>
-          <strong>Diperbarui:</strong>{" "}
-          {new Date(student.updated_at).toLocaleString()}
+          {/* Detail */}
+          <div className="space-y-2 text-gray-800 text-base">
+            <Detail label="ID" value={student.id} />
+            <Detail label="Nama" value={student.name} />
+            <Detail label="Email" value={student.email} />
+            <Detail label="Nomor HP" value={student.phone_number} />
+            <Detail label="Program" value={student.program} />
+            <Detail label="Jenis Kelamin" value={student.gender} />
+            <Detail label="Alamat" value={student.address} />
+            <Detail label="Level" value={student.level} />
+            <Detail label="Tahun Ajaran" value={student.academic_year} />
+            <Detail label="Tempat Lahir" value={birthPlace} />
+            <Detail label="Tanggal Lahir" value={birthDate} />
+            <Detail label="Status Kelulusan" value={student.graduation_status} />
+            <Detail label="Status Pembayaran" value={student.payment_status} />
+            <Detail label="Dibuat" value={new Date(student.created_at).toLocaleString()} />
+            <Detail label="Diperbarui" value={new Date(student.updated_at).toLocaleString()} />
+          </div>
         </div>
       </div>
     </div>
   );
 }
+
+const Detail = ({ label, value }: { label: string; value: string }) => (
+  <div>
+    <span className="font-medium text-[#006A71]">{label}:</span>{" "}
+    <span className="text-gray-700">{value || '-'}</span>
+  </div>
+);
