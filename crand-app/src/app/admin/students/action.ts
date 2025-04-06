@@ -14,3 +14,21 @@ export const getAllStudents = async () => {
     return JSON.stringify([]);
   }
 };
+
+export const createStudent = async (formData: any) => {
+  const client = await getMongoClientInstance();
+  const db = client.db("pesantren_db");
+
+  try {
+    const result = await db.collection("prospective_students").insertOne({
+      ...formData,
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
+
+    return result.insertedId ? true : false;
+  } catch (error) {
+    console.error("Error creating student:", error);
+    return false;
+  }
+};

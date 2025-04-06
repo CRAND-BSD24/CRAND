@@ -1,7 +1,9 @@
 'use client';
+
 import React, { useEffect, useState } from 'react';
 import { getAllStudents } from './action';
 import Link from 'next/link';
+import AddStudentModal from './AddStudentModal';
 
 interface Student {
   _id: string;
@@ -12,13 +14,13 @@ interface Student {
 const StudentsPage = () => {
   const [students, setStudents] = useState<Student[]>([]);
 
-  useEffect(() => {
-    const fetchStudents = async () => {
-      const response = await getAllStudents();
-      const data = JSON.parse(response);
-      setStudents(data);
-    };
+  const fetchStudents = async () => {
+    const response = await getAllStudents();
+    const data = JSON.parse(response);
+    setStudents(data);
+  };
 
+  useEffect(() => {
     fetchStudents();
   }, []);
 
@@ -28,9 +30,7 @@ const StudentsPage = () => {
       <div className="bg-white shadow rounded-lg p-4">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">Daftar Santri</h2>
-          <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-            Tambah Santri
-          </button>
+          <AddStudentModal onStudentAdded={fetchStudents} />
         </div>
         <table className="w-full border-collapse border border-gray-300">
           <thead>
@@ -54,7 +54,6 @@ const StudentsPage = () => {
                   >
                     Detail
                   </Link>
-                  <button className="text-red-500 hover:underline">Hapus</button>
                 </td>
               </tr>
             ))}

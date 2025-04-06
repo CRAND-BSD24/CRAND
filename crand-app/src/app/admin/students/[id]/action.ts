@@ -20,3 +20,43 @@ export const getStudentById = async (id: string) => {
     return null;
   }
 };
+
+// ✅ Fungsi untuk edit data santri
+export const updateStudentById = async (id: string, updatedData: any) => {
+  const client = await getMongoClientInstance();
+  const db = client.db("pesantren_db");
+
+  try {
+    const result = await db.collection("prospective_students").updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          ...updatedData,
+          updated_at: new Date()
+        }
+      }
+    );
+
+    return result.modifiedCount > 0;
+  } catch (error) {
+    console.error("Error updating student:", error);
+    return false;
+  }
+};
+
+// ❌ Fungsi untuk hapus data santri
+export const deleteStudentById = async (id: string) => {
+  const client = await getMongoClientInstance();
+  const db = client.db("pesantren_db");
+
+  try {
+    const result = await db.collection("prospective_students").deleteOne({
+      _id: new ObjectId(id),
+    });
+
+    return result.deletedCount > 0;
+  } catch (error) {
+    console.error("Error deleting student:", error);
+    return false;
+  }
+};
