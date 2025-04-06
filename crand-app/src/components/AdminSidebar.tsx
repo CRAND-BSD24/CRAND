@@ -35,6 +35,11 @@ const AdminSidebar = () => {
               Profil
             </a>
           </li>
+          <li className="mb-4">
+            <a href="/admin/pis-assistant" className="hover:text-gray-300">
+              PIS Assistant
+            </a>
+          </li>
         </ul>
       </nav>
     </aside>
