@@ -13,6 +13,25 @@ interface ClassDistribution {
   count: number;
 }
 
+// Helper function to get gender display text
+function getGenderDisplay(gender: string | undefined): string {
+  if (!gender) return 'Tidak Diketahui';
+  
+  // Handle various possible gender values from database
+  switch(gender.toLowerCase()) {
+    case 'l':
+    case 'laki-laki':
+    case 'male':
+      return 'Laki-laki';
+    case 'p':
+    case 'perempuan':
+    case 'female':
+      return 'Perempuan';
+    default:
+      return 'Tidak Diketahui';
+  }
+}
+
 export async function processQuestion(question: string): Promise<string> {
   try {
     const client = await getMongoClientInstance();
@@ -74,7 +93,7 @@ export async function processQuestion(question: string): Promise<string> {
         let response = `Informasi tentang santri ${student.name}:\n\n`;
         response += `Kelas: ${student.class}\n`;
         response += `Status: ${student.status}\n`;
-        response += `Jenis Kelamin: ${student.gender === 'L' ? 'Laki-laki' : 'Perempuan'}\n`;
+        response += `Jenis Kelamin: ${getGenderDisplay(student.gender)}\n`;
         if (student.enrollmentDate) {
           response += `Tanggal Masuk: ${new Date(student.enrollmentDate).toLocaleDateString('id-ID')}\n`;
         }
