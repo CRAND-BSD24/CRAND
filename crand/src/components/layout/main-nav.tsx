@@ -8,17 +8,17 @@ import { LayoutDashboard, Users, BookOpen, CalendarDays, Bot } from "lucide-reac
 const items = [
   {
     title: "Dashboard",
-    href: "/dashboard",
+    href: "/",
     icon: LayoutDashboard,
   },
   {
     title: "Santri",
-    href: "/santri",
+    href: "/student",
     icon: Users,
   },
   {
     title: "Ustadz",
-    href: "/ustadz",
+    href: "/teacher",
     icon: Users,
   },
   {
