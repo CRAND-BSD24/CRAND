@@ -1,11 +1,11 @@
- 'use client';
+'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import { processQuestion } from './action';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MessageCircle, Send, Bot } from 'lucide-react';
+import { MessageCircle, Send, Bot, User } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -39,7 +39,6 @@ export default function PISAssistant() {
     setInput('');
     setIsLoading(true);
 
-    // Add user message to chat
     setMessages(prev => [...prev, { 
       role: 'user', 
       content: userMessage,
@@ -48,8 +47,6 @@ export default function PISAssistant() {
 
     try {
       const response = await processQuestion(userMessage);
-      
-      // Add AI response to chat
       setMessages(prev => [...prev, { 
         role: 'assistant', 
         content: response,
@@ -97,15 +94,22 @@ export default function PISAssistant() {
                 message.role === 'user' ? 'justify-end' : 'justify-start'
               }`}
             >
-              <div
-                className={`flex flex-col max-w-[80%] space-y-1 ${
-                  message.role === 'user' ? 'items-end' : 'items-start'
-                }`}
-              >
+              <div className={`flex gap-3 max-w-[85%] ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                <div className="flex-shrink-0 w-8 h-8">
+                  {message.role === 'user' ? (
+                    <div className="bg-primary/10 rounded-full p-1">
+                      <User className="h-6 w-6 text-primary" />
+                    </div>
+                  ) : (
+                    <div className="bg-white border rounded-full p-1 shadow-sm">
+                      <Bot className="h-6 w-6 text-primary" />
+                    </div>
+                  )}
+                </div>
                 <div
-                  className={`rounded-lg p-3 ${
+                  className={`rounded-2xl px-4 py-3 border border-black ${
                     message.role === 'user'
-                      ? 'bg-primary text-primary-foreground'
+                      ? 'bg-primary text-black'
                       : 'bg-muted'
                   }`}
                 >
@@ -114,19 +118,26 @@ export default function PISAssistant() {
                       {line}
                     </p>
                   ))}
+                  <span className="text-xs text-muted-foreground mt-1 block">
+                    {formatTime(message.timestamp)}
+                  </span>
                 </div>
-                <span className="text-xs text-muted-foreground px-2">
-                  {formatTime(message.timestamp)}
-                </span>
               </div>
             </div>
           ))}
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-muted rounded-lg p-3">
-                <div className="flex items-center gap-2">
-                  <MessageCircle className="w-4 h-4 animate-bounce" />
-                  <span>Sedang mengetik...</span>
+              <div className="flex gap-3">
+                <div className="flex-shrink-0 w-8 h-8">
+                  <div className="bg-white border rounded-full p-1 shadow-sm">
+                    <Bot className="h-6 w-6 text-primary animate-pulse" />
+                  </div>
+                </div>
+                <div className="bg-muted rounded-lg p-3">
+                  <div className="flex items-center gap-2">
+                    <MessageCircle className="w-4 h-4 animate-bounce" />
+                    <span>Sedang mengetik...</span>
+                  </div>
                 </div>
               </div>
             </div>
