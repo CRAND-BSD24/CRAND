@@ -14,6 +14,9 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { useEffect, useState } from "react";
+import { getAllTeachers, getAllStudents } from "./action";
+
 
 ChartJS.register(
   CategoryScale,
@@ -25,6 +28,30 @@ ChartJS.register(
 );
 
 const AdminDashboard = () => {
+  const [students, setStudents] = useState([]);
+  const [teachers, setTeachers] = useState([]);
+  
+  useEffect(() => {
+    
+    const fetchStudents = async () => {
+      const response = await getAllStudents();
+      const data = JSON.parse(response);
+      console.log(data);
+      
+      setStudents(data);
+    };
+
+    const fetchTeachers = async () => {
+      const response = await getAllTeachers();
+      const data = JSON.parse(response);
+      
+      setTeachers(data);
+    };
+
+    fetchStudents();
+    fetchTeachers();
+  }, [])
+
   const weeklyData = {
     labels: ["Minggu 1", "Minggu 2", "Minggu 3", "Minggu 4"],
     datasets: [
@@ -72,8 +99,7 @@ const AdminDashboard = () => {
             <Users className="text-blue-500 w-8 h-8" />
             <div>
               <p className="text-lg font-semibold">Total Santri</p>
-              <p className="text-2xl font-bold">245</p>
-              <p className="text-sm text-gray-500">+12 bulan ini</p>
+              <p className="text-2xl font-bold">{students.length}</p>
             </div>
           </CardContent>
         </Card>
@@ -82,8 +108,7 @@ const AdminDashboard = () => {
             <User className="text-green-500 w-8 h-8" />
             <div>
               <p className="text-lg font-semibold">Total Ustadz</p>
-              <p className="text-2xl font-bold">32</p>
-              <p className="text-sm text-gray-500">+2 bulan ini</p>
+              <p className="text-2xl font-bold">{teachers.length}</p>
             </div>
           </CardContent>
         </Card>

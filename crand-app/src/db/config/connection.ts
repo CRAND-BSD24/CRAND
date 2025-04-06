@@ -3,6 +3,8 @@ import { config } from "dotenv";
 config();
 
 const connectionString = process.env.MONGODB_CONNECTION_STRING;
+// test INI
+const dbName = "pesantren_db";
 
 // Memastikan bahwa connectionString sudah ada value-nya
 if (!connectionString) {
@@ -19,6 +21,8 @@ export const getMongoClientInstance = async () => {
     client = await MongoClient.connect(connectionString);
     await client.connect();
   }
+
+  //test INI
 
   return client;
 };

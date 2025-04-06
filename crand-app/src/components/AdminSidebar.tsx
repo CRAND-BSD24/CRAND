@@ -11,33 +11,28 @@ const AdminSidebar = () => {
             </a>
           </li>
           <li className="mb-4">
-            <a href="/admin/users" className="hover:text-gray-300">
-              Users
-            </a>
-          </li>
-          <li className="mb-4">
-            <a href="/admin/settings" className="hover:text-gray-300">
-              Settings
+            <a href="/admin/students" className="hover:text-gray-300">
+              Santri
             </a>
           </li>
           <li className="mb-4">
             <a href="/admin/academic" className="hover:text-gray-300">
-              Academic
+              Akademik
             </a>
           </li>
           <li className="mb-4">
             <a href="/admin/attendance" className="hover:text-gray-300">
-              Attendance
+              Absensi
             </a>
           </li>
           <li className="mb-4">
             <a href="/admin/memorization" className="hover:text-gray-300">
-              Memorization
+              Hafalan
             </a>
           </li>
           <li className="mb-4">
             <a href="/admin/profile" className="hover:text-gray-300">
-              Profile
+              Profil
             </a>
           </li>
         </ul>
