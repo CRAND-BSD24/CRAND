@@ -9,6 +9,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Pencil } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -16,20 +17,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { createAttendance } from "@/app/teacher/attendance/action";
+import { createAttendance } from "@/app/teacher/attendance/actions";
 import { toast } from "sonner";
 
-interface AttendanceModalProps {
+interface StudentAttendanceModalProps {
   studentId: string;
   studentName: string;
   onSuccess?: () => void;
 }
 
-export default function AttendanceModal({
+export default function StudentAttendanceModal({
   studentId,
   studentName,
   onSuccess,
-}: AttendanceModalProps) {
+}: StudentAttendanceModalProps) {
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<
     "Present" | "Sick" | "Permission" | "Absent"
@@ -55,7 +56,10 @@ export default function AttendanceModal({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Edit Kehadiran</Button>
+        <Button variant="outline" size="sm" className="hover:bg-blue-50">
+          <Pencil className="mr-2 h-4 w-4" />
+          Edit
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
