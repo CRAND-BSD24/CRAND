@@ -93,25 +93,7 @@ const AdminDashboard = () => {
         Selamat datang di Sistem Manajemen Pesantren.
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="flex items-center space-x-4">
-            <Users className="text-blue-500 w-8 h-8" />
-            <div>
-              <p className="text-lg font-semibold">Total Santri</p>
-              <p className="text-2xl font-bold">{students.length}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="flex items-center space-x-4">
-            <User className="text-green-500 w-8 h-8" />
-            <div>
-              <p className="text-lg font-semibold">Total Ustadz</p>
-              <p className="text-2xl font-bold">{teachers.length}</p>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-2 md:grid-cols-2 gap-14">
         <Card>
           <CardContent className="flex items-center space-x-4">
             <BookOpen className="text-purple-500 w-8 h-8" />
@@ -134,8 +116,13 @@ const AdminDashboard = () => {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
+      <div className="grid grid-cols-1 grid-rows-1 gap-1">
+        <div>
+          <h1>
+            
+          </h1>
+        </div>
+        <Card className=" size-280 h-170">
           <CardHeader>
             <CardTitle>Perkembangan Mingguan</CardTitle>
             <p className="text-sm text-gray-500">
@@ -144,33 +131,6 @@ const AdminDashboard = () => {
           </CardHeader>
           <CardContent>
             <Bar data={weeklyData} />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Santri Berprestasi Minggu Ini</CardTitle>
-            <p className="text-sm text-gray-500">
-              Santri dengan pencapaian terbaik
-            </p>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-4">
-              {topStudents.map((student, index) => (
-                <li key={index} className="flex items-center space-x-4">
-                  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-600">
-                    {student.name[0]}
-                  </div>
-                  <div>
-                    <p className="font-semibold">{student.name}</p>
-                    <p className="text-sm text-gray-500">{student.class}</p>
-                    <p className="text-sm text-gray-700">
-                      {student.achievement}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ul>
           </CardContent>
         </Card>
       </div>
