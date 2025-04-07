@@ -11,9 +11,11 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "lucide-react";
+import AttendanceModal from "@/components/AttendanceModal";
+import { useState } from "react";
 
 const AttendancePage = () => {
-  const attendanceData = [
+  const [attendanceData, setAttendanceData] = useState([
     {
       name: "Ahmad Farhan",
       class: "10A",
@@ -32,7 +34,23 @@ const AttendancePage = () => {
       status: "Hadir",
       date: "2024-03-20",
     },
-  ];
+  ]);
+
+  const handleAttendanceSuccess = (name: string, timestamp: string) => {
+    setAttendanceData((prevData) => [
+      {
+        name,
+        class: "10A",
+        status: "Hadir",
+        date: new Date().toISOString().split("T")[0],
+      },
+      ...prevData,
+    ]);
+  };
+
+  const handleAttendanceError = (message: string) => {
+    console.error(message);
+  };
 
   return (
     <div className="space-y-6 m-5">
@@ -41,10 +59,10 @@ const AttendancePage = () => {
           <h1 className="text-2xl font-bold">Manajemen Kehadiran</h1>
           <p className="text-gray-600">Kelola kehadiran santri di kelas Anda</p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700">
-          <Calendar className="mr-2 h-4 w-4" />
-          Tambah Kehadiran
-        </Button>
+        <AttendanceModal
+          onSuccess={handleAttendanceSuccess}
+          onError={handleAttendanceError}
+        />
       </div>
 
       <Card className="bg-white shadow-lg">
