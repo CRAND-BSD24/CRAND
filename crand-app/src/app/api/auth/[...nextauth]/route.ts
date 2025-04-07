@@ -1,10 +1,10 @@
-import NextAuth from "next-auth";
+import NextAuth, { AuthOptions, SessionStrategy } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { cookies } from "next/headers";
 import { getMongoClientInstance } from "@/db/config/connection";
 import { compare } from "bcrypt";
 
-const handler = NextAuth({
+export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -21,10 +21,10 @@ const handler = NextAuth({
 
           const client = await getMongoClientInstance();
           const db = client.db("pesantren_db");
-          
+
           console.log("Attempting to find user:", credentials.email);
-          const user = await db.collection("users").findOne({ 
-            email: credentials.email.toLowerCase() 
+          const user = await db.collection("users").findOne({
+            email: credentials.email.toLowerCase(),
           });
 
           if (!user) {
@@ -33,7 +33,10 @@ const handler = NextAuth({
           }
 
           console.log("Checking password...");
-          const passwordValid = await compare(credentials.password, user.password);
+          const passwordValid = await compare(
+            credentials.password,
+            user.password
+          );
 
           if (!passwordValid) {
             console.log("Invalid password");
@@ -73,22 +76,24 @@ const handler = NextAuth({
       return session;
     },
   },
-  debug: process.env.NODE_ENV === 'development',
+  debug: process.env.NODE_ENV === "development",
   session: {
-    strategy: "jwt",
+    strategy: "jwt" as SessionStrategy,
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   cookies: {
     sessionToken: {
-      name: 'next-auth.session-token',
+      name: "next-auth.session-token",
       options: {
         httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: process.env.NODE_ENV === 'production',
-      }
-    }
-  }
-});
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
+  },
+};
 
-export { handler as GET, handler as POST }; 
+const handler = NextAuth(authOptions);
+
+export { handler as GET, handler as POST };
