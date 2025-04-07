@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bar } from "react-chartjs-2";
-import { Users, BookOpen, Calendar, Award } from "lucide-react";
+import { User, Users, BookOpen, Calendar } from "lucide-react";
 
 // Import dan daftarkan elemen Chart.js
 import {
@@ -14,6 +14,8 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { useEffect, useState } from "react";
+import { getAllTeachers, getAllStudents } from "../admin/action";
 
 ChartJS.register(
   CategoryScale,
@@ -25,6 +27,26 @@ ChartJS.register(
 );
 
 const TeacherDashboard = () => {
+  const [students, setStudents] = useState([]);
+  const [teachers, setTeachers] = useState([]);
+
+  useEffect(() => {
+    const fetchStudents = async () => {
+      const response = await getAllStudents();
+      const data = JSON.parse(response);
+      setStudents(data);
+    };
+
+    const fetchTeachers = async () => {
+      const response = await getAllTeachers();
+      const data = JSON.parse(response);
+      setTeachers(data);
+    };
+
+    fetchStudents();
+    fetchTeachers();
+  }, []);
+
   const weeklyData = {
     labels: ["Minggu 1", "Minggu 2", "Minggu 3", "Minggu 4"],
     datasets: [
@@ -60,10 +82,10 @@ const TeacherDashboard = () => {
   ];
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Dashboard Guru</h1>
+    <div className="space-y-6 bg-gradient-to-br from-[#BEE5E6] to-[#9ACBD0] h-full-screen m-5">
+      <h1 className="text-2xl font-bold">Dashboard</h1>
       <p className="text-gray-600">
-        Selamat datang di Dashboard Guru Sistem Manajemen Pesantren.
+        Selamat datang di Sistem Manajemen Pesantren.
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -71,15 +93,23 @@ const TeacherDashboard = () => {
           <CardContent className="flex items-center space-x-4">
             <Users className="text-blue-500 w-8 h-8" />
             <div>
-              <p className="text-lg font-semibold">Total Siswa</p>
-              <p className="text-2xl font-bold">45</p>
-              <p className="text-sm text-gray-500">Kelas Anda</p>
+              <p className="text-lg font-semibold">Total Santri</p>
+              <p className="text-2xl font-bold">{students.length}</p>
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="flex items-center space-x-4">
-            <BookOpen className="text-green-500 w-8 h-8" />
+            <User className="text-green-500 w-8 h-8" />
+            <div>
+              <p className="text-lg font-semibold">Total Ustadz</p>
+              <p className="text-2xl font-bold">{teachers.length}</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex items-center space-x-4">
+            <BookOpen className="text-purple-500 w-8 h-8" />
             <div>
               <p className="text-lg font-semibold">Rata-rata Hafalan</p>
               <p className="text-2xl font-bold">3.2</p>
@@ -89,21 +119,11 @@ const TeacherDashboard = () => {
         </Card>
         <Card>
           <CardContent className="flex items-center space-x-4">
-            <Calendar className="text-purple-500 w-8 h-8" />
+            <Calendar className="text-orange-500 w-8 h-8" />
             <div>
               <p className="text-lg font-semibold">Kehadiran</p>
               <p className="text-2xl font-bold">98.2%</p>
               <p className="text-sm text-gray-500">+2.1% dari minggu lalu</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="flex items-center space-x-4">
-            <Award className="text-orange-500 w-8 h-8" />
-            <div>
-              <p className="text-lg font-semibold">Nilai Rata-rata</p>
-              <p className="text-2xl font-bold">85.5</p>
-              <p className="text-sm text-gray-500">+1.2 dari bulan lalu</p>
             </div>
           </CardContent>
         </Card>
@@ -114,7 +134,7 @@ const TeacherDashboard = () => {
           <CardHeader>
             <CardTitle>Perkembangan Mingguan</CardTitle>
             <p className="text-sm text-gray-500">
-              Rata-rata capaian hafalan dan belajar siswa per minggu
+              Rata-rata capaian hafalan dan belajar santri per minggu
             </p>
           </CardHeader>
           <CardContent>
@@ -124,9 +144,9 @@ const TeacherDashboard = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Siswa Berprestasi Minggu Ini</CardTitle>
+            <CardTitle>Santri Berprestasi Minggu Ini</CardTitle>
             <p className="text-sm text-gray-500">
-              Siswa dengan pencapaian terbaik di kelas Anda
+              Santri dengan pencapaian terbaik
             </p>
           </CardHeader>
           <CardContent>

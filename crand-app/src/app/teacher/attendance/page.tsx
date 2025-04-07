@@ -1,7 +1,14 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "lucide-react";
 
@@ -28,24 +35,27 @@ const AttendancePage = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 m-5">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Manajemen Kehadiran</h1>
-        <Button>
+        <div>
+          <h1 className="text-2xl font-bold">Manajemen Kehadiran</h1>
+          <p className="text-gray-600">Kelola kehadiran santri di kelas Anda</p>
+        </div>
+        <Button className="bg-blue-600 hover:bg-blue-700">
           <Calendar className="mr-2 h-4 w-4" />
           Tambah Kehadiran
         </Button>
       </div>
 
-      <Card>
+      <Card className="bg-white shadow-lg">
         <CardHeader>
-          <CardTitle>Daftar Kehadiran Siswa</CardTitle>
+          <CardTitle>Daftar Kehadiran Santri</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nama Siswa</TableHead>
+                <TableHead>Nama Santri</TableHead>
                 <TableHead>Kelas</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Tanggal</TableHead>
@@ -70,7 +80,11 @@ const AttendancePage = () => {
                   </TableCell>
                   <TableCell>{student.date}</TableCell>
                   <TableCell>
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="hover:bg-blue-50"
+                    >
                       Edit
                     </Button>
                   </TableCell>
@@ -84,4 +98,4 @@ const AttendancePage = () => {
   );
 };
 
-export default AttendancePage; 
+export default AttendancePage;
