@@ -2,7 +2,7 @@
 
 import { getMongoClientInstance } from "@/db/config/connection";
 import { Student, Achievement } from '@/types/database';
-import { ObjectId } from 'mongodb';
+import { ObjectId, Document, WithId } from 'mongodb';
 
 interface AchievementWithStudent extends Achievement {
   student: Student;
@@ -136,51 +136,181 @@ export async function processQuestion(question: string): Promise<string> {
       }
     }
 
-    // Handle questions about student achievements
-    if (normalizedQuestion.includes('prestasi') || normalizedQuestion.includes('berprestasi')) {
-      const oneWeekAgo = new Date();
-      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
-      const achievements = await db.collection('achievements')
-        .aggregate([
-          {
-            $match: {
-              date: { $gte: oneWeekAgo }
-            }
-          },
-          {
-            $lookup: {
-              from: 'students',
-              localField: 'studentId',
-              foreignField: '_id',
-              as: 'student'
-            }
-          },
-          {
-            $unwind: '$student'
-          },
-          {
-            $sort: { date: -1 }
-          }
-        ]).toArray();
-
-      if (achievements.length === 0) {
-        return "Tidak ada prestasi santri yang tercatat dalam minggu ini.";
+    // Handle questions about specific teacher
+    if (normalizedQuestion.includes('ustadz bernama') || normalizedQuestion.includes('info ustadz')) {
+      let teacherName;
+      if (normalizedQuestion.includes('ustadz bernama')) {
+        teacherName = question.split('ustadz bernama')[1].trim();
+      } else if (normalizedQuestion.includes('info ustadz')) {
+        teacherName = question.split('info ustadz')[1].trim();
       }
 
-      let response = "Berikut adalah santri yang berprestasi dalam minggu ini:\n\n";
-      achievements.forEach((achievement, index) => {
-        response += `${index + 1}. ${achievement.student.name} (${achievement.student.class})\n`;
-        response += `   Prestasi: ${achievement.title}\n`;
-        if (achievement.description) {
-          response += `   Detail: ${achievement.description}\n`;
-        }
-        response += `   Kategori: ${achievement.category}\n`;
-        response += `   Tingkat: ${achievement.level}\n`;
-        response += `   Tanggal: ${new Date(achievement.date).toLocaleDateString('id-ID')}\n\n`;
-      });
+      if (teacherName) {
+        console.log("Searching for teacher:", teacherName); // Debug log
 
-      return response;
+        try {
+          // Try different collections to find the teacher
+          let allTeachers: any[] = [];
+          
+          // Get collections available in the database
+          const collections = await db.listCollections().toArray();
+          const collectionNames = collections.map(c => c.name);
+          console.log("Available collections:", collectionNames);
+          
+          // Check teachers collection
+          if (collectionNames.includes("teachers")) {
+            const teachersData = await db.collection("teachers").find({}).toArray();
+            console.log(`Found ${teachersData.length} records in teachers collection`);
+            allTeachers = [...allTeachers, ...teachersData];
+          }
+          
+          // Check teacher collection (singular)
+          if (collectionNames.includes("teacher")) {
+            const teacherData = await db.collection("teacher").find({}).toArray();
+            console.log(`Found ${teacherData.length} records in teacher collection`);
+            allTeachers = [...allTeachers, ...teacherData];
+          }
+          
+          // Check users collection for teachers
+          if (collectionNames.includes("users")) {
+            // Try different strategies to find teachers in users collection
+            // Strategy 1: Look for role field
+            const teacherUsers = await db.collection("users").find({ 
+              $or: [
+                { role: { $in: ["teacher", "ustadz", "ustadzah", "guru"] } },
+                { userType: { $in: ["teacher", "ustadz", "ustadzah", "guru"] } }
+              ]
+            }).toArray();
+            
+            // Strategy 2: If no teachers found with roles, check if there's any type indicator
+            if (teacherUsers.length === 0) {
+              const allUsers = await db.collection("users").find({}).toArray();
+              const potentialTeachers = allUsers.filter(user => {
+                // Look for any field that might indicate this is a teacher
+                return Object.values(user).some(value => 
+                  typeof value === 'string' && 
+                  ["teacher", "ustadz", "ustadzah", "guru"].some(term => 
+                    value.toLowerCase().includes(term)
+                  )
+                );
+              });
+              console.log(`Found ${potentialTeachers.length} potential teachers in users collection`);
+              allTeachers = [...allTeachers, ...potentialTeachers];
+            } else {
+              console.log(`Found ${teacherUsers.length} teachers in users collection`);
+              allTeachers = [...allTeachers, ...teacherUsers];
+            }
+          }
+          
+          console.log(`Combined total of ${allTeachers.length} teachers from all collections`);
+          
+          // Remove duplicates (if any) based on _id or name
+          const uniqueTeachers = allTeachers.filter((teacher, index, self) => {
+            if (!teacher._id && !teacher.name) return false;
+            
+            // If we have _id, use that for uniqueness
+            if (teacher._id) {
+              return index === self.findIndex(t => 
+                t._id && t._id.toString() === teacher._id.toString()
+              );
+            }
+            
+            // Otherwise use name
+            return index === self.findIndex(t => 
+              t.name && teacher.name && t.name.toLowerCase() === teacher.name.toLowerCase()
+            );
+          });
+          
+          console.log(`Found ${uniqueTeachers.length} unique teachers after deduplication`);
+          
+          // Try multiple search strategies
+          let matchedTeacher = null;
+          
+          if (uniqueTeachers.length > 0) {
+            matchedTeacher = uniqueTeachers.find(t => {
+              if (!t.name) return false;
+              
+              // Try exact match first
+              if (t.name.toLowerCase() === teacherName.toLowerCase()) {
+                return true;
+              }
+              
+              // Try partial match
+              if (t.name.toLowerCase().includes(teacherName.toLowerCase())) {
+                return true;
+              }
+              
+              // Try splitting the name and matching parts
+              const nameParts = t.name.toLowerCase().split(' ');
+              const searchParts = teacherName.toLowerCase().split(' ');
+              return nameParts.some((part: string) => searchParts.includes(part));
+            });
+          }
+          
+          if (!matchedTeacher) {
+            console.log("No teacher found with name:", teacherName);
+            if (uniqueTeachers.length > 0) {
+              console.log("Available teachers:", uniqueTeachers.map(t => t.name).join(', '));
+            } else {
+              console.log("No teachers found in any collection");
+            }
+            return `Maaf, tidak dapat menemukan data ustadz dengan nama "${teacherName}".`;
+          }
+          
+          console.log("Matched teacher:", JSON.stringify(matchedTeacher, null, 2));
+          
+          let response = `Informasi tentang ${matchedTeacher.name}:\n\n`;
+          
+          // Create a normalized object with standard field names
+          const teacher = {
+            name: matchedTeacher.name,
+            position: matchedTeacher.position || matchedTeacher.jabatan || matchedTeacher.title || matchedTeacher.role || "Guru",
+            status: matchedTeacher.status || "Aktif",
+            joinDate: matchedTeacher.joinDate || matchedTeacher.join_date || matchedTeacher.tanggalBergabung || matchedTeacher.created_at,
+            phone: matchedTeacher.phone || matchedTeacher.phoneNumber || matchedTeacher.telepon || matchedTeacher.noTelepon,
+            email: matchedTeacher.email,
+            specialization: matchedTeacher.specialization || matchedTeacher.keahlian || matchedTeacher.expertise || matchedTeacher.subject,
+            address: matchedTeacher.address || matchedTeacher.alamat,
+          };
+          
+          // Add all available fields from the teacher object
+          if (teacher.position) {
+            response += `Jabatan: ${teacher.position}\n`;
+          }
+          
+          if (teacher.status) {
+            response += `Status: ${teacher.status}\n`;
+          }
+          
+          if (teacher.joinDate) {
+            const date = new Date(teacher.joinDate);
+            if (!isNaN(date.getTime())) {
+              response += `Tanggal Bergabung: ${date.toLocaleDateString('id-ID')}\n`;
+            }
+          }
+          
+          if (teacher.phone) {
+            response += `Nomor Telepon: ${teacher.phone}\n`;
+          }
+          
+          if (teacher.email) {
+            response += `Email: ${teacher.email}\n`;
+          }
+          
+          if (teacher.specialization) {
+            response += `Spesialisasi: ${teacher.specialization}\n`;
+          }
+          
+          if (teacher.address) {
+            response += `Alamat: ${teacher.address}\n`;
+          }
+
+          return response;
+        } catch (error) {
+          console.error("Error fetching teacher data:", error);
+          return `Maaf, terjadi kesalahan saat mencari data ustadz dengan nama "${teacherName}".`;
+        }
+      }
     }
 
     // Handle questions about total students
@@ -202,6 +332,75 @@ export async function processQuestion(question: string): Promise<string> {
       });
 
       return response;
+    }
+
+    // Handle questions about total teachers
+    if (normalizedQuestion.includes('jumlah ustadz') || normalizedQuestion.includes('total ustadz')) {
+      try {
+        // Count teachers from multiple collections
+        let totalTeachers = 0;
+        const statusMap = new Map();
+        
+        // Get collections available in the database
+        const collections = await db.listCollections().toArray();
+        const collectionNames = collections.map(c => c.name);
+        
+        // Check teachers collection
+        if (collectionNames.includes("teachers")) {
+          const teachers = await db.collection("teachers").find({}).toArray();
+          totalTeachers += teachers.length;
+          
+          // Count by status
+          teachers.forEach(teacher => {
+            const status = teacher.status || 'Aktif';
+            statusMap.set(status, (statusMap.get(status) || 0) + 1);
+          });
+        }
+        
+        // Check teacher collection (singular)
+        if (collectionNames.includes("teacher")) {
+          const teachers = await db.collection("teacher").find({}).toArray();
+          totalTeachers += teachers.length;
+          
+          // Count by status
+          teachers.forEach(teacher => {
+            const status = teacher.status || 'Aktif';
+            statusMap.set(status, (statusMap.get(status) || 0) + 1);
+          });
+        }
+        
+        // Check users collection for teachers
+        if (collectionNames.includes("users")) {
+          const teacherUsers = await db.collection("users").find({ 
+            $or: [
+              { role: { $in: ["teacher", "ustadz", "ustadzah", "guru"] } },
+              { userType: { $in: ["teacher", "ustadz", "ustadzah", "guru"] } }
+            ]
+          }).toArray();
+          
+          totalTeachers += teacherUsers.length;
+          
+          // Count by status
+          teacherUsers.forEach(teacher => {
+            const status = teacher.status || 'Aktif';
+            statusMap.set(status, (statusMap.get(status) || 0) + 1);
+          });
+        }
+        
+        let response = `Total ustadz terdaftar: ${totalTeachers} orang\n\n`;
+        
+        if (statusMap.size > 0) {
+          response += "Detail status ustadz:\n";
+          statusMap.forEach((count, status) => {
+            response += `${status}: ${count} orang\n`;
+          });
+        }
+        
+        return response;
+      } catch (error) {
+        console.error("Error fetching teacher count:", error);
+        return "Maaf, terjadi kesalahan saat mengambil data jumlah ustadz.";
+      }
     }
 
     // Handle questions about class distribution
@@ -234,57 +433,13 @@ export async function processQuestion(question: string): Promise<string> {
       return response;
     }
 
-    // Handle questions about recent achievements
-    if (normalizedQuestion.includes('prestasi terbaru') || normalizedQuestion.includes('pencapaian terbaru')) {
-      const recentAchievements = await db.collection('achievements')
-        .aggregate([
-          {
-            $sort: { date: -1 }
-          },
-          {
-            $limit: 5
-          },
-          {
-            $lookup: {
-              from: 'students',
-              localField: 'studentId',
-              foreignField: '_id',
-              as: 'student'
-            }
-          },
-          {
-            $unwind: '$student'
-          }
-        ]).toArray();
-
-      if (recentAchievements.length === 0) {
-        return "Belum ada prestasi yang tercatat.";
-      }
-
-      let response = "Prestasi terbaru santri:\n\n";
-      recentAchievements.forEach((achievement, index) => {
-        response += `${index + 1}. ${achievement.student.name} (${achievement.student.class})\n`;
-        response += `   Prestasi: ${achievement.title}\n`;
-        if (achievement.description) {
-          response += `   Detail: ${achievement.description}\n`;
-        }
-        response += `   Kategori: ${achievement.category}\n`;
-        response += `   Tingkat: ${achievement.level}\n`;
-        if (achievement.date) {
-          response += `   Tanggal: ${new Date(achievement.date).toLocaleDateString('id-ID')}\n`;
-        }
-        response += '\n';
-      });
-
-      return response;
-    }
-
     // Default response for unrecognized questions
     return `Maaf, saya tidak dapat memahami pertanyaan Anda. Anda dapat menanyakan tentang:
-1. Prestasi santri (minggu ini atau terbaru)
-2. Jumlah total santri dan status
+1. Jumlah total santri dan status
+2. Jumlah total ustadz dan status
 3. Distribusi kelas
-4. Informasi santri tertentu (contoh: "info santri bernama Ahmad")`;
+4. Informasi santri tertentu (contoh: "info santri bernama Ahmad")
+5. Informasi ustadz tertentu (contoh: "info ustadz bernama Umar")`;
 
   } catch (error) {
     console.error('Error processing question:', error);

@@ -16,7 +16,7 @@ interface Message {
 export default function PISAssistant() {
   const [messages, setMessages] = useState<Message[]>([{
     role: 'assistant',
-    content: '👋 Selamat datang di PIS Assistant!\nSaya siap membantu informasi seputar santri. Anda bisa bertanya tentang:\n\n📌 Prestasi terbaru\n👥 Jumlah santri\n🏫 Distribusi kelas\n🔍 Data santri tertentu',
+    content: 'Selamat datang di PIS Assistant! Saya siap membantu Anda dengan informasi seputar santri dan ustadz. Anda dapat menanyakan tentang:\n1. Jumlah total santri dan status\n2. Jumlah total ustadz dan status\n3. Distribusi kelas\n4. Informasi santri tertentu (contoh: "info santri bernama Ahmad")\n5. Informasi ustadz tertentu (contoh: "info ustadz bernama Umar")',
     timestamp: new Date()
   }]);
   const [input, setInput] = useState('');
@@ -81,8 +81,10 @@ export default function PISAssistant() {
             <Bot className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-wide">PIS Assistant</h1>
-            <p className="text-sm text-white/80">Tanyakan apapun tentang santri 🌟</p>
+            <h1 className="text-xl font-semibold">PIS Assistant</h1>
+            <p className="text-sm text-muted-foreground">
+              Tanyakan informasi seputar database santri dan ustadz
+            </p>
           </div>
         </div>
 

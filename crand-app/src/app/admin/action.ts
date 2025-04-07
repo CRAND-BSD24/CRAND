@@ -10,6 +10,7 @@ export const getAllStudents = async () => {
   const data = JSON.stringify(students);
   return data;
 };
+
 export const getAllTeachers = async () => {
   const client = await getMongoClientInstance();
   const db = client.db("pesantren_db");
