@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import LogoutButton from "./LogoutButton";
+import Link from "next/link";
 
 const StudentSidebar = () => {
     return (
@@ -8,29 +9,29 @@ const StudentSidebar = () => {
                 <div className="flex-1">
                     <ul>
                         <li className="mb-4">
-                            <a href="/student" className="hover:text-gray-300">
+                            <Link href="/student" className="hover:text-gray-300">
                                 Dashboard
-                            </a>
+                            </Link>
                         </li>
                         <li className="mb-4">
-                            <a href="/student/academic" className="hover:text-gray-300">
+                            <Link href="/student/academic" className="hover:text-gray-300">
                                 Akademik
-                            </a>
+                            </Link>
                         </li>
                         <li className="mb-4">
-                            <a href="/student/attendance" className="hover:text-gray-300">
+                            <Link href="/student/attendance" className="hover:text-gray-300">
                                 Absensi
-                            </a>
+                            </Link>
                         </li>
                         <li className="mb-4">
-                            <a href="/student/memorization" className="hover:text-gray-300">
+                            <Link href="/student/memorization" className="hover:text-gray-300">
                                 Hafalan
-                            </a>
+                            </Link>
                         </li>
                         <li className="mb-4">
-                            <a href="/student/profile" className="hover:text-gray-300">
+                            <Link href="/student/profile" className="hover:text-gray-300">
                                 Profil
-                            </a>
+                            </Link>
                         </li>
                     </ul>
                 </div>

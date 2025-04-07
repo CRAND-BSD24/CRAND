@@ -10,6 +10,7 @@
     "seed": "node src/db/scripts/runSeed.js"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.1",
     "@radix-ui/react-slot": "^1.1.2",
     "@types/bcrypt": "^5.0.2",
     "bcrypt": "^5.1.1",
