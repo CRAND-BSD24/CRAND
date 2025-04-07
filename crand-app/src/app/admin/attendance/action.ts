@@ -11,6 +11,13 @@ interface AttendanceResponse {
   timestamp?: Date;
 }
 
+export interface AttendanceRecord {
+  _id: string;
+  name: string;
+  timestamp: Date;
+  photo: Buffer;
+}
+
 export async function handleAbsensi(formData: FormData): Promise<AttendanceResponse> {
   try {
     const base64Image = formData.get('photo') as string;
@@ -38,9 +45,10 @@ export async function handleAbsensi(formData: FormData): Promise<AttendanceRespo
     try {
       descriptor = JSON.parse(faceDescriptor);
       if (!Array.isArray(descriptor) || descriptor.length === 0) {
-        throw new Error('Invalid face descriptor format');
+        return { success: false, message: 'Format deskriptor wajah tidak valid' };
       }
     } catch (error) {
+      console.error('Error parsing face descriptor:', error);
       return { success: false, message: 'Format deskriptor wajah tidak valid' };
     }
 
@@ -123,5 +131,29 @@ export async function handleAbsensi(formData: FormData): Promise<AttendanceRespo
       success: false,
       message: 'Terjadi kesalahan saat memproses absensi'
     };
+  }
+}
+
+export async function getAttendanceRecords(): Promise<AttendanceRecord[]> {
+  try {
+    const client = await getMongoClientInstance();
+    const db = client.db('pesantren_db');
+    const attendanceCollection = db.collection('attendance');
+
+    const records = await attendanceCollection
+      .find({})
+      .sort({ timestamp: -1 })
+      .toArray();
+
+    // Convert ObjectId to string and Binary photo to base64
+    return records.map(record => ({
+      _id: record._id.toString(),
+      name: record.name,
+      timestamp: record.timestamp,
+      photo: record.photo.buffer.toString('base64')
+    })) as AttendanceRecord[];
+  } catch (error) {
+    console.error('Error fetching attendance records:', error);
+    return [];
   }
 }

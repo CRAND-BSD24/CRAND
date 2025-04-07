@@ -3,6 +3,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import { handleAbsensi } from "./action";
 import { FaceRecognitionService } from "@/services/faceRecognition";
+import Link from 'next/link';
+import Image from 'next/image';
+
 
 export default function AbsensiPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -189,10 +192,10 @@ export default function AbsensiPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#9ACBD0] flex items-center justify-center px-4 py-10">
-      <div className="bg-white shadow-2xl rounded-2xl p-8 w-full max-w-lg border border-[#48A6A7]">
+    <div className="min-h-screen bg-[#9ACBD0] flex flex-col items-center px-4 py-10">
+      <div className="bg-white shadow-2xl rounded-2xl p-8 w-full max-w-lg border border-[#48A6A7] mb-8">
         <h2 className="text-3xl font-bold text-[#006A71] text-center mb-6">
-          Absensi Santri
+          Absensi Kehadiran
         </h2>
 
         <div className="mb-6">
@@ -222,11 +225,12 @@ export default function AbsensiPage() {
         </div>
 
         {selectedFile && (
-          <div className="mb-6">
-            <img
+          <div className="mb-6 relative w-full h-64">
+            <Image
               src={URL.createObjectURL(selectedFile)}
               alt="Preview"
-              className="w-full rounded-xl border-2 border-gray-200"
+              fill
+              className="rounded-xl border-2 border-gray-200 object-cover"
             />
           </div>
         )}
@@ -253,6 +257,14 @@ export default function AbsensiPage() {
           >
             Submit Absensi
           </button>
+          <br />
+          <br />
+          <Link
+            href="/admin/attendance/history"
+            className="block w-full bg-[#48A6A7] text-white py-3 px-4 rounded-xl font-semibold hover:bg-[#3d9395] transition-all duration-300 text-center"
+          >
+            Lihat Riwayat Absensi
+          </Link>
         </form>
 
         {message && (
