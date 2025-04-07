@@ -6,14 +6,18 @@ import { createStudent } from './action';
 export default function AddStudentModal({ onStudentAdded }: { onStudentAdded: () => void }) {
   const [isOpen, setIsOpen] = useState(false);
   const [form, setForm] = useState({
+    profile_picture: '',
     name: '',
     email: '',
     phone_number: '',
-    address: '',
     program: '',
     gender: '',
+    address: '',
     level: '',
     academic_year: '',
+    birth_place: '',
+    birth_date: '',
+    payment_status: 'Belum Lunas',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -22,20 +26,30 @@ export default function AddStudentModal({ onStudentAdded }: { onStudentAdded: ()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = await createStudent(form);
+
+    const payload = {
+      ...form,
+      birth_place_date: `${form.birth_place}, ${form.birth_date}`,
+    };
+
+    const success = await createStudent(payload);
 
     if (success) {
       alert('Santri berhasil ditambahkan');
       setIsOpen(false);
       setForm({
+        profile_picture: '',
         name: '',
         email: '',
         phone_number: '',
-        address: '',
         program: '',
         gender: '',
+        address: '',
         level: '',
         academic_year: '',
+        birth_place: '',
+        birth_date: '',
+        payment_status: 'Belum Lunas',
       });
       onStudentAdded();
     } else {
@@ -43,13 +57,8 @@ export default function AddStudentModal({ onStudentAdded }: { onStudentAdded: ()
     }
   };
 
-  // Blok scroll background saat modal terbuka
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
-    }
+    document.body.style.overflow = isOpen ? 'hidden' : 'auto';
   }, [isOpen]);
 
   return (
@@ -65,18 +74,43 @@ export default function AddStudentModal({ onStudentAdded }: { onStudentAdded: ()
         <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn">
           <div
             className="bg-gray-100 p-6 rounded-xl w-full max-w-lg space-y-4 shadow-xl shadow-black"
-            onClick={(e) => e.stopPropagation()} // cegah close saat klik dalam modal
+            onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-2xl font-bold text-[#006A71] mb-2 text-center">Tambah Data Santri</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
+              <Input
+                name="profile_picture"
+                value={form.profile_picture}
+                onChange={handleChange}
+                placeholder="URL Foto Profil"
+              />
+              {form.profile_picture && (
+                <img
+                  src={form.profile_picture}
+                  alt="Preview Foto Profil"
+                  className="w-32 h-32 object-cover rounded-md border mx-auto"
+                />
+              )}
               <Input name="name" value={form.name} onChange={handleChange} placeholder="Nama" required />
               <Input name="email" value={form.email} onChange={handleChange} placeholder="Email" />
               <Input name="phone_number" value={form.phone_number} onChange={handleChange} placeholder="Nomor HP" />
               <Input name="address" value={form.address} onChange={handleChange} placeholder="Alamat" />
               <Input name="program" value={form.program} onChange={handleChange} placeholder="Program" />
-              <Select name="gender" value={form.gender} onChange={handleChange} />
+              <Select name="gender" value={form.gender} onChange={handleChange}>
+                <option value="">Pilih Jenis Kelamin</option>
+                <option value="Laki-laki">Laki-laki</option>
+                <option value="Perempuan">Perempuan</option>
+              </Select>
               <Input name="level" value={form.level} onChange={handleChange} placeholder="Level" />
               <Input name="academic_year" value={form.academic_year} onChange={handleChange} placeholder="Tahun Ajaran" />
+              <Input name="birth_place" value={form.birth_place} onChange={handleChange} placeholder="Tempat Lahir" />
+              <input
+                type="date"
+                name="birth_date"
+                value={form.birth_date}
+                onChange={handleChange}
+                className="w-full border border-[#9ACBD0] rounded-md px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#48A6A7] transition"
+              />
 
               <div className="flex justify-end space-x-2 pt-2">
                 <button
@@ -128,10 +162,12 @@ const Select = ({
   name,
   value,
   onChange,
+  children,
 }: {
   name: string;
   value: string;
   onChange: any;
+  children: React.ReactNode;
 }) => (
   <select
     name={name}
@@ -139,8 +175,6 @@ const Select = ({
     onChange={onChange}
     className="w-full border border-[#9ACBD0] rounded-md px-4 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#48A6A7] transition"
   >
-    <option value="">Pilih Jenis Kelamin</option>
-    <option value="Laki-laki">Laki-laki</option>
-    <option value="Perempuan">Perempuan</option>
+    {children}
   </select>
 );

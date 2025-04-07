@@ -8,14 +8,17 @@ export default function EditStudentModal({ student }: { student: any }) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [form, setForm] = useState({
+    profile_picture: student.profile_picture || "",
     name: student.name || "",
     email: student.email || "",
     phone_number: student.phone_number || "",
-    address: student.address || "",
     program: student.program || "",
     gender: student.gender || "",
+    address: student.address || "",
     level: student.level || "",
     academic_year: student.academic_year || "",
+    birth_place_date: student.birth_place_date || "",
+    payment_status: student.payment_status || "",
   });
 
   const handleChange = (
@@ -51,6 +54,13 @@ export default function EditStudentModal({ student }: { student: any }) {
           <div className="bg-gray-100 p-6 rounded-lg w-full max-w-lg space-y-4 shadow-xl shadow-black">
             <h2 className="text-xl font-semibold mb-4">Edit Data Santri</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
+              <input
+                name="profile_picture"
+                value={form.profile_picture}
+                onChange={handleChange}
+                placeholder="URL Foto Profil"
+                className="w-full border p-2 rounded"
+              />
               <input
                 name="name"
                 value={form.name}
@@ -110,6 +120,23 @@ export default function EditStudentModal({ student }: { student: any }) {
                 placeholder="Tahun Ajaran"
                 className="w-full border p-2 rounded"
               />
+              <input
+                name="birth_place_date"
+                value={form.birth_place_date}
+                onChange={handleChange}
+                placeholder="Tempat, Tanggal Lahir"
+                className="w-full border p-2 rounded"
+              />
+              <select
+                name="payment_status"
+                value={form.payment_status}
+                onChange={handleChange}
+                className="w-full border p-2 rounded"
+              >
+                <option value="">Status Pembayaran</option>
+                <option value="Lunas">Lunas</option>
+                <option value="Belum Lunas">Belum Lunas</option>
+              </select>
 
               <div className="flex justify-end space-x-2">
                 <button

@@ -27,6 +27,11 @@ const AdminSidebar = () => {
               </a>
             </li>
             <li className="mb-4">
+              <a href="/admin/prospective_students" className="hover:text-gray-300">
+                Calon Santri
+              </a>
+            </li>
+            <li className="mb-4">
               <a href="/admin/academic" className="hover:text-gray-300">
                 Akademik
               </a>
