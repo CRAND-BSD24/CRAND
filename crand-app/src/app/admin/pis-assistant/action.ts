@@ -259,7 +259,7 @@ export async function processQuestion(question: string): Promise<string> {
           
           console.log("Matched teacher:", JSON.stringify(matchedTeacher, null, 2));
           
-          let response = `Informasi tentang ustadz ${matchedTeacher.name}:\n\n`;
+          let response = `Informasi tentang ${matchedTeacher.name}:\n\n`;
           
           // Create a normalized object with standard field names
           const teacher = {
