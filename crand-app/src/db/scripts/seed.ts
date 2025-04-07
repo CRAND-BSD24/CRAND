@@ -20,24 +20,8 @@ async function seed() {
     // Create test users
     const users = [
       {
-        name: "Admin User",
-        email: "admin@example.com",
-        password: await hash("password123", 10),
-        role: "admin",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        name: "Teacher User",
-        email: "teacher@example.com",
-        password: await hash("password123", 10),
-        role: "teacher",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
         name: "Student User",
-        email: "student@example.com",
+        email: "student@mail.com",
         password: await hash("password123", 10),
         role: "student",
         createdAt: new Date(),
