@@ -186,6 +186,7 @@ export default function AbsensiPage() {
       };
       reader.readAsDataURL(selectedFile);
     } catch (error) {
+      console.log(error);
       setIsSuccess(false);
       setMessage("Tidak dapat mengambil lokasi. Pastikan GPS diaktifkan.");
     }
