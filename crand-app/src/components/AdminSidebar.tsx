@@ -16,13 +16,13 @@ const AdminSidebar = () => {
             </a>
           </li>
           <li className="mb-4">
-            <a href="/admin/academic" className="hover:text-gray-300">
-              Akademik
+            <a href="/admin/attendance" className="hover:text-gray-300">
+              Absensi
             </a>
           </li>
           <li className="mb-4">
-            <a href="/admin/attendance" className="hover:text-gray-300">
-              Absensi
+            <a href="/admin/teachers" className="hover:text-gray-300">
+              Teacher
             </a>
           </li>
           <li className="mb-4">

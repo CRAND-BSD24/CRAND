@@ -9,13 +9,15 @@ export default function EditStudentModal({ student }: { student: any }) {
   const [isOpen, setIsOpen] = useState(false);
   const [form, setForm] = useState({
     name: student.name || "",
-    email: student.email || "",
-    phone_number: student.phone_number || "",
-    address: student.address || "",
-    program: student.program || "",
+    class: student.class || "",
+    academic_level: student.academic_level || "",
     gender: student.gender || "",
-    level: student.level || "",
-    academic_year: student.academic_year || "",
+    parent_name: student.parent_name || "",
+    batch_year: student.batch_year || "",
+    birth_date: student.birth_date ? new Date(student.birth_date).toISOString().split("T")[0] : "",
+    birth_place: student.birth_place || "",
+    address: student.address || "",
+    phone_number: student.phone_number || "",
   });
 
   const handleChange = (
@@ -48,42 +50,28 @@ export default function EditStudentModal({ student }: { student: any }) {
 
       {isOpen && (
         <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn">
-          <div className="bg-gray-100 p-6 rounded-lg w-full max-w-lg space-y-4 shadow-xl shadow-black">
-            <h2 className="text-xl font-semibold mb-4">Edit Data Santri</h2>
+          <div className="bg-white p-6 rounded-lg w-full max-w-lg space-y-4 shadow-xl">
+            <h2 className="text-xl font-semibold mb-4 text-[#006A71]">Edit Data Santri</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <input
                 name="name"
                 value={form.name}
                 onChange={handleChange}
-                placeholder="Nama"
+                placeholder="Nama Lengkap"
                 className="w-full border p-2 rounded"
               />
               <input
-                name="email"
-                value={form.email}
+                name="class"
+                value={form.class}
                 onChange={handleChange}
-                placeholder="Email"
+                placeholder="Kelas (misal: 1A)"
                 className="w-full border p-2 rounded"
               />
               <input
-                name="phone_number"
-                value={form.phone_number}
+                name="academic_level"
+                value={form.academic_level}
                 onChange={handleChange}
-                placeholder="Nomor HP"
-                className="w-full border p-2 rounded"
-              />
-              <input
-                name="address"
-                value={form.address}
-                onChange={handleChange}
-                placeholder="Alamat"
-                className="w-full border p-2 rounded"
-              />
-              <input
-                name="program"
-                value={form.program}
-                onChange={handleChange}
-                placeholder="Program"
+                placeholder="Tingkat Akademik (misal: Ibtidaiyah)"
                 className="w-full border p-2 rounded"
               />
               <select
@@ -97,17 +85,45 @@ export default function EditStudentModal({ student }: { student: any }) {
                 <option value="Perempuan">Perempuan</option>
               </select>
               <input
-                name="level"
-                value={form.level}
+                name="parent_name"
+                value={form.parent_name}
                 onChange={handleChange}
-                placeholder="Level"
+                placeholder="Nama Orang Tua"
                 className="w-full border p-2 rounded"
               />
               <input
-                name="academic_year"
-                value={form.academic_year}
+                name="batch_year"
+                value={form.batch_year}
                 onChange={handleChange}
-                placeholder="Tahun Ajaran"
+                placeholder="Tahun Angkatan (misal: 2024)"
+                className="w-full border p-2 rounded"
+              />
+              <input
+                type="date"
+                name="birth_date"
+                value={form.birth_date}
+                onChange={handleChange}
+                className="w-full border p-2 rounded"
+              />
+              <input
+                name="birth_place"
+                value={form.birth_place}
+                onChange={handleChange}
+                placeholder="Tempat Lahir"
+                className="w-full border p-2 rounded"
+              />
+              <input
+                name="address"
+                value={form.address}
+                onChange={handleChange}
+                placeholder="Alamat Lengkap"
+                className="w-full border p-2 rounded"
+              />
+              <input
+                name="phone_number"
+                value={form.phone_number}
+                onChange={handleChange}
+                placeholder="Nomor HP"
                 className="w-full border p-2 rounded"
               />
 
