@@ -1,7 +1,14 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
 
@@ -31,24 +38,29 @@ const AcademicPage = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 m-5">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Manajemen Akademik</h1>
-        <Button>
+        <div>
+          <h1 className="text-2xl font-bold">Manajemen Akademik</h1>
+          <p className="text-gray-600">
+            Kelola nilai akademik santri di kelas Anda
+          </p>
+        </div>
+        <Button className="bg-blue-600 hover:bg-blue-700">
           <BookOpen className="mr-2 h-4 w-4" />
           Tambah Nilai
         </Button>
       </div>
 
-      <Card>
+      <Card className="bg-white shadow-lg">
         <CardHeader>
-          <CardTitle>Daftar Nilai Siswa</CardTitle>
+          <CardTitle>Daftar Nilai Santri</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nama Siswa</TableHead>
+                <TableHead>Nama Santri</TableHead>
                 <TableHead>Kelas</TableHead>
                 <TableHead>Mata Pelajaran</TableHead>
                 <TableHead>Nilai</TableHead>
@@ -77,7 +89,11 @@ const AcademicPage = () => {
                     </span>
                   </TableCell>
                   <TableCell>
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="hover:bg-blue-50"
+                    >
                       Edit
                     </Button>
                   </TableCell>
@@ -91,4 +107,4 @@ const AcademicPage = () => {
   );
 };
 
-export default AcademicPage; 
+export default AcademicPage;

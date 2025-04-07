@@ -1,7 +1,14 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { BookText } from "lucide-react";
 
@@ -31,24 +38,29 @@ const MemorizationPage = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 m-5">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Manajemen Hafalan</h1>
-        <Button>
+        <div>
+          <h1 className="text-2xl font-bold">Manajemen Hafalan</h1>
+          <p className="text-gray-600">
+            Kelola progress hafalan santri di kelas Anda
+          </p>
+        </div>
+        <Button className="bg-blue-600 hover:bg-blue-700">
           <BookText className="mr-2 h-4 w-4" />
           Tambah Hafalan
         </Button>
       </div>
 
-      <Card>
+      <Card className="bg-white shadow-lg">
         <CardHeader>
-          <CardTitle>Daftar Hafalan Siswa</CardTitle>
+          <CardTitle>Daftar Hafalan Santri</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nama Siswa</TableHead>
+                <TableHead>Nama Santri</TableHead>
                 <TableHead>Kelas</TableHead>
                 <TableHead>Surah</TableHead>
                 <TableHead>Progress</TableHead>
@@ -77,7 +89,11 @@ const MemorizationPage = () => {
                     </span>
                   </TableCell>
                   <TableCell>
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="hover:bg-blue-50"
+                    >
                       Edit
                     </Button>
                   </TableCell>
@@ -91,4 +107,4 @@ const MemorizationPage = () => {
   );
 };
 
-export default MemorizationPage; 
+export default MemorizationPage;

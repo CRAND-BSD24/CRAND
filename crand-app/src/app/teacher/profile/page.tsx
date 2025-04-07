@@ -1,4 +1,4 @@
- "use client";
+"use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,16 +15,19 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 m-5">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Profil Guru</h1>
-        <Button>
+        <div>
+          <h1 className="text-2xl font-bold">Profil Ustadz</h1>
+          <p className="text-gray-600">Kelola informasi profil Anda</p>
+        </div>
+        <Button className="bg-blue-600 hover:bg-blue-700">
           <User className="mr-2 h-4 w-4" />
           Edit Profil
         </Button>
       </div>
 
-      <Card>
+      <Card className="bg-white shadow-lg">
         <CardHeader>
           <CardTitle>Informasi Pribadi</CardTitle>
         </CardHeader>
@@ -50,7 +53,7 @@ const ProfilePage = () => {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="bg-white shadow-lg">
         <CardHeader>
           <CardTitle>Informasi Mengajar</CardTitle>
         </CardHeader>
