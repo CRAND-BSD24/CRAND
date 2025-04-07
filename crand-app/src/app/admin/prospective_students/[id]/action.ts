@@ -21,7 +21,6 @@ export const getStudentById = async (id: string) => {
   }
 };
 
-// ✅ Fungsi untuk edit data santri
 export const updateStudentById = async (id: string, updatedData: any) => {
   const client = await getMongoClientInstance();
   const db = client.db("pesantren_db");
@@ -44,7 +43,6 @@ export const updateStudentById = async (id: string, updatedData: any) => {
   }
 };
 
-// ❌ Fungsi untuk hapus data santri
 export const deleteStudentById = async (id: string) => {
   const client = await getMongoClientInstance();
   const db = client.db("pesantren_db");
