@@ -8,7 +8,7 @@ const AdminSidebar = () => {
   const pathname = usePathname();
 
   return (
-    <aside className={cn("w-64 h-screen bg-[#006A71] text-white p-6 shadow-lg")}>
+    <aside className={cn("w-64 h-screen bg-[#006A71] text-white p-6 shadow-lg fixed")}>
       <nav>
         <ul>
           <li className="mb-4">
