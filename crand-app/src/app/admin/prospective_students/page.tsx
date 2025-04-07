@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { getAllStudents } from './action';
+import { getAllStudents, acceptStudent } from './action';
 import Link from 'next/link';
 import AddStudentModal from './AddStudentModal';
 
@@ -24,10 +24,19 @@ const StudentsPage = () => {
     fetchStudents();
   }, []);
 
-  const handleAccept = (id: string) => {
-    console.log(`Santri ${id} diterima`);
-    // Tambahkan logic "accept" di sini
+  const handleAccept = async (id: string) => {
+    const confirmed = confirm("Yakin ingin menerima santri ini?");
+    if (!confirmed) return;
+  
+    const result = await acceptStudent(id);
+    if (result.success) {
+      alert("Santri berhasil diterima.");
+      fetchStudents(); // Refresh daftar
+    } else {
+      alert(result.message || "Gagal menerima santri.");
+    }
   };
+  
 
   const handleReject = (id: string) => {
     console.log(`Santri ${id} ditolak`);
@@ -38,11 +47,11 @@ const StudentsPage = () => {
     <div className="p-8 bg-[#9ACBD0] min-h-screen">
       <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-xl p-8 mt-12">
         <h1 className="text-3xl font-bold text-[#006A71] mb-8 text-center">
-          Manajemen Data Santri
+          Manajemen Data Penerimaan Santri Baru
         </h1>
 
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-[#006A71]">Daftar Santri</h2>
+          <h2 className="text-xl font-semibold text-[#006A71]">Daftar Calon Santri</h2>
           <AddStudentModal onStudentAdded={fetchStudents} />
         </div>
 
@@ -68,7 +77,7 @@ const StudentsPage = () => {
                   <td className="px-4 py-3">{student.level}</td>
                   <td className="px-4 py-3">
                     <Link
-                      href={`/admin/students/${student._id}`}
+                      href={`/admin/prospective_students/${student._id}`}
                       className="text-[#006A71] font-semibold hover:underline transition-all"
                     >
                       Detail
