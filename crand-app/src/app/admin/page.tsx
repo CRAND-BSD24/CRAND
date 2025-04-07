@@ -87,7 +87,7 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="space-y-6 bg-gradient-to-br from-[#BEE5E6] to-[#9ACBD0] h-full-screen m-5">
+    <div className="space-y-6 bg-gradient-to-br from-[#BEE5E6] to-[#9ACBD0] h-full-screen m-5 max-h-fit">
       <h1 className="text-2xl font-bold">Dashboard</h1>
       <p className="text-gray-600">
         Selamat datang di Sistem Manajemen Pesantren.
