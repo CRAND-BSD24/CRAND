@@ -14,7 +14,10 @@ export default async function SantriDetailPage({ params }: SantriDetailPageProps
   if (!data) notFound();
 
   const student = JSON.parse(data);
-  const [birthPlace, birthDate] = student.birth_place_date?.split(", ") ?? ["-", "-"];
+
+  const profilePicture =
+    student.profile_picture ||
+    "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541";
 
   return (
     <div className="min-h-screen bg-[#9ACBD0] p-6 md:p-10">
@@ -33,7 +36,7 @@ export default async function SantriDetailPage({ params }: SantriDetailPageProps
           {/* Image */}
           <div className="flex justify-center md:justify-start">
             <img
-              src={student.profile_picture}
+              src={profilePicture}
               alt={student.name}
               className="w-44 h-44 object-cover rounded-full border-4 border-[#48A6A7] shadow-lg"
             />
@@ -41,7 +44,6 @@ export default async function SantriDetailPage({ params }: SantriDetailPageProps
 
           {/* Detail */}
           <div className="space-y-2 text-gray-800 text-base">
-            <Detail label="ID" value={student.id} />
             <Detail label="Nama" value={student.name} />
             <Detail label="Email" value={student.email} />
             <Detail label="Nomor HP" value={student.phone_number} />
@@ -49,12 +51,27 @@ export default async function SantriDetailPage({ params }: SantriDetailPageProps
             <Detail label="Jenis Kelamin" value={student.gender} />
             <Detail label="Alamat" value={student.address} />
             <Detail label="Level" value={student.level} />
+            <Detail label="Tingkat Akademik" value={student.academic_level} />
             <Detail label="Tahun Ajaran" value={student.academic_year} />
-            <Detail label="Tempat Lahir" value={birthPlace} />
-            <Detail label="Tanggal Lahir" value={birthDate} />
-            <Detail label="Status Pembayaran" value={student.payment_status} />
-            <Detail label="Dibuat" value={new Date(student.created_at).toLocaleString()} />
-            <Detail label="Diperbarui" value={new Date(student.updated_at).toLocaleString()} />
+            <Detail label="Tempat Lahir" value={student.birth_place} />
+            <Detail
+              label="Tanggal Lahir"
+              value={
+                student.birth_date
+                  ? new Date(student.birth_date).toLocaleDateString("id-ID", {
+                      day: "2-digit",
+                      month: "long",
+                      year: "numeric",
+                    })
+                  : "-"
+              }
+            />
+            <Detail label="Nama Bapak" value={student.father_name} />
+            <Detail label="Nama Ibu" value={student.mother_name} />
+            <Detail
+              label="Dibuat"
+              value={new Date(student.created_at).toLocaleString("id-ID")}
+            />
           </div>
         </div>
       </div>
@@ -65,6 +82,6 @@ export default async function SantriDetailPage({ params }: SantriDetailPageProps
 const Detail = ({ label, value }: { label: string; value: string }) => (
   <div>
     <span className="font-medium text-[#006A71]">{label}:</span>{" "}
-    <span className="text-gray-700">{value || '-'}</span>
+    <span className="text-gray-700">{value || "-"}</span>
   </div>
 );

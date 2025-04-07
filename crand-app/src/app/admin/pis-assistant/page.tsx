@@ -72,12 +72,12 @@ export default function PISAssistant() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] bg-gradient-to-b from-[#E6F4F4] to-[#FFFFFF]">
-      <Card className="flex flex-col h-full shadow-xl border-none rounded-xl overflow-hidden">
+    <div className="flex flex-col h-full bg-gradient-to-b from-[#E6F4F4] to-[#FFFFFF]">
+      <Card className="flex flex-col h-full shadow-xl overflow-hidden">
 
         {/* Header */}
         <div className="p-5 bg-gradient-to-r from-[#48A6A7] to-[#006A71] text-white flex items-center gap-4">
-          <div className="bg-white/20 p-2 rounded-full">
+          <div className="bg-white/20 p-2">
             <Bot className="w-6 h-6" />
           </div>
           <div>

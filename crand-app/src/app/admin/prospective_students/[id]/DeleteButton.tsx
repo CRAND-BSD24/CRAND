@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { deleteStudentById } from "./action";
 import { useRouter } from "next/navigation";
@@ -13,9 +13,9 @@ export default function DeleteButton({ id }: { id: string }) {
     const success = await deleteStudentById(id);
     if (success) {
       alert("Santri berhasil dihapus.");
-      router.push("/admin/students");
+      router.push("/admin/prospective_students");
     } else {
-      alert("Gagal menghapus santri.");
+      alert("Gagal menghapus santri. Coba lagi nanti.");
     }
   };
 

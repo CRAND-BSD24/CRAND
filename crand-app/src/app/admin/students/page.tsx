@@ -8,7 +8,7 @@ import AddStudentModal from "./AddStudentModal";
 interface Student {
   _id: string;
   name: string;
-  class: string; 
+  class: string;
   academic_level: string;
   gender: string;
   parent_name: string;
@@ -41,7 +41,7 @@ const StudentsPage = () => {
   }, []);
 
   const handlePromoteByClass = async () => {
-    if (!filterClass) return alert("Pilih kelas terlebih dahulu yaa 😘");
+    if (!filterClass) return alert("Pilih kelas terlebih dahulu ya");
 
     const confirmed = confirm(
       `Yakin ingin menaikkan semua santri di kelas ${filterClass}?`
@@ -50,7 +50,9 @@ const StudentsPage = () => {
 
     const success = await promoteStudentsByClass(filterClass);
     if (success) {
-      alert(`Santri di kelas ${filterClass} berhasil dinaikkan ke tingkat selanjutnya!`);
+      alert(
+        `Santri di kelas ${filterClass} berhasil dinaikkan ke tingkat selanjutnya!`
+      );
       fetchStudents();
       setFilterClass(""); // Reset filter setelah promote
     } else {
@@ -63,7 +65,7 @@ const StudentsPage = () => {
   );
 
   const uniqueClasses = Array.from(
-    new Set(students.map((s) => s.class))
+    new Set(students.map((s) => s.class).filter(Boolean))
   ).sort();
 
   return (
@@ -87,8 +89,8 @@ const StudentsPage = () => {
             className="border p-2 rounded"
           >
             <option value="">Pilih Kelas</option>
-            {uniqueClasses.map((kelas) => (
-              <option key={kelas} value={kelas}>
+            {uniqueClasses.map((kelas, index) => (
+              <option key={`${kelas}-${index}`} value={kelas}>
                 {kelas}
               </option>
             ))}
