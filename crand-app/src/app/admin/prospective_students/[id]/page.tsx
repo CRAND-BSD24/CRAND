@@ -2,6 +2,8 @@ import { getStudentById } from "./action";
 import { notFound } from "next/navigation";
 import DeleteButton from "./DeleteButton";
 import EditStudentModal from "./EditStudentModal";
+import { ObjectId } from "mongodb";
+import Image from "next/image";
 
 interface SantriDetailPageProps {
   params: {
@@ -10,7 +12,15 @@ interface SantriDetailPageProps {
 }
 
 export default async function SantriDetailPage({ params }: SantriDetailPageProps) {
-  const data = await getStudentById(params.id);
+  const awaitedParams = await params;
+  const id = awaitedParams.id;
+  
+  // Validate ObjectId format
+  if (!ObjectId.isValid(id)) {
+    notFound();
+  }
+
+  const data = await getStudentById(id);
   if (!data) notFound();
 
   const student = JSON.parse(data);
@@ -27,7 +37,7 @@ export default async function SantriDetailPage({ params }: SantriDetailPageProps
           <h1 className="text-3xl font-bold text-[#006A71]">Detail Santri</h1>
           <div className="flex space-x-2">
             <EditStudentModal student={student} />
-            <DeleteButton id={params.id} />
+            <DeleteButton id={id} />
           </div>
         </div>
 
@@ -35,15 +45,18 @@ export default async function SantriDetailPage({ params }: SantriDetailPageProps
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Image */}
           <div className="flex justify-center md:justify-start">
-            <img
-              src={profilePicture}
+            <Image
+              src={student.profile_picture}
               alt={student.name}
-              className="w-44 h-44 object-cover rounded-full border-4 border-[#48A6A7] shadow-lg"
+              width={176}
+              height={176}
+              className="rounded-full border-4 border-[#48A6A7] shadow-lg"
             />
           </div>
 
           {/* Detail */}
           <div className="space-y-2 text-gray-800 text-base">
+            <Detail label="ID" value={student._id} />
             <Detail label="Nama" value={student.name} />
             <Detail label="Email" value={student.email} />
             <Detail label="Nomor HP" value={student.phone_number} />

@@ -140,9 +140,9 @@ export default function AddStudentModal({
                 <option value="Shorhul Qurro">Shorhul Qurro'</option>
               </Select>
               <Select name="gender" value={form.gender} onChange={handleChange}>
-                <option value="">Pilih Jenis Kelamin</option>
-                <option value="Laki-laki">Laki-laki</option>
-                <option value="Perempuan">Perempuan</option>
+                <option key="default" value="">Pilih Jenis Kelamin</option>
+                <option key="male" value="Laki-laki">Laki-laki</option>
+                <option key="female" value="Perempuan">Perempuan</option>
               </Select>
               <Select
                 name="academic_level"
