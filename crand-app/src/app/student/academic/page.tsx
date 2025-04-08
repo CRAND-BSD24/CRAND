@@ -1,89 +1,69 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Card } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { getAcademicByStudentId } from "./action";
 
-interface Grade {
+interface AcademicData {
   _id: string;
-  student_name: string;
-  subject_name: string;
+  student_id: string;
+  subject_id: string;
   semester: string;
   academic_year: string;
   score: number;
+  created_at: string;
+  updated_at: string;
+  student_info?: {
+    name: string;
+    class_id: string;
+    academic_level: string;
+  };
 }
 
-// Simulasi data user yang sedang login
-const currentUser = {
-  role: "student",
-  name: "Ahmad Fauzi", // ganti sesuai nama di data dummy
-};
-
-// Simulasi data nilai
-const dummyGrades: Grade[] = [
-  {
-    _id: "1",
-    student_name: "Ahmad Fauzi",
-    subject_name: "Matematika",
-    semester: "Ganjil",
-    academic_year: "2024/2025",
-    score: 89,
-  },
-  {
-    _id: "2",
-    student_name: "Budi Santoso",
-    subject_name: "Bahasa Arab",
-    semester: "Genap",
-    academic_year: "2023/2024",
-    score: 85,
-  },
-];
-
 const AcademicPage = () => {
-  const [grade, setGrade] = useState<Grade | null>(null);
+  const [academic, setAcademic] = useState<AcademicData | null>(null);
+
+  const fetchAcademicData = async () => {
+    try {
+      const data = await getAcademicByStudentId();
+      console.log(data, '<<< ini data dari akademik student');
+
+      if (data) {
+        setAcademic(data);
+      } else {
+        setAcademic(null);
+      }
+    } catch (error) {
+      console.error("Gagal mengambil data akademik:", error);
+    }
+  };
 
   useEffect(() => {
-    // Ambil data berdasarkan user yang login
-    if (currentUser.role === "student") {
-      const userGrade = dummyGrades.find(
-        (g) => g.student_name === currentUser.name
-      );
-      setGrade(userGrade || null);
-    }
+    fetchAcademicData();
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#9ACBD0] flex items-center justify-center p-6">
-      <Card className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8 border border-[#48A6A7]">
-        <h1 className="text-2xl font-bold text-[#006A71] mb-6 text-center">
-          Nilai Akademik
+    <div className="p-8 bg-[#9ACBD0] min-h-screen">
+      <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-8 mt-12">
+        <h1 className="text-3xl font-bold text-[#006A71] mb-6 text-center">
+          Nilai Akademik Santri
         </h1>
-        {grade ? (
-          <div className="space-y-4 text-[#004D4D]">
-            <div className="flex justify-between">
-              <span className="font-semibold">Nama Santri:</span>
-              <span>{grade.student_name}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="font-semibold">Mata Pelajaran:</span>
-              <span>{grade.subject_name}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="font-semibold">Semester:</span>
-              <span>{grade.semester}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="font-semibold">Tahun Ajaran:</span>
-              <span>{grade.academic_year}</span>
-            </div>
-            <div className="flex justify-between text-lg font-bold text-[#006A71] border-t pt-4">
-              <span>Nilai:</span>
-              <span>{grade.score}</span>
-            </div>
+
+        {academic ? (
+          <div className="space-y-4 text-[#006A71]">
+            <p><strong>Nama:</strong> {academic.student_info?.name}</p>
+            <p><strong>Semester:</strong> {academic.semester}</p>
+            <p><strong>Tahun Ajaran:</strong> {academic.academic_year}</p>
+            <p><strong>Nilai:</strong> {academic.score}</p>
+            <p className="text-sm text-gray-600">
+              Diperbarui: {new Date(academic.updated_at).toLocaleString()}
+            </p>
           </div>
         ) : (
-          <p className="text-center text-gray-500">Tidak ada data nilai tersedia.</p>
+          <p className="text-center text-[#006A71] italic">
+            Data nilai belum tersedia.
+          </p>
         )}
-      </Card>
+      </div>
     </div>
   );
 };
