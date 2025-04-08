@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import { getMonthlyAttendance, MonthlyAttendance } from "./action";
+import { useSession } from "next-auth/react";
 
 export default function AttendanceHistoryPage() {
+  const { data: session } = useSession();
   const [monthlyAttendance, setMonthlyAttendance] = useState<
     MonthlyAttendance[]
   >([]);
@@ -11,30 +13,42 @@ export default function AttendanceHistoryPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchMonthlyAttendance();
-  }, [selectedMonth]);
+    if (session?.user?.id) {
+      fetchMonthlyAttendance();
+    }
+  }, [selectedMonth, session]);
 
   const fetchMonthlyAttendance = async () => {
+    if (!session?.user?.id) {
+      console.log("No session user ID found:", session);
+      return;
+    }
+
     setIsLoading(true);
     const year = selectedMonth.getFullYear();
     const month = selectedMonth.getMonth() + 1;
-    const studentId = "1"; // Ganti dengan studentId yang sesuai dari sesi login
-    const data = await getMonthlyAttendance(year, month, studentId);
+    console.log("Fetching attendance for:", {
+      year,
+      month,
+      studentId: session.user.id,
+    });
+    const data = await getMonthlyAttendance(year, month, session.user.id);
+    console.log("Received attendance data:", data);
     setMonthlyAttendance(data);
     setIsLoading(false);
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "present":
+      case "Present":
         return "bg-green-100 text-green-800";
-      case "absent":
+      case "Absent":
         return "bg-red-100 text-red-800";
-      case "sick":
+      case "Sick":
         return "bg-yellow-100 text-yellow-800";
-      case "permission":
+      case "Permission":
         return "bg-blue-100 text-blue-800";
-      case "holiday":
+      case "Holiday":
         return "bg-purple-100 text-purple-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -43,15 +57,15 @@ export default function AttendanceHistoryPage() {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case "present":
+      case "Present":
         return "Hadir";
-      case "absent":
+      case "Absent":
         return "Tidak Hadir";
-      case "sick":
+      case "Sick":
         return "Sakit";
-      case "permission":
+      case "Permission":
         return "Izin";
-      case "holiday":
+      case "Holiday":
         return "Libur";
       default:
         return status;
