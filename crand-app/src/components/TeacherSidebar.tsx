@@ -13,11 +13,6 @@ const TeacherSidebar = () => {
               </a>
             </li>
             <li className="mb-4">
-              <a href="/teacher/students" className="hover:text-gray-300">
-                Santri
-              </a>
-            </li>
-            <li className="mb-4">
               <a href="/teacher/academic" className="hover:text-gray-300">
                 Akademik
               </a>
