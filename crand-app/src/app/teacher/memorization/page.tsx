@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { BookText } from "lucide-react";
+import { Pencil } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import {
   Dialog,
@@ -18,120 +18,120 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { getStudentMemorization, updateMemorizationStatus, addNewMemorization, type MemorizationStudent } from "./action";
+import { getStudentMemorization, updateMemorizationData, type MemorizationStudent } from "./action";
+
+interface QuranMemorization {
+  _id: string;
+  name: string;
+}
 
 const MemorizationPage = () => {
   const [memorizationData, setMemorizationData] = useState<MemorizationStudent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [newMemorization, setNewMemorization] = useState({
-    student_id: "",
-    semester: "",
-    academic_year: "",
-    juz_name: "",
-    pages: "",
-    status: "",
-    notes: "",
-  });
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [editingStudent, setEditingStudent] = useState<MemorizationStudent | null>(null);
+  const [juzList, setJuzList] = useState<QuranMemorization[]>([]);
+  const [selectedJuzId, setSelectedJuzId] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchMemorizationData();
+    fetchJuzList();
   }, []);
 
   const fetchMemorizationData = async () => {
     try {
+      setLoading(true);
       const data = await getStudentMemorization();
       setMemorizationData(data);
-      setLoading(false);
+      setError(null);
     } catch (error) {
       console.error("Error fetching memorization data:", error);
       setError("Gagal memuat data hafalan");
+    } finally {
       setLoading(false);
     }
   };
 
-  const handleStatusChange = async (studentId: string, newStatus: string) => {
+  const fetchJuzList = async () => {
     try {
-      const student = memorizationData.find((s) => s.id === studentId);
-      if (!student) return;
-
-      await updateMemorizationStatus(studentId, {
-        status: newStatus,
-        notes: student.notes,
-      });
-
-      // Update local state
-      setMemorizationData((prev) =>
-        prev.map((s) =>
-          s.id === studentId ? { ...s, status: newStatus } : s
-        )
-      );
+      const response = await fetch("/api/quran-memorization");
+      if (!response.ok) {
+        throw new Error("Failed to fetch juz list");
+      }
+      const data = await response.json();
+      setJuzList(data);
     } catch (error) {
-      console.error("Error updating status:", error);
-      alert("Gagal mengupdate status hafalan");
+      console.error("Error fetching juz list:", error);
+      setError("Gagal memuat daftar juz");
     }
   };
 
-  const handleNotesChange = async (studentId: string, newNotes: string) => {
-    try {
-      const student = memorizationData.find((s) => s.id === studentId);
-      if (!student) return;
-
-      await updateMemorizationStatus(studentId, {
-        status: student.status,
-        notes: newNotes,
-      });
-
-      // Update local state
-      setMemorizationData((prev) =>
-        prev.map((s) =>
-          s.id === studentId ? { ...s, notes: newNotes } : s
-        )
-      );
-    } catch (error) {
-      console.error("Error updating notes:", error);
-      alert("Gagal mengupdate catatan hafalan");
-    }
+  const handleEditClick = (student: MemorizationStudent) => {
+    setEditingStudent({
+      ...student,
+      semester: student.semester || "",
+      academic_year: student.academic_year || "",
+      pages: student.pages || "",
+      status: student.status || "",
+      notes: student.notes || "",
+    });
+    setSelectedJuzId(student.quran_memorization_id || "");
+    setShowEditForm(true);
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
+    if (!editingStudent) return;
     const { name, value } = e.target;
-    setNewMemorization({ ...newMemorization, [name]: value });
+    
+    if (name === "quran_memorization_id") {
+      setSelectedJuzId(value);
+    } else {
+      setEditingStudent({ ...editingStudent, [name]: value });
+    }
   };
 
-  const addMemorizationData = async () => {
+  const handleEditSubmit = async () => {
+    if (!editingStudent || !selectedJuzId) {
+      alert("Mohon lengkapi semua field, termasuk pemilihan Juz");
+      return;
+    }
+
+    setIsSubmitting(true);
+
     try {
-      await addNewMemorization({
-        student_id: newMemorization.student_id,
-        semester: newMemorization.semester,
-        academic_year: newMemorization.academic_year,
-        juz_name: newMemorization.juz_name,
-        pages: newMemorization.pages,
-        status: newMemorization.status,
-        notes: newMemorization.notes,
+      // Update the data in MongoDB
+      const result = await updateMemorizationData(editingStudent.id, {
+        semester: editingStudent.semester,
+        academic_year: editingStudent.academic_year,
+        quran_memorization_id: selectedJuzId,
+        pages: editingStudent.pages,
+        status: editingStudent.status,
+        notes: editingStudent.notes,
       });
 
-      // Refresh data
-      await fetchMemorizationData();
-
-      // Reset form
-      setNewMemorization({
-        student_id: "",
-        semester: "",
-        academic_year: "",
-        juz_name: "",
-        pages: "",
-        status: "",
-        notes: "",
-      });
-
-      setShowForm(false);
+      if (result.success) {
+        // Refresh the data to show updates
+        await fetchMemorizationData();
+        
+        // Close the form and reset states
+        setShowEditForm(false);
+        setEditingStudent(null);
+        setSelectedJuzId("");
+        
+        // Show success message
+        alert("Data berhasil disimpan");
+      } else {
+        throw new Error("Failed to update data");
+      }
     } catch (error) {
-      console.error("Error adding memorization:", error);
-      alert("Gagal menambahkan data hafalan");
+      console.error("Error updating memorization:", error);
+      alert("Gagal mengupdate data hafalan");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -160,13 +160,6 @@ const MemorizationPage = () => {
             Kelola progress hafalan santri di kelas Anda
           </p>
         </div>
-        <Button
-          className="bg-blue-600 hover:bg-blue-700"
-          onClick={() => setShowForm(true)}
-        >
-          <BookText className="mr-2 h-4 w-4" />
-          Tambah Hafalan
-        </Button>
       </div>
 
       <Card className="bg-white shadow-lg">
@@ -178,61 +171,33 @@ const MemorizationPage = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Nama Santri</TableHead>
-                <TableHead>Kelas</TableHead>
                 <TableHead>Semester</TableHead>
                 <TableHead>Tahun Angkatan</TableHead>
                 <TableHead>Juz</TableHead>
                 <TableHead>Halaman</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Catatan</TableHead>
+                <TableHead>Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {memorizationData.map((student) => (
                 <TableRow key={student.id}>
                   <TableCell>{student.name}</TableCell>
-                  <TableCell>{student.class_name}</TableCell>
                   <TableCell>{student.semester}</TableCell>
                   <TableCell>{student.academic_year}</TableCell>
                   <TableCell>{student.juz_name}</TableCell>
                   <TableCell>{student.pages}</TableCell>
+                  <TableCell>{student.status}</TableCell>
+                  <TableCell>{student.notes}</TableCell>
                   <TableCell>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant={
-                          student.status === "Lancar" ? "default" : "outline"
-                        }
-                        size="sm"
-                        className="hover:bg-green-50"
-                        onClick={() => handleStatusChange(student.id, "Lancar")}
-                      >
-                        Lancar
-                      </Button>
-                      <Button
-                        variant={
-                          student.status === "Tidak Lancar"
-                            ? "default"
-                            : "outline"
-                        }
-                        size="sm"
-                        className="hover:bg-red-50"
-                        onClick={() =>
-                          handleStatusChange(student.id, "Tidak Lancar")
-                        }
-                      >
-                        Tidak Lancar
-                      </Button>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <textarea
-                      className="w-full p-2 border border-gray-300 rounded"
-                      placeholder="Tambahkan catatan..."
-                      value={student.notes}
-                      onChange={(e) =>
-                        handleNotesChange(student.id, e.target.value)
-                      }
-                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditClick(student)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -241,72 +206,100 @@ const MemorizationPage = () => {
         </CardContent>
       </Card>
 
-      <Dialog open={showForm} onOpenChange={setShowForm}>
+      {/* Edit Dialog */}
+      <Dialog open={showEditForm} onOpenChange={setShowEditForm}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Tambah Hafalan Baru</DialogTitle>
+            <DialogTitle>Edit Hafalan</DialogTitle>
           </DialogHeader>
-          <div className="mb-4">
-            <input
-              type="text"
-              name="student_id"
-              placeholder="ID Santri"
-              value={newMemorization.student_id}
-              onChange={handleInputChange}
-              className="w-full p-2 mb-2 border border-gray-300 rounded"
-            />
-            <input
-              type="text"
-              name="semester"
-              placeholder="Semester"
-              value={newMemorization.semester}
-              onChange={handleInputChange}
-              className="w-full p-2 mb-2 border border-gray-300 rounded"
-            />
-            <input
-              type="text"
-              name="academic_year"
-              placeholder="Tahun Angkatan"
-              value={newMemorization.academic_year}
-              onChange={handleInputChange}
-              className="w-full p-2 mb-2 border border-gray-300 rounded"
-            />
-            <input
-              type="text"
-              name="juz_name"
-              placeholder="Juz"
-              value={newMemorization.juz_name}
-              onChange={handleInputChange}
-              className="w-full p-2 mb-2 border border-gray-300 rounded"
-            />
-            <input
-              type="text"
-              name="pages"
-              placeholder="Halaman"
-              value={newMemorization.pages}
-              onChange={handleInputChange}
-              className="w-full p-2 mb-2 border border-gray-300 rounded"
-            />
-            <input
-              type="text"
-              name="status"
-              placeholder="Status"
-              value={newMemorization.status}
-              onChange={handleInputChange}
-              className="w-full p-2 mb-2 border border-gray-300 rounded"
-            />
-            <textarea
-              name="notes"
-              placeholder="Catatan"
-              value={newMemorization.notes}
-              onChange={handleInputChange}
-              className="w-full p-2 mb-2 border border-gray-300 rounded"
-            />
+          <div className="mb-4 space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Semester</label>
+              <input
+                type="text"
+                name="semester"
+                value={editingStudent?.semester || ""}
+                onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded"
+                required
+                disabled={isSubmitting}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Tahun Angkatan</label>
+              <input
+                type="text"
+                name="academic_year"
+                value={editingStudent?.academic_year || ""}
+                onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded"
+                required
+                disabled={isSubmitting}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Juz</label>
+              <select
+                name="quran_memorization_id"
+                value={selectedJuzId}
+                onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded"
+                required
+                disabled={isSubmitting}
+              >
+                <option value="">Pilih Juz</option>
+                {juzList.map((juz) => (
+                  <option key={juz._id} value={juz._id}>
+                    {juz.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Halaman</label>
+              <input
+                type="text"
+                name="pages"
+                value={editingStudent?.pages || ""}
+                onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded"
+                required
+                disabled={isSubmitting}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Status</label>
+              <select
+                name="status"
+                value={editingStudent?.status || ""}
+                onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded"
+                required
+                disabled={isSubmitting}
+              >
+                <option value="">Pilih Status</option>
+                <option value="Lancar">Lancar</option>
+                <option value="Tidak Lancar">Tidak Lancar</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Catatan</label>
+              <textarea
+                name="notes"
+                value={editingStudent?.notes || ""}
+                onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded"
+                rows={3}
+                required
+                disabled={isSubmitting}
+              />
+            </div>
             <Button
-              className="bg-blue-600 hover:bg-blue-700"
-              onClick={addMemorizationData}
+              className="w-full bg-blue-600 hover:bg-blue-700"
+              onClick={handleEditSubmit}
+              disabled={isSubmitting}
             >
-              Simpan Hafalan
+              {isSubmitting ? "Menyimpan..." : "Simpan Perubahan"}
             </Button>
           </div>
         </DialogContent>

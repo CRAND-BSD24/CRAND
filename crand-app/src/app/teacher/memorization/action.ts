@@ -5,7 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { ObjectId } from "mongodb";
 
-export interface MemorizationStudent {
+export type MemorizationStudent = {
   id: string;
   name: string;
   class_name: string;
@@ -16,7 +16,8 @@ export interface MemorizationStudent {
   status: string;
   notes: string;
   teacher_id: string;
-}
+  quran_memorization_id: string;
+};
 
 export interface MemorizationData {
   student_id: string;
@@ -68,26 +69,6 @@ export async function getStudentMemorization(): Promise<MemorizationStudent[]> {
       },
       {
         $lookup: {
-          from: "quran_memorization",
-          let: { studentId: "$_id" },
-          pipeline: [
-            {
-              $match: {
-                $expr: { $eq: ["$student_id", "$$studentId"] }
-              }
-            },
-            {
-              $sort: { created_at: -1 }
-            },
-            {
-              $limit: 1
-            }
-          ],
-          as: "memorization",
-        },
-      },
-      {
-        $lookup: {
           from: "memorization_grades",
           let: { studentId: "$_id" },
           pipeline: [
@@ -107,9 +88,23 @@ export async function getStudentMemorization(): Promise<MemorizationStudent[]> {
         },
       },
       {
+        $lookup: {
+          from: "quran_memorization",
+          let: { memorizationId: { $arrayElemAt: ["$grades.quran_memorization_id", 0] } },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$_id", "$$memorizationId"] }
+              }
+            }
+          ],
+          as: "memorization",
+        },
+      },
+      {
         $addFields: {
-          memorization: { $arrayElemAt: ["$memorization", 0] },
-          grades: { $arrayElemAt: ["$grades", 0] }
+          grades: { $arrayElemAt: ["$grades", 0] },
+          memorization: { $arrayElemAt: ["$memorization", 0] }
         }
       }
     ];
@@ -120,8 +115,8 @@ export async function getStudentMemorization(): Promise<MemorizationStudent[]> {
       .toArray();
 
     return result.map((doc) => {
-      const latestMemorization = doc.memorization || {};
       const latestGrade = doc.grades || {};
+      const memorization = doc.memorization || {};
 
       return {
         id: doc._id.toString(),
@@ -129,11 +124,12 @@ export async function getStudentMemorization(): Promise<MemorizationStudent[]> {
         class_name: doc.class?.class_name || "",
         semester: latestGrade.semester || "",
         academic_year: latestGrade.academic_year || "",
-        juz_name: latestMemorization.name || "",
+        juz_name: memorization.name || "",
         pages: latestGrade.pages || "",
         status: latestGrade.status || "Belum Ada",
         notes: latestGrade.notes || "",
         teacher_id: doc.class?.teacher_id?.toString() || "",
+        quran_memorization_id: latestGrade.quran_memorization_id?.toString() || "",
       };
     });
   } catch (error) {
@@ -201,6 +197,45 @@ export async function addNewMemorization(data: MemorizationData) {
     };
   } catch (error) {
     console.error("Error adding new memorization:", error);
+    throw error;
+  }
+}
+
+export async function updateMemorizationData(
+  studentId: string,
+  data: {
+    semester: string;
+    academic_year: string;
+    quran_memorization_id: string;
+    pages: string;
+    status: string;
+    notes: string;
+  }
+) {
+  const client = await getMongoClientInstance();
+  const db = client.db("pesantren_db");
+
+  try {
+    // Update memorization_grades collection
+    const result = await db.collection("memorization_grades").updateOne(
+      { student_id: new ObjectId(studentId) },
+      {
+        $set: {
+          semester: data.semester,
+          academic_year: data.academic_year,
+          quran_memorization_id: new ObjectId(data.quran_memorization_id),
+          pages: data.pages,
+          status: data.status,
+          notes: data.notes,
+          updated_at: new Date(),
+        },
+      },
+      { upsert: true }
+    );
+
+    return { success: true, id: result.upsertedId?.toString() };
+  } catch (error) {
+    console.error("Error updating memorization data:", error);
     throw error;
   }
 } 
