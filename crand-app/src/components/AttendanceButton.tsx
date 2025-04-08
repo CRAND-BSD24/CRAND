@@ -145,19 +145,19 @@ export default function AttendanceButton({
       const pesantrenLng = 106.64997821247849;
       const radius = 100;
 
-      if (
-        !isWithinRadius(latitude, longitude, pesantrenLat, pesantrenLng, radius)
-      ) {
-        setIsSuccess(false);
-        setMessage(
-          "Absensi hanya dapat dilakukan di dalam lingkungan pesantren."
-        );
-        if (onError)
-          onError(
-            "Absensi hanya dapat dilakukan di dalam lingkungan pesantren."
-          );
-        return;
-      }
+      // if (
+      //   !isWithinRadius(latitude, longitude, pesantrenLat, pesantrenLng, radius)
+      // ) {
+      //   setIsSuccess(false);
+      //   setMessage(
+      //     "Absensi hanya dapat dilakukan di dalam lingkungan pesantren."
+      //   );
+      //   if (onError)
+      //     onError(
+      //       "Absensi hanya dapat dilakukan di dalam lingkungan pesantren."
+      //     );
+      //   return;
+      // }
 
       const reader = new FileReader();
       reader.onload = async () => {

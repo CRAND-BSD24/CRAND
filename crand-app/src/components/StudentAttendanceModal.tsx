@@ -77,11 +77,19 @@ export default function StudentAttendanceModal({
               <SelectTrigger>
                 <SelectValue placeholder="Pilih status" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Present">Hadir</SelectItem>
-                <SelectItem value="Sick">Sakit</SelectItem>
-                <SelectItem value="Permission">Izin</SelectItem>
-                <SelectItem value="Absent">Tidak Hadir</SelectItem>
+              <SelectContent className="bg-white">
+                <SelectItem value="Present" className="hover:bg-gray-100">
+                  Hadir
+                </SelectItem>
+                <SelectItem value="Sick" className="hover:bg-gray-100">
+                  Sakit
+                </SelectItem>
+                <SelectItem value="Permission" className="hover:bg-gray-100">
+                  Izin
+                </SelectItem>
+                <SelectItem value="Absent" className="hover:bg-gray-100">
+                  Tidak Hadir
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
