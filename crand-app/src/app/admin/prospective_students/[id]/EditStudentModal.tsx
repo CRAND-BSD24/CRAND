@@ -4,7 +4,22 @@ import { useState } from "react";
 import { updateStudentById } from "./action";
 import { useRouter } from "next/navigation";
 
-export default function EditStudentModal({ student }: { student: any }) {
+interface Student {
+  _id: string;
+  profile_picture?: string;
+  name?: string;
+  email?: string;
+  phone_number?: string;
+  program?: string;
+  gender?: string;
+  address?: string;
+  level?: string;
+  academic_year?: string;
+  birth_place_date?: string;
+  payment_status?: string;
+}
+
+export default function EditStudentModal({ student }: { student: Student }) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [form, setForm] = useState({

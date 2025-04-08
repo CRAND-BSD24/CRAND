@@ -97,9 +97,9 @@ export default function AddStudentModal({ onStudentAdded }: { onStudentAdded: ()
               <Input name="address" value={form.address} onChange={handleChange} placeholder="Alamat" />
               <Input name="program" value={form.program} onChange={handleChange} placeholder="Program" />
               <Select name="gender" value={form.gender} onChange={handleChange}>
-                <option value="">Pilih Jenis Kelamin</option>
-                <option value="Laki-laki">Laki-laki</option>
-                <option value="Perempuan">Perempuan</option>
+                <option key="default" value="">Pilih Jenis Kelamin</option>
+                <option key="male" value="Laki-laki">Laki-laki</option>
+                <option key="female" value="Perempuan">Perempuan</option>
               </Select>
               <Input name="level" value={form.level} onChange={handleChange} placeholder="Level" />
               <Input name="academic_year" value={form.academic_year} onChange={handleChange} placeholder="Tahun Ajaran" />

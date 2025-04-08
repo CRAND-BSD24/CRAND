@@ -8,11 +8,11 @@ import AddStudentModal from "./AddStudentModal";
 interface Student {
   _id: string;
   name: string;
-  class: string; 
+  class_id: string | null;
+  class_name: string;
   academic_level: string;
   gender: string;
   parent_name: string;
-  batch_year: number;
   birth_date?: string;
   birth_place?: string;
   address?: string;
@@ -25,6 +25,8 @@ interface Student {
 const StudentsPage = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [filterClass, setFilterClass] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [classes, setClasses] = useState<{_id: string, class_name: string}[]>([]);
 
   const fetchStudents = async () => {
     try {
@@ -36,8 +38,19 @@ const StudentsPage = () => {
     }
   };
 
+  const fetchClasses = async () => {
+    try {
+      const response = await fetch('/api/classes');
+      const data = await response.json();
+      setClasses(data);
+    } catch (error) {
+      console.error('Error fetching classes:', error);
+    }
+  };
+
   useEffect(() => {
     fetchStudents();
+    fetchClasses();
   }, []);
 
   const handlePromoteByClass = async () => {
@@ -58,13 +71,12 @@ const StudentsPage = () => {
     }
   };
 
-  const filteredStudents = students.filter((s) =>
-    filterClass === "" ? true : s.class === filterClass
-  );
-
-  const uniqueClasses = Array.from(
-    new Set(students.map((s) => s.class))
-  ).sort();
+  const filteredStudents = students.filter((s) => {
+    const matchesClass = filterClass === "" ? true : s.class_id === filterClass;
+    const matchesSearch = searchQuery === "" ? true : 
+      s.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesClass && matchesSearch;
+  });
 
   return (
     <div className="p-8 bg-[#9ACBD0] min-h-screen">
@@ -80,19 +92,27 @@ const StudentsPage = () => {
           <AddStudentModal onStudentAdded={fetchStudents} />
         </div>
 
-        <div className="flex items-center gap-4 mb-4">
+        <div className="flex items-center gap-4 mb-4 flex-wrap">
           <select
             value={filterClass}
             onChange={(e) => setFilterClass(e.target.value)}
             className="border p-2 rounded"
           >
             <option value="">Pilih Kelas</option>
-            {uniqueClasses.map((kelas) => (
-              <option key={kelas} value={kelas}>
-                {kelas}
+            {classes.map((kelas) => (
+              <option key={kelas._id} value={kelas._id}>
+                {kelas.class_name}
               </option>
             ))}
           </select>
+
+          <input
+            type="text"
+            placeholder="Cari nama santri..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="border p-2 rounded flex-grow max-w-md"
+          />
 
           <button
             onClick={handlePromoteByClass}
@@ -110,8 +130,8 @@ const StudentsPage = () => {
                 <th className="px-4 py-3">#</th>
                 <th className="px-4 py-3">Nama</th>
                 <th className="px-4 py-3">Kelas</th>
-                <th className="px-4 py-3">Tingkat Akademik</th>
-                <th className="px-4 py-3">Tahun Angkatan</th>
+                <th className="px-4 py-3">Jenjang Akademik</th>
+                <th className="px-4 py-3">Jenis Kelamin</th>
                 <th className="px-4 py-3">Aksi</th>
               </tr>
             </thead>
@@ -123,9 +143,9 @@ const StudentsPage = () => {
                 >
                   <td className="px-4 py-3">{index + 1}</td>
                   <td className="px-4 py-3">{student.name}</td>
-                  <td className="px-4 py-3">{student.class}</td>
+                  <td className="px-4 py-3">{student.class_name || "-"}</td>
                   <td className="px-4 py-3">{student.academic_level}</td>
-                  <td className="px-4 py-3">{student.batch_year}</td>
+                  <td className="px-4 py-3">{student.gender}</td>
                   <td className="px-4 py-3">
                     <Link
                       href={`/admin/students/${student._id}`}
@@ -142,7 +162,7 @@ const StudentsPage = () => {
                     colSpan={6}
                     className="text-center py-6 text-[#006A71] italic bg-[#f0fafa] rounded-md"
                   >
-                    Tidak ada data santri untuk kelas ini.
+                    Tidak ada data santri yang ditemukan.
                   </td>
                 </tr>
               )}

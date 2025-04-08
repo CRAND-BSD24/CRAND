@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import LogoutButton from "./LogoutButton";
 import logo from "@/assets/logo.jpg";
 import Image from "next/image";
+import Link from "next/link";
 
 const AdminSidebar = () => {
 
@@ -22,28 +23,23 @@ const AdminSidebar = () => {
               </a>
             </li>
             <li className="mb-4">
-              <a href="/admin/students" className="hover:text-gray-300">
+              <Link href="/admin/students" className="hover:text-gray-300">
                 Santri
-              </a>
+              </Link>
             </li>
             <li className="mb-4">
-              <a href="/admin/prospective_students" className="hover:text-gray-300">
+              <Link href="/admin/prospective_students" className="hover:text-gray-300">
                 Calon Santri
-              </a>
+              </Link>
             </li>
             <li className="mb-4">
-              <a href="/admin/academic" className="hover:text-gray-300">
-                Akademik
+              <a href="/admin/teachers" className="hover:text-gray-300">
+                Ustadz
               </a>
             </li>
             <li className="mb-4">
               <a href="/admin/attendance" className="hover:text-gray-300">
                 Absensi
-              </a>
-            </li>
-            <li className="mb-4">
-              <a href="/admin/memorization" className="hover:text-gray-300">
-                Hafalan
               </a>
             </li>
             <li className="mb-4">
