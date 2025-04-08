@@ -11,16 +11,23 @@ interface Student {
   class_id: string | null;
   academic_level: string;
   gender: string;
-  parent_name: string;
-  batch_year: number;
-  birth_date: string;
-  birth_place: string;
+  father_name: string;
+  mother_name: string;
+  academic_year: string;
+  birth_date_place: string;
   address: string;
   email: string;
   phone_number: string;
   profile_picture?: string;
   graduation_status: string;
   payment_status: string;
+  VA_SPP: string;
+  ekskul: string;
+  level: string;
+  nisn: string;
+  program: string;
+  halaqah: string;
+  halaqah_id: string | null;
 }
 
 interface Class {
@@ -28,24 +35,35 @@ interface Class {
   class_name: string;
 }
 
+interface Halaqah {
+  _id: string;
+  name: string;
+}
+
 export default function EditStudentModal({ student }: { student: Student }) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState("");
   const [classes, setClasses] = useState<Class[]>([]);
+  const [halaqahs, setHalaqahs] = useState<Halaqah[]>([]);
 
   useEffect(() => {
-    const fetchClasses = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('/api/classes');
-        const data = await response.json();
-        setClasses(data);
+        const [classesResponse, halaqahsResponse] = await Promise.all([
+          fetch('/api/classes'),
+          fetch('/api/halaqah')
+        ]);
+        const classesData = await classesResponse.json();
+        const halaqahsData = await halaqahsResponse.json();
+        setClasses(classesData);
+        setHalaqahs(halaqahsData);
       } catch (error) {
-        console.error('Error fetching classes:', error);
+        console.error('Error fetching data:', error);
       }
     };
 
-    fetchClasses();
+    fetchData();
   }, []);
 
   const [form, setForm] = useState({
@@ -53,26 +71,23 @@ export default function EditStudentModal({ student }: { student: Student }) {
     class_id: student.class_id || "",
     academic_level: student.academic_level || "",
     gender: student.gender || "",
-    parent_name: student.parent_name || "",
-    batch_year: student.batch_year?.toString() || "",
-    birth_date: student.birth_date
-      ? new Date(student.birth_date).toISOString().split("T")[0]
-      : "",
-    birth_place: student.birth_place || "",
+    father_name: student.father_name || "",
+    mother_name: student.mother_name || "",
+    academic_year: student.academic_year || "",
+    birth_date_place: student.birth_date_place || "",
     address: student.address || "",
     email: student.email || "",
     phone_number: student.phone_number || "",
     profile_picture: student.profile_picture || "",
     graduation_status: student.graduation_status || "Aktif",
     payment_status: student.payment_status || "Lunas",
+    VA_SPP: student.VA_SPP || "",
+    ekskul: student.ekskul || "",
+    level: student.level || "",
+    nisn: student.nisn || "",
+    program: student.program || "",
+    halaqah_id: student.halaqah_id || "",
   });
-
-  useEffect(() => {
-    console.log("Student data received:", student);
-    console.log("Phone number from student:", student.phone_number);
-    console.log("Current form state:", form);
-    console.log("Phone number in form:", form.phone_number);
-  }, [student, form]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -97,21 +112,16 @@ export default function EditStudentModal({ student }: { student: Student }) {
       setError("Jenis kelamin harus dipilih");
       return;
     }
-    if (!form.birth_date) {
-      setError("Tanggal lahir harus diisi");
+    if (!form.birth_date_place) {
+      setError("Tempat Tanggal Lahir harus diisi");
       return;
     }
-    if (!form.batch_year) {
-      setError("Tahun angkatan harus diisi");
+    if (!form.academic_year) {
+      setError("Tahun Angkatan harus diisi");
       return;
     }
 
-    const updatedForm = {
-      ...form,
-      batch_year: Number(form.batch_year),
-    };
-
-    const success = await updateStudentById(student._id, updatedForm);
+    const success = await updateStudentById(student._id, form);
 
     if (success) {
       alert("Data berhasil diperbarui.");
@@ -160,23 +170,46 @@ export default function EditStudentModal({ student }: { student: Student }) {
                 </select>
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Halaqah</label>
+                <select
+                  name="halaqah_id"
+                  value={form.halaqah_id}
+                  onChange={handleChange}
+                  className="w-full border p-2 rounded"
+                >
+                  <option value="">Pilih Halaqah</option>
+                  {halaqahs.map((halaqah) => (
+                    <option key={halaqah._id} value={halaqah._id}>
+                      {halaqah.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               {[
                 { label: "Nama Lengkap", name: "name" },
                 { label: "Tingkat Akademik", name: "academic_level" },
-                { label: "Nama Orang Tua", name: "parent_name" },
-                { label: "Tahun Angkatan", name: "batch_year", type: "number" },
-                { label: "Tempat Lahir", name: "birth_place" },
+                { label: "Nama Ayah", name: "father_name" },
+                { label: "Nama Ibu", name: "mother_name" },
+                { label: "Tahun Angkatan", name: "academic_year" },
+                { label: "Tempat Tanggal Lahir", name: "birth_date_place" },
                 { label: "Alamat Lengkap", name: "address" },
                 { label: "Email", name: "email", type: "email" },
                 { label: "Nomor HP", name: "phone_number" },
                 { label: "URL Foto Profil", name: "profile_picture" },
+                { label: "VA SPP", name: "VA_SPP" },
+                { label: "Ekskul", name: "ekskul" },
+                { label: "Level", name: "level" },
+                { label: "NIS", name: "nisn" },
+                { label: "Program", name: "program" },
               ].map(({ label, name, type = "text" }) => (
                 <div key={name}>
                   <label className="block text-sm font-medium text-gray-700">{label}</label>
                   <input
                     name={name}
                     type={type}
-                    value={(form as any)[name]}
+                    value={form[name as keyof typeof form]}
                     onChange={handleChange}
                     className="w-full border p-2 rounded"
                   />
@@ -223,17 +256,6 @@ export default function EditStudentModal({ student }: { student: Student }) {
                   <option value="Belum Lunas">Belum Lunas</option>
                   <option value="Cicilan">Cicilan</option>
                 </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Tanggal Lahir</label>
-                <input
-                  type="date"
-                  name="birth_date"
-                  value={form.birth_date}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded"
-                />
               </div>
 
               <div className="md:col-span-2 flex justify-end space-x-2 pt-2">

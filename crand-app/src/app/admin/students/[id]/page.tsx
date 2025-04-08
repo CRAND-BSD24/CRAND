@@ -58,18 +58,23 @@ export default async function SantriDetailPage({ params }: SantriDetailPageProps
             <Detail label="Kelas" value={student.class} />
             <Detail label="Tingkat Akademik" value={student.academic_level} />
             <Detail label="Jenis Kelamin" value={student.gender} />
-            <Detail label="Nama Orang Tua" value={student.parent_name} />
-            <Detail label="Tahun Angkatan" value={student.batch_year} />
-            <Detail label="Tempat Lahir" value={student.birth_place} />
-            <Detail label="Tanggal Lahir" value={student.birth_date} />
-            <Detail
-              label="Tanggal Masuk"
-              value={
-                student.created_at
-                  ? new Date(student.created_at).toLocaleString()
-                  : "-"
-              }
-            />
+            <Detail label="Nama Ayah" value={student.father_name} />
+            <Detail label="Nama Ibu" value={student.mother_name} />
+            <Detail label="Tahun Angkatan" value={student.academic_year} />
+            <Detail label="Tempat Tanggal Lahir" value={student.birth_date_place} />
+            <Detail label="Alamat" value={student.address} />
+            <Detail label="Email" value={student.email} />
+            <Detail label="Nomor HP" value={student.phone_number} />
+            <Detail label="Status Kelulusan" value={student.graduation_status} />
+            <Detail label="Status Pembayaran" value={student.payment_status} />
+            <Detail label="VA SPP" value={student.VA_SPP} />
+            <Detail label="Ekskul" value={student.ekskul} />
+            <Detail label="Level" value={student.level} />
+            <Detail label="NIS" value={student.nisn} />
+            <Detail label="Program" value={student.program} />
+            <Detail label="Halaqah" value={student.halaqah} />
+            <Detail label="Dibuat" value={new Date(student.created_at).toLocaleString()} />
+            <Detail label="Diperbarui" value={new Date(student.updated_at).toLocaleString()} />
           </div>
         </div>
       </div>
