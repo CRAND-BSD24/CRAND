@@ -13,7 +13,7 @@ export async function GET() {
       students: students.map(s => ({
         _id: s._id.toString(),
         name: s.name,
-        birth_date_place: s.birth_date_place
+        birth_place_date: s.birth_place_date
       })),
       users: users.map(u => ({
         _id: u._id.toString(),
