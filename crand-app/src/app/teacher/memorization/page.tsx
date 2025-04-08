@@ -11,65 +11,88 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { BookText } from "lucide-react";
-import React, { useState } from "react";
-import { PDFDocument, rgb } from "pdf-lib";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogClose,
 } from "@/components/ui/dialog";
+import { getStudentMemorization, updateMemorizationStatus, addNewMemorization, type MemorizationStudent } from "./action";
 
 const MemorizationPage = () => {
-  const [memorizationData, setMemorizationData] = useState([
-    {
-      name: "Ahmad Farhan",
-      class: "10A",
-      surah: "Al-Fatihah",
-      progress: "5/7",
-      status: "Baik",
-      comment: "",
-    },
-    {
-      name: "Fatimah Azzahra",
-      class: "10A",
-      surah: "Al-Baqarah",
-      progress: "12/286",
-      status: "Sangat Baik",
-      comment: "",
-    },
-    {
-      name: "Muhammad Rizky",
-      class: "10A",
-      surah: "Al-Fatihah",
-      progress: "3/7",
-      status: "Cukup",
-      comment: "",
-    },
-  ]);
-
+  const [memorizationData, setMemorizationData] = useState<MemorizationStudent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
   const [newMemorization, setNewMemorization] = useState({
-    name: "",
-    class: "",
-    surah: "",
-    progress: "",
+    student_id: "",
+    semester: "",
+    academic_year: "",
+    juz_name: "",
+    pages: "",
     status: "",
-    comment: "",
+    notes: "",
   });
 
-  const [showForm, setShowForm] = useState(false);
+  useEffect(() => {
+    fetchMemorizationData();
+  }, []);
 
-  const handleCommentChange = (index: number, newComment: string) => {
-    const updatedData = [...memorizationData];
-    updatedData[index].comment = newComment;
-    setMemorizationData(updatedData);
+  const fetchMemorizationData = async () => {
+    try {
+      const data = await getStudentMemorization();
+      setMemorizationData(data);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching memorization data:", error);
+      setError("Gagal memuat data hafalan");
+      setLoading(false);
+    }
   };
 
-  const handleStatusChange = (index: number, newStatus: string) => {
-    const updatedData = [...memorizationData];
-    updatedData[index].status = newStatus;
-    setMemorizationData(updatedData);
+  const handleStatusChange = async (studentId: string, newStatus: string) => {
+    try {
+      const student = memorizationData.find((s) => s.id === studentId);
+      if (!student) return;
+
+      await updateMemorizationStatus(studentId, {
+        status: newStatus,
+        notes: student.notes,
+      });
+
+      // Update local state
+      setMemorizationData((prev) =>
+        prev.map((s) =>
+          s.id === studentId ? { ...s, status: newStatus } : s
+        )
+      );
+    } catch (error) {
+      console.error("Error updating status:", error);
+      alert("Gagal mengupdate status hafalan");
+    }
+  };
+
+  const handleNotesChange = async (studentId: string, newNotes: string) => {
+    try {
+      const student = memorizationData.find((s) => s.id === studentId);
+      if (!student) return;
+
+      await updateMemorizationStatus(studentId, {
+        status: student.status,
+        notes: newNotes,
+      });
+
+      // Update local state
+      setMemorizationData((prev) =>
+        prev.map((s) =>
+          s.id === studentId ? { ...s, notes: newNotes } : s
+        )
+      );
+    } catch (error) {
+      console.error("Error updating notes:", error);
+      alert("Gagal mengupdate catatan hafalan");
+    }
   };
 
   const handleInputChange = (
@@ -79,200 +102,54 @@ const MemorizationPage = () => {
     setNewMemorization({ ...newMemorization, [name]: value });
   };
 
-  const downloadPDF = async () => {
-    const pdfDoc = await PDFDocument.create();
-    const page = pdfDoc.addPage([600, 900]);
-    const { width, height } = page.getSize();
-
-    // Header
-    page.drawText("LAPORAN HASIL HAFALAN", {
-      x: width / 2 - 100,
-      y: height - 50,
-      size: 18,
-      color: rgb(0, 0, 0),
-    });
-
-    // Tabel Hafalan
-    const tableTop = height - 100;
-    const rowHeight = 30;
-    const colWidths = [100, 50, 100, 100, 100, 150];
-
-    // Header tabel
-    const headers = [
-      "Nama Santri",
-      "Kelas",
-      "Surah",
-      "Progress",
-      "Status",
-      "Keterangan",
-    ];
-    headers.forEach((header, i) => {
-      page.drawText(header, {
-        x: 50 + colWidths.slice(0, i).reduce((a, b) => a + b, 0),
-        y: tableTop,
-        size: 12,
-        color: rgb(0, 0, 0),
-      });
-    });
-
-    // Garis bawah header tabel
-    page.drawLine({
-      start: { x: 50, y: tableTop - 5 },
-      end: { x: width - 50, y: tableTop - 5 },
-      thickness: 1,
-      color: rgb(0, 0, 0),
-    });
-
-    // Isi tabel
-    memorizationData.forEach((student, index) => {
-      const y = tableTop - (index + 1) * rowHeight;
-      const row = [
-        student.name,
-        student.class,
-        student.surah,
-        student.progress,
-        student.status,
-        student.comment,
-      ];
-      row.forEach((text, i) => {
-        page.drawText(text, {
-          x: 50 + colWidths.slice(0, i).reduce((a, b) => a + b, 0),
-          y,
-          size: 10,
-          color: rgb(0, 0, 0),
-        });
-      });
-
-      // Garis bawah setiap baris
-      page.drawLine({
-        start: { x: 50, y: y - 5 },
-        end: { x: width - 50, y: y - 5 },
-        thickness: 0.5,
-        color: rgb(0, 0, 0),
-      });
-    });
-
-    const pdfBytes = await pdfDoc.save();
-
-    const blob = new Blob([pdfBytes], { type: "application/pdf" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "Rapor_Hafalan_Santri.pdf";
-    link.click();
-  };
-
-  const sendPDF = async (emailAddress: string) => {
-    const pdfDoc = await PDFDocument.create();
-    const page = pdfDoc.addPage([600, 900]);
-    const { width, height } = page.getSize();
-
-    // Header
-    page.drawText("LAPORAN HASIL HAFALAN", {
-      x: width / 2 - 100,
-      y: height - 50,
-      size: 18,
-      color: rgb(0, 0, 0),
-    });
-
-    // Tabel Hafalan
-    const tableTop = height - 100;
-    const rowHeight = 30;
-    const colWidths = [100, 50, 100, 100, 100, 150];
-
-    // Header tabel
-    const headers = [
-      "Nama Santri",
-      "Kelas",
-      "Surah",
-      "Progress",
-      "Status",
-      "Keterangan",
-    ];
-    headers.forEach((header, i) => {
-      page.drawText(header, {
-        x: 50 + colWidths.slice(0, i).reduce((a, b) => a + b, 0),
-        y: tableTop,
-        size: 12,
-        color: rgb(0, 0, 0),
-      });
-    });
-
-    // Garis bawah header tabel
-    page.drawLine({
-      start: { x: 50, y: tableTop - 5 },
-      end: { x: width - 50, y: tableTop - 5 },
-      thickness: 1,
-      color: rgb(0, 0, 0),
-    });
-
-    // Isi tabel
-    memorizationData.forEach((student, index) => {
-      const y = tableTop - (index + 1) * rowHeight;
-      const row = [
-        student.name,
-        student.class,
-        student.surah,
-        student.progress,
-        student.status,
-        student.comment,
-      ];
-      row.forEach((text, i) => {
-        page.drawText(text, {
-          x: 50 + colWidths.slice(0, i).reduce((a, b) => a + b, 0),
-          y,
-          size: 10,
-          color: rgb(0, 0, 0),
-        });
-      });
-
-      // Garis bawah setiap baris
-      page.drawLine({
-        start: { x: 50, y: y - 5 },
-        end: { x: width - 50, y: y - 5 },
-        thickness: 0.5,
-        color: rgb(0, 0, 0),
-      });
-    });
-
-    const pdfBytes = await pdfDoc.save();
-    const pdfBase64 = Buffer.from(pdfBytes).toString("base64");
-
-    // Panggil API untuk mengirim email
+  const addMemorizationData = async () => {
     try {
-      const response = await fetch("/api/sendEmail", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ emailAddress, pdfBase64 }),
+      await addNewMemorization({
+        student_id: newMemorization.student_id,
+        semester: newMemorization.semester,
+        academic_year: newMemorization.academic_year,
+        juz_name: newMemorization.juz_name,
+        pages: newMemorization.pages,
+        status: newMemorization.status,
+        notes: newMemorization.notes,
       });
 
-      const textResponse = await response.text();
-      console.log("Server response:", textResponse);
+      // Refresh data
+      await fetchMemorizationData();
 
-      const result = JSON.parse(textResponse);
-      alert(result.message);
+      // Reset form
+      setNewMemorization({
+        student_id: "",
+        semester: "",
+        academic_year: "",
+        juz_name: "",
+        pages: "",
+        status: "",
+        notes: "",
+      });
+
+      setShowForm(false);
     } catch (error) {
-      console.error("Error sending email:", error);
-      alert("Gagal mengirim email. Silakan coba lagi.");
+      console.error("Error adding memorization:", error);
+      alert("Gagal menambahkan data hafalan");
     }
   };
 
-  const addMemorizationData = () => {
-    setMemorizationData([...memorizationData, newMemorization]);
-    setNewMemorization({
-      name: "",
-      class: "",
-      surah: "",
-      progress: "",
-      status: "",
-      comment: "",
-    });
-  };
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading...
+      </div>
+    );
+  }
 
-  const toggleFormVisibility = () => {
-    setShowForm(!showForm);
-  };
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen text-red-500">
+        {error}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 m-5">
@@ -285,25 +162,11 @@ const MemorizationPage = () => {
         </div>
         <Button
           className="bg-blue-600 hover:bg-blue-700"
-          onClick={toggleFormVisibility}
+          onClick={() => setShowForm(true)}
         >
           <BookText className="mr-2 h-4 w-4" />
           Tambah Hafalan
         </Button>
-        <div className="flex space-x-2">
-          <Button
-            className="bg-blue-600 hover:bg-blue-700"
-            onClick={() => downloadPDF()}
-          >
-            Download PDF
-          </Button>
-          <Button
-            className="bg-blue-600 hover:bg-blue-700"
-            onClick={() => sendPDF("geofannywewe@gmail.com")}
-          >
-            Send PDF
-          </Button>
-        </div>
       </div>
 
       <Card className="bg-white shadow-lg">
@@ -316,19 +179,23 @@ const MemorizationPage = () => {
               <TableRow>
                 <TableHead>Nama Santri</TableHead>
                 <TableHead>Kelas</TableHead>
-                <TableHead>Surah</TableHead>
-                <TableHead>Progress</TableHead>
+                <TableHead>Semester</TableHead>
+                <TableHead>Tahun Angkatan</TableHead>
+                <TableHead>Juz</TableHead>
+                <TableHead>Halaman</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Keterangan</TableHead>
+                <TableHead>Catatan</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {memorizationData.map((student, index) => (
-                <TableRow key={index}>
+              {memorizationData.map((student) => (
+                <TableRow key={student.id}>
                   <TableCell>{student.name}</TableCell>
-                  <TableCell>{student.class}</TableCell>
-                  <TableCell>{student.surah}</TableCell>
-                  <TableCell>{student.progress}</TableCell>
+                  <TableCell>{student.class_name}</TableCell>
+                  <TableCell>{student.semester}</TableCell>
+                  <TableCell>{student.academic_year}</TableCell>
+                  <TableCell>{student.juz_name}</TableCell>
+                  <TableCell>{student.pages}</TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
                       <Button
@@ -337,7 +204,7 @@ const MemorizationPage = () => {
                         }
                         size="sm"
                         className="hover:bg-green-50"
-                        onClick={() => handleStatusChange(index, "Lancar")}
+                        onClick={() => handleStatusChange(student.id, "Lancar")}
                       >
                         Lancar
                       </Button>
@@ -350,7 +217,7 @@ const MemorizationPage = () => {
                         size="sm"
                         className="hover:bg-red-50"
                         onClick={() =>
-                          handleStatusChange(index, "Tidak Lancar")
+                          handleStatusChange(student.id, "Tidak Lancar")
                         }
                       >
                         Tidak Lancar
@@ -360,10 +227,10 @@ const MemorizationPage = () => {
                   <TableCell>
                     <textarea
                       className="w-full p-2 border border-gray-300 rounded"
-                      placeholder="Tambahkan keterangan..."
-                      value={student.comment}
+                      placeholder="Tambahkan catatan..."
+                      value={student.notes}
                       onChange={(e) =>
-                        handleCommentChange(index, e.target.value)
+                        handleNotesChange(student.id, e.target.value)
                       }
                     />
                   </TableCell>
@@ -374,7 +241,7 @@ const MemorizationPage = () => {
         </CardContent>
       </Card>
 
-      <Dialog open={showForm} onOpenChange={toggleFormVisibility}>
+      <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Tambah Hafalan Baru</DialogTitle>
@@ -382,33 +249,41 @@ const MemorizationPage = () => {
           <div className="mb-4">
             <input
               type="text"
-              name="name"
-              placeholder="Nama Santri"
-              value={newMemorization.name}
+              name="student_id"
+              placeholder="ID Santri"
+              value={newMemorization.student_id}
               onChange={handleInputChange}
               className="w-full p-2 mb-2 border border-gray-300 rounded"
             />
             <input
               type="text"
-              name="class"
-              placeholder="Kelas"
-              value={newMemorization.class}
+              name="semester"
+              placeholder="Semester"
+              value={newMemorization.semester}
               onChange={handleInputChange}
               className="w-full p-2 mb-2 border border-gray-300 rounded"
             />
             <input
               type="text"
-              name="surah"
-              placeholder="Surah"
-              value={newMemorization.surah}
+              name="academic_year"
+              placeholder="Tahun Angkatan"
+              value={newMemorization.academic_year}
               onChange={handleInputChange}
               className="w-full p-2 mb-2 border border-gray-300 rounded"
             />
             <input
               type="text"
-              name="progress"
-              placeholder="Progress"
-              value={newMemorization.progress}
+              name="juz_name"
+              placeholder="Juz"
+              value={newMemorization.juz_name}
+              onChange={handleInputChange}
+              className="w-full p-2 mb-2 border border-gray-300 rounded"
+            />
+            <input
+              type="text"
+              name="pages"
+              placeholder="Halaman"
+              value={newMemorization.pages}
               onChange={handleInputChange}
               className="w-full p-2 mb-2 border border-gray-300 rounded"
             />
@@ -421,18 +296,15 @@ const MemorizationPage = () => {
               className="w-full p-2 mb-2 border border-gray-300 rounded"
             />
             <textarea
-              name="comment"
-              placeholder="Keterangan"
-              value={newMemorization.comment}
+              name="notes"
+              placeholder="Catatan"
+              value={newMemorization.notes}
               onChange={handleInputChange}
               className="w-full p-2 mb-2 border border-gray-300 rounded"
             />
             <Button
               className="bg-blue-600 hover:bg-blue-700"
-              onClick={() => {
-                addMemorizationData();
-                toggleFormVisibility();
-              }}
+              onClick={addMemorizationData}
             >
               Simpan Hafalan
             </Button>
