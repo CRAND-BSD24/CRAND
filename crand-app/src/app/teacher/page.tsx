@@ -147,14 +147,16 @@ const TeacherDashboard = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Santri Berprestasi Minggu Ini</CardTitle>
+            <CardTitle>
+              Santri Kelas {classData?.class_name} Berprestasi Minggu Ini
+            </CardTitle>
             <p className="text-sm text-gray-500">
-              Santri dengan pencapaian terbaik
+              Santri dengan pencapaian hafalan terbaik
             </p>
           </CardHeader>
           <CardContent>
             <ul className="space-y-4">
-              {students.slice(0, 3).map((student, index) => (
+              {dashboardData?.topStudents.map((student, index) => (
                 <li key={index} className="flex items-center space-x-4">
                   <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-600">
                     {student.name[0]}
@@ -165,7 +167,7 @@ const TeacherDashboard = () => {
                       {student.class_name}
                     </p>
                     <p className="text-sm text-gray-700">
-                      {student.academic_level}
+                      {student.achievement}
                     </p>
                   </div>
                 </li>
