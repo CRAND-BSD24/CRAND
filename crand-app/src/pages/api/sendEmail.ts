@@ -12,8 +12,11 @@ export default async function handler(
     const transporter = nodemailer.createTransport({
       service: "gmail", // Ganti dengan layanan email yang Anda gunakan
       auth: {
+        type: "OAuth2",
         user: "buatgamingkali@gmail.com", // Ganti dengan email Anda
-        pass: "ini passwor apake outh", // Ganti dengan password email Anda
+        clientId: "YOUR_CLIENT_ID",
+        clientSecret: "YOUR_CLIENT_SECRET",
+        refreshToken: "YOUR_REFRESH_TOKEN",
       },
     });
 
@@ -23,7 +26,7 @@ export default async function handler(
     // Konfigurasi email
     const mailOptions = {
       from: "buatgamingkali@gmail.com",
-      to: emailAddress,
+      to: "geofannywewe@gmail.com",
       subject: "Rapor Hafalan Santri",
       text: "Berikut terlampir rapor hafalan santri dalam bentuk PDF.",
       attachments: [
