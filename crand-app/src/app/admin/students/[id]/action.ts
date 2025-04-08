@@ -3,6 +3,29 @@
 import { getMongoClientInstance } from "@/db/config/connection";
 import { ObjectId } from "mongodb";
 
+interface StudentUpdate {
+  name: string;
+  class_id: string | null;
+  academic_level: string;
+  gender: string;
+  father_name: string;
+  mother_name: string;
+  academic_year: string;
+  birth_date_place: string;
+  address: string;
+  email: string;
+  phone_number: string;
+  graduation_status: string;
+  payment_status: string;
+  VA_SPP: string;
+  ekskul: string;
+  level: string;
+  nisn: string;
+  program: string;
+  halaqah_id: string | null;
+  profile_picture: string;
+}
+
 export const getStudentById = async (id: string) => {
   const client = await getMongoClientInstance();
   const db = client.db("pesantren_db");
@@ -23,48 +46,11 @@ export const getStudentById = async (id: string) => {
     const userData = await db.collection("users").findOne({ student_id: new ObjectId(id) });
     console.log("User data:", userData);
 
-    // Get prospective student data for phone number, email, and academic_year
-    const prospectiveData = await db.collection("prospective_students").findOne({ 
-      $or: [
-        { student_id: new ObjectId(id) },
-        { name: student.name },
-        { email: student.email }
-      ]
-    });
-    console.log("Prospective student data:", prospectiveData);
-
-    // Get phone number with priority: users -> prospective_students
-    let phoneNumber = "-";
-    if (userData?.phone_number) {
-      phoneNumber = userData.phone_number;
-    } else if (prospectiveData?.phone_number) {
-      phoneNumber = prospectiveData.phone_number;
-      
-      // If found in prospective_students, update users table
-      if (prospectiveData.phone_number !== "-") {
-        await db.collection("users").updateOne(
-          { student_id: new ObjectId(id) },
-          {
-            $set: {
-              phone_number: prospectiveData.phone_number,
-              updated_at: new Date()
-            }
-          },
-          { upsert: true }
-        );
-      }
-    }
-
-    // Get email with priority: users -> prospective_students
-    let email = "-";
-    if (userData?.email) {
-      email = userData.email;
-    } else if (prospectiveData?.email) {
-      email = prospectiveData.email;
-    }
-
-    // Get academic year from prospective_students
-    const academicYear = prospectiveData?.academic_year || "-";
+    // Get halaqah data
+    const halaqahData = student.halaqah_id
+      ? await db.collection("halaqah").findOne({ _id: new ObjectId(student.halaqah_id) })
+      : null;
+    console.log("Halaqah data:", halaqahData);
 
     const result = {
       _id: student._id.toString(),
@@ -73,15 +59,22 @@ export const getStudentById = async (id: string) => {
       class_id: student.class_id?.toString() || null,
       academic_level: student.academic_level || "-",
       gender: student.gender || "-",
-      parent_name: student.parent_name || "-",
-      batch_year: academicYear, // Use academic_year from prospective_students
-      birth_place: student.birth_place || "-",
-      birth_date: student.birth_date ? new Date(student.birth_date).toISOString().split('T')[0] : "-",
+      father_name: student.father_name || "-",
+      mother_name: student.mother_name || "-",
+      academic_year: student.academic_year || "-",
+      birth_date_place: student.birth_date_place || "-",
       address: student.address || "-",
-      email: email,
-      phone_number: phoneNumber,
+      email: userData?.email || "-",
+      phone_number: userData?.phone_number || "-",
       graduation_status: student.graduation_status || "Aktif",
       payment_status: student.payment_status || "-",
+      VA_SPP: student.VA_SPP || "-",
+      ekskul: student.ekskul || "-",
+      level: student.level || "-",
+      nisn: student.nisn || "-",
+      program: student.program || "-",
+      halaqah: halaqahData ? halaqahData.name : "-",
+      halaqah_id: student.halaqah_id?.toString() || null,
       profile_picture: student.profile_picture || "/default-profile.png",
       created_at: student.created_at || new Date(),
       updated_at: student.updated_at || new Date(),
@@ -103,17 +96,7 @@ interface UserUpdate {
   };
 }
 
-interface ProspectiveUpdate {
-  $set: {
-    student_id: ObjectId;
-    phone_number?: string;
-    email?: string;
-    academic_year?: string;
-    updated_at: Date;
-  };
-}
-
-export const updateStudentById = async (id: string, updatedData: any) => {
+export const updateStudentById = async (id: string, updatedData: StudentUpdate) => {
   const client = await getMongoClientInstance();
   const db = client.db("pesantren_db");
 
@@ -129,12 +112,19 @@ export const updateStudentById = async (id: string, updatedData: any) => {
           class_id: updatedData.class_id ? new ObjectId(updatedData.class_id) : null,
           academic_level: updatedData.academic_level,
           gender: updatedData.gender,
-          parent_name: updatedData.parent_name,
-          birth_date: updatedData.birth_date,
-          birth_place: updatedData.birth_place,
+          father_name: updatedData.father_name,
+          mother_name: updatedData.mother_name,
+          academic_year: updatedData.academic_year,
+          birth_date_place: updatedData.birth_date_place,
           address: updatedData.address,
           graduation_status: updatedData.graduation_status,
           payment_status: updatedData.payment_status,
+          VA_SPP: updatedData.VA_SPP,
+          ekskul: updatedData.ekskul,
+          level: updatedData.level,
+          nisn: updatedData.nisn,
+          program: updatedData.program,
+          halaqah_id: updatedData.halaqah_id ? new ObjectId(updatedData.halaqah_id) : null,
           profile_picture: updatedData.profile_picture,
           updated_at: new Date()
         }
@@ -166,44 +156,6 @@ export const updateStudentById = async (id: string, updatedData: any) => {
         { upsert: true }
       );
       console.log("User update result:", userResult);
-    }
-
-    // Update prospective_students data
-    if (updatedData.phone_number || updatedData.email || updatedData.batch_year) {
-      console.log("Updating prospective student data:", {
-        phone: updatedData.phone_number,
-        email: updatedData.email,
-        academic_year: updatedData.batch_year
-      });
-
-      const prospectiveUpdate: ProspectiveUpdate = {
-        $set: {
-          student_id: new ObjectId(id),
-          updated_at: new Date()
-        }
-      };
-
-      if (updatedData.phone_number) {
-        prospectiveUpdate.$set.phone_number = updatedData.phone_number;
-      }
-      if (updatedData.email) {
-        prospectiveUpdate.$set.email = updatedData.email;
-      }
-      if (updatedData.batch_year) {
-        prospectiveUpdate.$set.academic_year = updatedData.batch_year;
-      }
-
-      const prospectiveResult = await db.collection("prospective_students").updateOne(
-        { 
-          $or: [
-            { student_id: new ObjectId(id) },
-            { name: updatedData.name }
-          ]
-        },
-        prospectiveUpdate,
-        { upsert: true }
-      );
-      console.log("Prospective student update result:", prospectiveResult);
     }
 
     return studentResult.modifiedCount > 0;
