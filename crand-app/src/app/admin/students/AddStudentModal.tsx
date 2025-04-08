@@ -6,15 +6,19 @@ import { createStudent } from "./action";
 // Interface khusus untuk form input
 interface NewStudentFormData {
   name: string;
-  class: string;
+  class_id: string;
   academic_level: string;
   gender: string;
   parent_name: string;
-  batch_year: number;
   birth_date: string;
   birth_place: string;
   address: string;
   phone_number: string;
+}
+
+interface Class {
+  _id: string;
+  class_name: string;
 }
 
 export default function AddStudentModal({
@@ -23,55 +27,52 @@ export default function AddStudentModal({
   onStudentAdded: () => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [classes, setClasses] = useState<Class[]>([]);
   const [form, setForm] = useState<NewStudentFormData>({
     name: "",
-    class: "",
+    class_id: "",
     academic_level: "",
     gender: "",
     parent_name: "",
-    batch_year: new Date().getFullYear(),
     birth_date: "",
     birth_place: "",
     address: "",
     phone_number: "",
   });
 
+  useEffect(() => {
+    const fetchClasses = async () => {
+      try {
+        const response = await fetch('/api/classes');
+        const data = await response.json();
+        setClasses(data);
+      } catch (error) {
+        console.error('Error fetching classes:', error);
+      }
+    };
+
+    fetchClasses();
+  }, []);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: name === "batch_year" ? +value : value,
-    }));
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const fullForm = {
-      ...form,
-      nisn: "",
-      program: "",
-      level: "",
-      eskul: "",
-      VA_SPP: "",
-      user_id: "",
-      class_id: "",
-      halaqah_id: "",
-    };
-
-    const success = await createStudent(fullForm);
+    const success = await createStudent(form);
     if (success) {
       alert("Santri berhasil ditambahkan");
       setIsOpen(false);
       setForm({
         name: "",
-        class: "",
+        class_id: "",
         academic_level: "",
         gender: "",
         parent_name: "",
-        batch_year: new Date().getFullYear(),
         birth_date: "",
         birth_place: "",
         address: "",
@@ -86,9 +87,6 @@ export default function AddStudentModal({
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "auto";
   }, [isOpen]);
-
-  const currentYear = new Date().getFullYear();
-  const academicYearOptions = Array.from({ length: 13 }, (_, i) => currentYear - 10 + i);
 
   return (
     <>
@@ -112,8 +110,21 @@ export default function AddStudentModal({
               <Input name="name" value={form.name} onChange={handleChange} placeholder="Nama Lengkap" required />
 
               <div className="grid grid-cols-2 gap-4">
-                <Select name="class" value={form.class} onChange={handleChange} options={["1A", "1B", "2A", "2B", "3A", "3B", "4A", "4B", "5A", "5B", "6A", "6B", "7A", "7B", "8A", "8B", "9A", "9B", "10A", "10B", "11A", "11B", "12A", "12B"]} placeholder="Kelas" required />
-                <Select name="academic_level" value={form.academic_level} onChange={handleChange} options={["Ibtidaiyah", "Tsanawiyah", "Aliyah"]} placeholder="Tingkat Akademik" required />
+                <select
+                  name="class_id"
+                  value={form.class_id}
+                  onChange={handleChange}
+                  className="w-full border border-[#9ACBD0] rounded-md px-4 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#48A6A7] transition"
+                  required
+                >
+                  <option value="">Pilih Kelas</option>
+                  {classes.map((kelas) => (
+                    <option key={kelas._id} value={kelas._id}>
+                      {kelas.class_name}
+                    </option>
+                  ))}
+                </select>
+                <Select name="academic_level" value={form.academic_level} onChange={handleChange} options={["Ibtidaiyah", "Tsanawiyah", "Aliyah", "SMA", "Wustho"]} placeholder="Tingkat Akademik" required />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -122,11 +133,10 @@ export default function AddStudentModal({
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <Select name="batch_year" value={form.batch_year.toString()} onChange={handleChange} options={academicYearOptions.map((year) => year.toString())} placeholder="Tahun Angkatan" required />
                 <Input name="birth_date" type="date" value={form.birth_date} onChange={handleChange} placeholder="Tanggal Lahir" />
+                <Input name="birth_place" value={form.birth_place} onChange={handleChange} placeholder="Tempat Lahir" />
               </div>
 
-              <Input name="birth_place" value={form.birth_place} onChange={handleChange} placeholder="Tempat Lahir" />
               <Input name="address" value={form.address} onChange={handleChange} placeholder="Alamat Lengkap" />
               <Input name="phone_number" value={form.phone_number} onChange={handleChange} placeholder="Nomor Telepon/HP" />
 
@@ -157,7 +167,7 @@ const Input = ({
 }: {
   name: string;
   value: string;
-  onChange: any;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder: string;
   required?: boolean;
   type?: string;
@@ -177,7 +187,7 @@ const Input = ({
 interface SelectProps {
   name: string;
   value: string;
-  onChange: any;
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   options: string[];
   placeholder: string;
   required?: boolean;
