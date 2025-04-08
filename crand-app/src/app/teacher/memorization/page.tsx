@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Pencil } from "lucide-react";
+import { Pencil, History, Plus } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import {
   Dialog,
@@ -18,8 +18,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { getStudentMemorization, updateMemorizationData, type MemorizationStudent } from "./action";
+import { 
+  getStudentMemorization, 
+  updateMemorizationData, 
+  addMemorizationData,
+  getMemorizationHistory,
+  type MemorizationStudent,
+  type MemorizationHistory 
+} from "./action";
 import { useToast } from "@/components/ui/use-toast";
+import { format, startOfWeek, endOfWeek, addWeeks, subWeeks } from "date-fns";
+import { id } from "date-fns/locale";
 
 interface QuranMemorization {
   _id: string;
@@ -31,11 +40,23 @@ const MemorizationPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showEditForm, setShowEditForm] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const [editingStudent, setEditingStudent] = useState<MemorizationStudent | null>(null);
+  const [selectedStudent, setSelectedStudent] = useState<MemorizationStudent | null>(null);
+  const [historyData, setHistoryData] = useState<MemorizationHistory[]>([]);
   const [juzList, setJuzList] = useState<QuranMemorization[]>([]);
   const [selectedJuzId, setSelectedJuzId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [newMemorization, setNewMemorization] = useState({
+    semester: "",
+    academic_year: "",
+    pages: "",
+    status: "",
+    notes: "",
+  });
   const { toast } = useToast();
+  const [currentWeek, setCurrentWeek] = useState(new Date());
 
   useEffect(() => {
     fetchMemorizationData();
@@ -170,6 +191,218 @@ const MemorizationPage = () => {
     }
   };
 
+  const handleAddClick = (student: MemorizationStudent) => {
+    setSelectedStudent(student);
+    setNewMemorization({
+      semester: "",
+      academic_year: "",
+      pages: "",
+      status: "",
+      notes: "",
+    });
+    setSelectedJuzId("");
+    setShowAddForm(true);
+  };
+
+  const handleAddInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setNewMemorization((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleHistoryClick = async (student: MemorizationStudent) => {
+    try {
+      setLoading(true);
+      const startOfCurrentWeek = startOfWeek(currentWeek, { weekStartsOn: 1 }); // Start from Monday
+      const endOfCurrentWeek = endOfWeek(currentWeek, { weekStartsOn: 1 }); // End on Sunday
+      const history = await getMemorizationHistory(
+        student.id,
+        startOfCurrentWeek,
+        endOfCurrentWeek
+      );
+      setHistoryData(history);
+      setSelectedStudent(student);
+      setShowHistory(true);
+    } catch (error) {
+      console.error("Error fetching history:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Gagal memuat riwayat hafalan",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePreviousWeek = async () => {
+    const newWeek = subWeeks(currentWeek, 1);
+    setCurrentWeek(newWeek);
+    if (selectedStudent) {
+      try {
+        setLoading(true);
+        const weekStart = startOfWeek(newWeek, { weekStartsOn: 1 });
+        const weekEnd = endOfWeek(newWeek, { weekStartsOn: 1 });
+        const history = await getMemorizationHistory(
+          selectedStudent.id,
+          weekStart,
+          weekEnd
+        );
+        setHistoryData(history);
+      } catch (error) {
+        console.error("Error fetching history:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Gagal memuat riwayat hafalan",
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleNextWeek = async () => {
+    const newWeek = addWeeks(currentWeek, 1);
+    setCurrentWeek(newWeek);
+    if (selectedStudent) {
+      try {
+        setLoading(true);
+        const weekStart = startOfWeek(newWeek, { weekStartsOn: 1 });
+        const weekEnd = endOfWeek(newWeek, { weekStartsOn: 1 });
+        const history = await getMemorizationHistory(
+          selectedStudent.id,
+          weekStart,
+          weekEnd
+        );
+        setHistoryData(history);
+      } catch (error) {
+        console.error("Error fetching history:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Gagal memuat riwayat hafalan",
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleCurrentWeek = async () => {
+    const newWeek = new Date();
+    setCurrentWeek(newWeek);
+    if (selectedStudent) {
+      try {
+        setLoading(true);
+        const weekStart = startOfWeek(newWeek, { weekStartsOn: 1 });
+        const weekEnd = endOfWeek(newWeek, { weekStartsOn: 1 });
+        const history = await getMemorizationHistory(
+          selectedStudent.id,
+          weekStart,
+          weekEnd
+        );
+        setHistoryData(history);
+      } catch (error) {
+        console.error("Error fetching history:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Gagal memuat riwayat hafalan",
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleAddSubmit = async () => {
+    if (!selectedStudent || !selectedJuzId) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Mohon lengkapi semua field, termasuk pemilihan Juz",
+      });
+      return;
+    }
+
+    // Validate required fields
+    if (!newMemorization.semester || !newMemorization.academic_year || !newMemorization.pages || !newMemorization.status) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Mohon lengkapi semua field yang wajib diisi",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const result = await addMemorizationData(selectedStudent.id, {
+        semester: newMemorization.semester,
+        academic_year: newMemorization.academic_year,
+        quran_memorization_id: selectedJuzId,
+        pages: newMemorization.pages,
+        status: newMemorization.status,
+        notes: newMemorization.notes,
+      });
+
+      if (result.success) {
+        // Update the local state instead of refreshing
+        setMemorizationData(prevData => 
+          prevData.map(student => {
+            if (student.id === selectedStudent.id) {
+              const selectedJuz = juzList.find(juz => juz._id === selectedJuzId);
+              return {
+                ...student,
+                semester: newMemorization.semester,
+                academic_year: newMemorization.academic_year,
+                juz_name: selectedJuz?.name || student.juz_name,
+                pages: newMemorization.pages,
+                status: newMemorization.status,
+                notes: newMemorization.notes,
+                quran_memorization_id: selectedJuzId,
+                created_at: new Date(),
+              };
+            }
+            return student;
+          })
+        );
+
+        setShowAddForm(false);
+        setSelectedStudent(null);
+        setSelectedJuzId("");
+        setNewMemorization({
+          semester: "",
+          academic_year: "",
+          pages: "",
+          status: "",
+          notes: "",
+        });
+        toast({
+          title: "Success",
+          description: "Data hafalan berhasil ditambahkan",
+        });
+      } else {
+        throw new Error("Failed to add data");
+      }
+    } catch (error) {
+      console.error("Error adding memorization:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Gagal menambahkan data hafalan",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -212,6 +445,7 @@ const MemorizationPage = () => {
                 <TableHead>Halaman</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Catatan</TableHead>
+                <TableHead>Tanggal</TableHead>
                 <TableHead>Aksi</TableHead>
               </TableRow>
             </TableHeader>
@@ -226,12 +460,29 @@ const MemorizationPage = () => {
                   <TableCell>{student.status}</TableCell>
                   <TableCell>{student.notes}</TableCell>
                   <TableCell>
+                    {student.created_at ? format(new Date(student.created_at), "dd MMMM yyyy", { locale: id }) : "-"}
+                  </TableCell>
+                  <TableCell className="space-x-2">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleEditClick(student)}
                     >
                       <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddClick(student)}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleHistoryClick(student)}
+                    >
+                      <History className="h-4 w-4" />
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -250,23 +501,23 @@ const MemorizationPage = () => {
           <div className="mb-4 space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1">Semester</label>
-              <input
-                type="text"
+            <input
+              type="text"
                 name="semester"
                 value={editingStudent?.semester || ""}
-                onChange={handleInputChange}
+              onChange={handleInputChange}
                 className="w-full p-2 border border-gray-300 rounded"
                 required
                 disabled={isSubmitting}
-              />
+            />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Tahun Angkatan</label>
-              <input
-                type="text"
+            <input
+              type="text"
                 name="academic_year"
                 value={editingStudent?.academic_year || ""}
-                onChange={handleInputChange}
+              onChange={handleInputChange}
                 className="w-full p-2 border border-gray-300 rounded"
                 required
                 disabled={isSubmitting}
@@ -277,7 +528,106 @@ const MemorizationPage = () => {
               <select
                 name="quran_memorization_id"
                 value={selectedJuzId}
-                onChange={handleInputChange}
+              onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded"
+                required
+                disabled={isSubmitting}
+              >
+                <option value="">Pilih Juz</option>
+                {juzList.map((juz) => (
+                  <option key={juz._id} value={juz._id}>
+                    {juz.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Halaman</label>
+            <input
+              type="text"
+                name="pages"
+                value={editingStudent?.pages || ""}
+              onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded"
+                required
+                disabled={isSubmitting}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Status</label>
+              <select
+              name="status"
+                value={editingStudent?.status || ""}
+              onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded"
+                required
+                disabled={isSubmitting}
+              >
+                <option value="">Pilih Status</option>
+                <option value="Lancar">Lancar</option>
+                <option value="Tidak Lancar">Tidak Lancar</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Catatan</label>
+            <textarea
+                name="notes"
+                value={editingStudent?.notes || ""}
+              onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded"
+                rows={3}
+                required
+                disabled={isSubmitting}
+            />
+            </div>
+            <Button
+              className="w-full bg-blue-600 hover:bg-blue-700"
+              onClick={handleEditSubmit}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Menyimpan..." : "Simpan Perubahan"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Dialog */}
+      <Dialog open={showAddForm} onOpenChange={setShowAddForm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Tambah Hafalan Baru</DialogTitle>
+          </DialogHeader>
+          <div className="mb-4 space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Semester</label>
+              <input
+                type="text"
+                name="semester"
+                value={newMemorization.semester}
+                onChange={handleAddInputChange}
+                className="w-full p-2 border border-gray-300 rounded"
+                required
+                disabled={isSubmitting}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Tahun Angkatan</label>
+              <input
+                type="text"
+                name="academic_year"
+                value={newMemorization.academic_year}
+                onChange={handleAddInputChange}
+                className="w-full p-2 border border-gray-300 rounded"
+                required
+                disabled={isSubmitting}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Juz</label>
+              <select
+                name="quran_memorization_id"
+                value={selectedJuzId}
+                onChange={(e) => setSelectedJuzId(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded"
                 required
                 disabled={isSubmitting}
@@ -295,8 +645,8 @@ const MemorizationPage = () => {
               <input
                 type="text"
                 name="pages"
-                value={editingStudent?.pages || ""}
-                onChange={handleInputChange}
+                value={newMemorization.pages}
+                onChange={handleAddInputChange}
                 className="w-full p-2 border border-gray-300 rounded"
                 required
                 disabled={isSubmitting}
@@ -306,8 +656,8 @@ const MemorizationPage = () => {
               <label className="block text-sm font-medium mb-1">Status</label>
               <select
                 name="status"
-                value={editingStudent?.status || ""}
-                onChange={handleInputChange}
+                value={newMemorization.status}
+                onChange={handleAddInputChange}
                 className="w-full p-2 border border-gray-300 rounded"
                 required
                 disabled={isSubmitting}
@@ -321,8 +671,8 @@ const MemorizationPage = () => {
               <label className="block text-sm font-medium mb-1">Catatan</label>
               <textarea
                 name="notes"
-                value={editingStudent?.notes || ""}
-                onChange={handleInputChange}
+                value={newMemorization.notes}
+                onChange={handleAddInputChange}
                 className="w-full p-2 border border-gray-300 rounded"
                 rows={3}
                 required
@@ -331,11 +681,94 @@ const MemorizationPage = () => {
             </div>
             <Button
               className="w-full bg-blue-600 hover:bg-blue-700"
-              onClick={handleEditSubmit}
+              onClick={handleAddSubmit}
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Menyimpan..." : "Simpan Perubahan"}
+              {isSubmitting ? "Menyimpan..." : "Tambah Hafalan"}
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* History Dialog */}
+      <Dialog open={showHistory} onOpenChange={setShowHistory}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>
+              Riwayat Hafalan {selectedStudent?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePreviousWeek}
+                disabled={loading}
+              >
+                Minggu Sebelumnya
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCurrentWeek}
+                disabled={loading}
+              >
+                Minggu Ini
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleNextWeek}
+                disabled={loading}
+              >
+                Minggu Berikutnya
+              </Button>
+            </div>
+            <div className="text-sm text-gray-500">
+              {format(startOfWeek(currentWeek, { weekStartsOn: 1 }), "dd MMMM yyyy", { locale: id })} - 
+              {format(endOfWeek(currentWeek, { weekStartsOn: 1 }), "dd MMMM yyyy", { locale: id })}
+            </div>
+          </div>
+          <div className="mt-4">
+            {loading ? (
+              <div className="flex justify-center items-center h-32">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+              </div>
+            ) : historyData.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Tanggal</TableHead>
+                    <TableHead>Semester</TableHead>
+                    <TableHead>Tahun Angkatan</TableHead>
+                    <TableHead>Juz</TableHead>
+                    <TableHead>Halaman</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Catatan</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {historyData.map((record) => (
+                    <TableRow key={record.id}>
+                      <TableCell>
+                        {format(new Date(record.created_at), "dd MMMM yyyy", { locale: id })}
+                      </TableCell>
+                      <TableCell>{record.semester}</TableCell>
+                      <TableCell>{record.academic_year}</TableCell>
+                      <TableCell>{record.juz_name}</TableCell>
+                      <TableCell>{record.pages}</TableCell>
+                      <TableCell>{record.status}</TableCell>
+                      <TableCell>{record.notes}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <div className="flex justify-center items-center h-32 text-gray-500">
+                Tidak ada setoran hafalan di minggu ini
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>

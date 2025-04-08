@@ -17,6 +17,7 @@ export type MemorizationStudent = {
   notes: string;
   teacher_id: string;
   quran_memorization_id: string;
+  created_at?: Date;
 };
 
 export interface MemorizationData {
@@ -28,6 +29,17 @@ export interface MemorizationData {
   status: string;
   notes: string;
 }
+
+export type MemorizationHistory = {
+  id: string;
+  semester: string;
+  academic_year: string;
+  juz_name: string;
+  pages: string;
+  status: string;
+  notes: string;
+  created_at: Date;
+};
 
 export async function getStudentMemorization(): Promise<MemorizationStudent[]> {
   const session = await getServerSession(authOptions);
@@ -130,6 +142,7 @@ export async function getStudentMemorization(): Promise<MemorizationStudent[]> {
         notes: latestGrade.notes || "",
         teacher_id: doc.class?.teacher_id?.toString() || "",
         quran_memorization_id: latestGrade.quran_memorization_id?.toString() || "",
+        created_at: latestGrade.created_at || new Date(),
       };
     });
   } catch (error) {
@@ -236,6 +249,102 @@ export async function updateMemorizationData(
     return { success: true, id: result.upsertedId?.toString() };
   } catch (error) {
     console.error("Error updating memorization data:", error);
+    throw error;
+  }
+}
+
+export async function getMemorizationHistory(
+  studentId: string,
+  startDate?: Date,
+  endDate?: Date
+): Promise<MemorizationHistory[]> {
+  const client = await getMongoClientInstance();
+  const db = client.db("pesantren_db");
+
+  try {
+    const matchStage: any = {
+      student_id: new ObjectId(studentId)
+    };
+
+    // Add date range filter if provided
+    if (startDate && endDate) {
+      matchStage.created_at = {
+        $gte: startDate,
+        $lte: endDate
+      };
+    }
+
+    const pipeline = [
+      {
+        $match: matchStage
+      },
+      {
+        $lookup: {
+          from: "quran_memorization",
+          localField: "quran_memorization_id",
+          foreignField: "_id",
+          as: "memorization"
+        }
+      },
+      {
+        $unwind: "$memorization"
+      },
+      {
+        $sort: { created_at: -1 }
+      }
+    ];
+
+    const result = await db
+      .collection("memorization_grades")
+      .aggregate(pipeline)
+      .toArray();
+
+    return result.map((doc) => ({
+      id: doc._id.toString(),
+      semester: doc.semester || "",
+      academic_year: doc.academic_year || "",
+      juz_name: doc.memorization.name || "",
+      pages: doc.pages || "",
+      status: doc.status || "",
+      notes: doc.notes || "",
+      created_at: doc.created_at || new Date()
+    }));
+  } catch (error) {
+    console.error("Error fetching memorization history:", error);
+    throw error;
+  }
+}
+
+export async function addMemorizationData(
+  studentId: string,
+  data: {
+    semester: string;
+    academic_year: string;
+    quran_memorization_id: string;
+    pages: string;
+    status: string;
+    notes: string;
+  }
+) {
+  const client = await getMongoClientInstance();
+  const db = client.db("pesantren_db");
+
+  try {
+    const result = await db.collection("memorization_grades").insertOne({
+      student_id: new ObjectId(studentId),
+      semester: data.semester,
+      academic_year: data.academic_year,
+      quran_memorization_id: new ObjectId(data.quran_memorization_id),
+      pages: data.pages,
+      status: data.status,
+      notes: data.notes,
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
+
+    return { success: true, id: result.insertedId.toString() };
+  } catch (error) {
+    console.error("Error adding memorization data:", error);
     throw error;
   }
 } 
