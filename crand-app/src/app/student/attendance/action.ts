@@ -16,18 +16,9 @@ export interface MonthlyAttendance {
   class: string;
   attendance: {
     date: Date;
-    status: "present" | "absent" | "sick" | "permission" | "holiday";
+    status: "Present" | "Absent" | "Sick" | "Permission" | "Holiday";
   }[];
 }
-
-// Data dummy untuk absensi
-const dummyStudents = [
-  { id: "1", name: "Ahmad Farhan", class: "10A" },
-  { id: "2", name: "Fatimah Azzahra", class: "10A" },
-  { id: "3", name: "Muhammad Rizky", class: "10B" },
-  { id: "4", name: "Siti Nurhaliza", class: "10B" },
-  { id: "5", name: "Abdul Rahman", class: "10C" },
-];
 
 // Fungsi untuk mengecek apakah suatu hari adalah hari Minggu
 const isSunday = (date: Date): boolean => {
@@ -69,6 +60,7 @@ export async function getAttendanceRecords(): Promise<AttendanceRecord[]> {
       .find({})
       .sort({ timestamp: -1 })
       .toArray();
+    // console.log(records,"<<<<<");
 
     // Convert ObjectId to string and Binary photo to base64
     return records.map((record) => ({
@@ -89,17 +81,63 @@ export async function getMonthlyAttendance(
   studentId: string
 ): Promise<MonthlyAttendance[]> {
   try {
-    // Generate data dummy untuk bulan yang dipilih
-    const startDate = new Date(year, month - 1, 1);
-    const endDate = new Date(year, month, 0);
-    const daysInMonth = endDate.getDate();
+    // console.log("Getting monthly attendance for:", { year, month, studentId });
 
-    // Filter data dummy untuk siswa yang login
-    const student = dummyStudents.find((s) => s.id === studentId);
+    const client = await getMongoClientInstance();
+    const db = client.db("pesantren_db");
+
+    // Ambil data siswa
+    const studentsCollection = db.collection("students");
+    // console.log("Finding student with ID:", studentId);
+
+    const student = await studentsCollection.findOne({
+      user_id: new ObjectId(studentId),
+    });
+
+    const kelas = await db.collection("classes").findOne({
+      _id: new ObjectId(student?.class_id.toString()),
+    });
+
+    // console.log("Found student:", student);
+
     if (!student) {
+      console.error("Student not found");
       return [];
     }
 
+    // Ambil data absensi
+    const attendanceCollection = db.collection("class_attendance");
+
+    // Tentukan rentang tanggal
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0);
+
+    // console.log("Searching attendance records between:", {
+    //   startDate: startDate.toISOString(),
+    //   endDate: endDate.toISOString(),
+    // });
+
+    const query = {
+      student_id: new ObjectId(student._id.toString()),
+      date: {
+        $gte: startDate,
+        $lte: endDate,
+      },
+    };
+
+    // console.log("Attendance query:", JSON.stringify(query));
+
+    const attendanceRecords = await attendanceCollection.find(query).toArray();
+
+    // console.log("Found attendance records:", attendanceRecords);
+
+    // Pastikan status yang diambil dari database sesuai dengan yang diharapkan
+    attendanceRecords.forEach((record) => {
+      console.log(`Record for date ${record.date}:`, record.status);
+    });
+
+    // Generate attendance array untuk setiap hari dalam bulan
+    const daysInMonth = endDate.getDate();
     const attendance = Array.from({ length: daysInMonth }, (_, i) => {
       const date = new Date(year, month - 1, i + 1);
 
@@ -107,33 +145,58 @@ export async function getMonthlyAttendance(
       if (isSunday(date) || isNationalHoliday(date)) {
         return {
           date,
-          status: "holiday" as const,
+          status: "Holiday" as const,
         };
       }
 
-      // Random status untuk setiap hari
-      const statuses: ("present" | "absent" | "sick" | "permission")[] = [
-        "present",
-        "absent",
-        "sick",
-        "permission",
-      ];
-      const status = statuses[Math.floor(Math.random() * statuses.length)];
+      // Cari record absensi untuk tanggal ini
+      const record = attendanceRecords.find((record) => {
+        const recordDate = new Date(record.date);
+        return (
+          recordDate.getDate() === date.getDate() &&
+          recordDate.getMonth() === date.getMonth() &&
+          recordDate.getFullYear() === date.getFullYear()
+        );
+      });
+      // console.log(record, "record");
+
+      // Jika tidak ada record, anggap Absent
+      if (!record) {
+        return {
+          date,
+          status: "Absent" as const,
+        };
+      }
+
+      // Konversi status ke format yang benar (kapitalisasi)
+      const statusMap: {
+        [key: string]: "Present" | "Absent" | "Sick" | "Permission";
+      } = {
+        present: "Present",
+        absent: "Absent",
+        sick: "Sick",
+        permission: "Permission",
+      };
 
       return {
         date,
-        status,
+        status: statusMap[record.status.toLowerCase()] || "Absent",
       };
     });
 
-    return [
+    const result = [
       {
-        _id: student.id,
+        _id: student._id.toString(),
         name: student.name,
-        class: student.class,
+        class: kelas?.class_name,
         attendance,
       },
     ];
+
+    // console.log("Returning result:", result);
+    // console.log(kelas, "kelas");
+    
+    return result;
   } catch (error) {
     console.error("Error fetching monthly attendance:", error);
     return [];
