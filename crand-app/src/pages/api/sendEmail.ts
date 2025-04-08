@@ -6,27 +6,21 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "POST") {
-    const { emailAddress, pdfBytes } = req.body;
+    const { emailAddress, pdfBase64 } = req.body;
 
-    // Konfigurasi transporter NodeMailer
     const transporter = nodemailer.createTransport({
-      service: "gmail", // Ganti dengan layanan email yang Anda gunakan
+      service: 'gmail',
       auth: {
-        type: "OAuth2",
-        user: "buatgamingkali@gmail.com", // Ganti dengan email Anda
-        clientId: "YOUR_CLIENT_ID",
-        clientSecret: "YOUR_CLIENT_SECRET",
-        refreshToken: "YOUR_REFRESH_TOKEN",
-      },
+        user: 'mrejaa@gmail.com',
+        pass: 'szao idot pzoq vxbi'
+      }
     });
 
-    // Konversi pdfBytes menjadi Buffer
-    const pdfBuffer = Buffer.from(pdfBytes);
+    const pdfBuffer = Buffer.from(pdfBase64, 'base64');
 
-    // Konfigurasi email
     const mailOptions = {
-      from: "buatgamingkali@gmail.com",
-      to: "geofannywewe@gmail.com",
+      from: "mrejaa@gmail.com",
+      to: emailAddress,
       subject: "Rapor Hafalan Santri",
       text: "Berikut terlampir rapor hafalan santri dalam bentuk PDF.",
       attachments: [
@@ -38,7 +32,6 @@ export default async function handler(
       ],
     };
 
-    // Kirim email
     try {
       await transporter.sendMail(mailOptions);
       res.status(200).json({ message: "Email berhasil dikirim!" });

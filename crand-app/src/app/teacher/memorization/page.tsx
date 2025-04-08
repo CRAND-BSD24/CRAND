@@ -235,6 +235,7 @@ const MemorizationPage = () => {
     });
 
     const pdfBytes = await pdfDoc.save();
+    const pdfBase64 = Buffer.from(pdfBytes).toString("base64");
 
     // Panggil API untuk mengirim email
     try {
@@ -243,7 +244,7 @@ const MemorizationPage = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ emailAddress, pdfBytes }),
+        body: JSON.stringify({ emailAddress, pdfBase64 }),
       });
 
       const textResponse = await response.text();
