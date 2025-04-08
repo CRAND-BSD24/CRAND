@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { getAllStudents, promoteStudentsByClass } from "./action";
+import { getAllStudents, promoteStudentsByClassId } from "./action";
 import Link from "next/link";
 import AddStudentModal from "./AddStudentModal";
 
 interface Student {
   _id: string;
   name: string;
-  class: string;
+  class_name: string;
   academic_level: string;
   gender: string;
   parent_name: string;
@@ -26,7 +26,7 @@ const StudentsPage = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [filterClass, setFilterClass] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [classes, setClasses] = useState<{_id: string, class_name: string}[]>([]);
+  const [classes, setClasses] = useState<{ _id: string; class_name: string }[]>([]);
 
   const fetchStudents = async () => {
     try {
@@ -40,11 +40,11 @@ const StudentsPage = () => {
 
   const fetchClasses = async () => {
     try {
-      const response = await fetch('/api/classes');
+      const response = await fetch("/api/classes");
       const data = await response.json();
       setClasses(data);
     } catch (error) {
-      console.error('Error fetching classes:', error);
+      console.error("Error fetching classes:", error);
     }
   };
 
@@ -56,16 +56,12 @@ const StudentsPage = () => {
   const handlePromoteByClass = async () => {
     if (!filterClass) return alert("Pilih kelas terlebih dahulu ya");
 
-    const confirmed = confirm(
-      `Yakin ingin menaikkan semua santri di kelas ${filterClass}?`
-    );
+    const confirmed = confirm(`Yakin ingin menaikkan semua santri di kelas ${filterClass}?`);
     if (!confirmed) return;
 
-    const success = await promoteStudentsByClass(filterClass);
+    const success = await promoteStudentsByClassId(filterClass);
     if (success) {
-      alert(
-        `Santri di kelas ${filterClass} berhasil dinaikkan ke tingkat selanjutnya!`
-      );
+      alert(`Santri di kelas ${filterClass} berhasil dinaikkan ke tingkat selanjutnya!`);
       fetchStudents();
       setFilterClass(""); // Reset filter setelah promote
     } else {
@@ -73,12 +69,18 @@ const StudentsPage = () => {
     }
   };
 
-  const filteredStudents = students.filter((s) =>
-    filterClass === "" ? true : s.class === filterClass
-  );
+  // ✅ Filtering berdasarkan kelas dan search query
+  const filteredStudents = students.filter((s) => {
+    const matchClass = filterClass === "" || s.class_name === filterClass;
+    const matchSearch =
+      searchQuery === "" ||
+      s.name.toLowerCase().includes(searchQuery.toLowerCase());
+
+    return matchClass && matchSearch;
+  });
 
   const uniqueClasses = Array.from(
-    new Set(students.map((s) => s.class).filter(Boolean))
+    new Set(students.map((s) => s.class_name).filter(Boolean))
   ).sort();
 
   return (

@@ -10,6 +10,8 @@ export const getStudentById = async (id: string) => {
   try {
     const student = await db.collection("prospective_students").findOne({ _id: new ObjectId(id) });
 
+    console.log(student,'<< ini satu student yang diambil dari db >>');
+    
     if (!student) {
       return null;
     }
@@ -26,14 +28,28 @@ export const updateStudentById = async (id: string, updatedData: any) => {
   const db = client.db("pesantren_db");
 
   try {
+    const formattedData = {
+      profile_picture: updatedData.profile_picture,
+      name: updatedData.name,
+      email: updatedData.email,
+      phone_number: updatedData.phone_number,
+      program: updatedData.program,
+      gender: updatedData.gender,
+      address: updatedData.address,
+      academic_level: updatedData.academic_level,
+      academic_year: updatedData.academic_year,
+      birth_place_date: updatedData.birth_place_date,
+      nisn: updatedData.nisn,
+      father_name: updatedData.father_name,
+      mother_name: updatedData.mother_name,
+      level: updatedData.level,
+      payment_status: updatedData.payment_status,
+      updated_at: new Date(),
+    };
+
     const result = await db.collection("prospective_students").updateOne(
       { _id: new ObjectId(id) },
-      {
-        $set: {
-          ...updatedData,
-          updated_at: new Date()
-        }
-      }
+      { $set: formattedData }
     );
 
     return result.modifiedCount > 0;

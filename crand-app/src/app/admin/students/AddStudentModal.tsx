@@ -10,8 +10,7 @@ interface NewStudentFormData {
   academic_level: string;
   gender: string;
   parent_name: string;
-  birth_date: string;
-  birth_place: string;
+  birth_place_date: string;
   address: string;
   phone_number: string;
 }
@@ -34,8 +33,7 @@ export default function AddStudentModal({
     academic_level: "",
     gender: "",
     parent_name: "",
-    birth_date: "",
-    birth_place: "",
+    birth_place_date: "",
     address: "",
     phone_number: "",
   });
@@ -73,8 +71,7 @@ export default function AddStudentModal({
         academic_level: "",
         gender: "",
         parent_name: "",
-        birth_date: "",
-        birth_place: "",
+        birth_place_date: "",
         address: "",
         phone_number: "",
       });
@@ -133,8 +130,7 @@ export default function AddStudentModal({
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <Input name="birth_date" type="date" value={form.birth_date} onChange={handleChange} placeholder="Tanggal Lahir" />
-                <Input name="birth_place" value={form.birth_place} onChange={handleChange} placeholder="Tempat Lahir" />
+                <Input name="birth_place_date" value={form.birth_place_date} onChange={handleChange} placeholder="Tempat Tanggal Lahir" />
               </div>
 
               <Input name="address" value={form.address} onChange={handleChange} placeholder="Alamat Lengkap" />

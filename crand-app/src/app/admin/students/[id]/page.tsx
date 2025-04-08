@@ -1,90 +1,126 @@
-import { getStudentById } from "./action";
-import { notFound } from "next/navigation";
-import DeleteButton from "./DeleteButton";
-import EditStudentModal from "./EditStudentModal";
-import { ObjectId } from "mongodb";
-import Image from "next/image";
+'use client';
 
-interface SantriDetailPageProps {
-  params: {
+import { useState, useEffect, use } from "react";
+import { getStudentById } from "./action";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import EditStudentModal from "./EditStudentModal";
+
+interface Props {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default async function SantriDetailPage({ params }: SantriDetailPageProps) {
-  const awaitedParams = await params;
-  const id = awaitedParams.id;
-  
-  // Validate ObjectId format
-  if (!ObjectId.isValid(id)) {
-    notFound();
-  }
+export default function StudentDetailPage({ params }: Props) {
+  const { id } = use(params);
+  const [student, setStudent] = useState<any | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
 
-  const data = await getStudentById(id);
-  if (!data) notFound();
+  useEffect(() => {
+    const fetchStudent = async () => {
+      const data = await getStudentById(id);
+      if (!data) return notFound();
+      setStudent(data);
+    };
+    fetchStudent();
+  }, [id]);
 
-  const student = JSON.parse(data);
-  console.log("Student Data:", student);
+  if (!student) return <div className="p-8 text-center text-gray-600">Loading data santri...</div>;
 
   return (
-    <div className="min-h-screen bg-[#9ACBD0] p-6 md:p-10">
-      <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-2xl p-6 md:p-10">
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-          <h1 className="text-3xl font-bold text-[#006A71]">Detail Santri</h1>
-          <div className="flex space-x-2">
-            <EditStudentModal student={student} />
-            <DeleteButton id={id} />
+    <div className="bg-gradient-to-b from-[#DCEFF1] to-[#9ACBD0] min-h-screen p-6">
+      <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-lg p-8 mt-10">
+        {/* Heading */}
+        <h1 className="text-4xl font-extrabold text-center text-[#006A71] mb-10 tracking-wide">
+          📘 Detail Santri
+        </h1>
+
+        {/* Profil Santri */}
+        <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+          <Image
+            src={student.profile_picture}
+            alt={student.name}
+            width={140}
+            height={140}
+            className="rounded-full border-4 border-[#006A71] shadow-md object-cover"
+          />
+          <div className="text-center md:text-left">
+            <h2 className="text-2xl font-bold text-[#006A71]">{student.name}</h2>
+            <p className="text-gray-600 mt-1 text-sm">NISN: {student.nisn}</p>
+            <p className="text-gray-600 text-sm">{student.email}</p>
           </div>
         </div>
 
-        {/* Content Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Image */}
-          <div className="flex justify-center md:justify-start">
-            <Image
-              src={student.profile_picture}
-              alt={student.name}
-              width={176}
-              height={176}
-              className="rounded-full border-4 border-[#48A6A7] shadow-lg"
-            />
-          </div>
+        {/* Tombol Aksi */}
+        <div className="flex gap-4 mt-8 justify-center md:justify-start">
+          <button
+            onClick={() => setShowEditModal(true)}
+            className="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold px-5 py-2 rounded-full shadow-md transition"
+          >
+            ✏️ Edit
+          </button>
+          <button
+            onClick={() => alert("Handler hapus belum dibuat")}
+            className="bg-red-500 hover:bg-red-600 text-white font-semibold px-5 py-2 rounded-full shadow-md transition"
+          >
+            🗑️ Hapus
+          </button>
+        </div>
 
-          {/* Detail */}
-          <div className="space-y-2 text-gray-800 text-base">
-            <Detail label="NIS" value={student.nisn} />
-            <Detail label="Nama" value={student.name} />
-            <Detail label="Kelas" value={student.class} />
-            <Detail label="Tingkat Akademik" value={student.academic_level} />
-            <Detail label="Jenis Kelamin" value={student.gender} />
-            <Detail label="Nama Ayah" value={student.father_name} />
-            <Detail label="Nama Ibu" value={student.mother_name} />
-            <Detail label="Tahun Angkatan" value={student.academic_year} />
-            <Detail label="Tempat Tanggal Lahir" value={student.birth_date_place} />
-            <Detail label="Alamat" value={student.address} />
-            <Detail label="Email" value={student.email} />
-            <Detail label="Nomor HP" value={student.phone_number} />
-            <Detail label="Status Kelulusan" value={student.graduation_status} />
-            <Detail label="Status Pembayaran" value={student.payment_status} />
-            <Detail label="VA SPP" value={student.VA_SPP} />
-            <Detail label="Ekskul" value={student.ekskul} />
-            <Detail label="Level" value={student.level} />
-            <Detail label="NIS" value={student.nisn} />
-            <Detail label="Program" value={student.program} />
-            <Detail label="Halaqah" value={student.halaqah} />
-            <Detail label="Dibuat" value={new Date(student.created_at).toLocaleString()} />
-            <Detail label="Diperbarui" value={new Date(student.updated_at).toLocaleString()} />
-          </div>
+        {/* Informasi Lengkap */}
+        <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6 text-[15px]">
+          <Info label="Jenis Kelamin" value={student.gender} />
+          <Info label="Tempat, Tanggal Lahir" value={student.birth_place_date} />
+          <Info label="No. HP" value={student.phone_number} />
+          <Info label="Alamat" value={student.address} />
+          <Info label="Nama Ayah" value={student.father_name} />
+          <Info label="Nama Ibu" value={student.mother_name} />
+          <Info label="Tahun Akademik" value={student.academic_year} />
+          <Info label="Tingkat Akademik" value={student.academic_level} />
+          <Info label="Program" value={student.program} />
+          <Info label="Level" value={student.level} />
+          <Info label="Ekskul" value={student.ekskul} />
+          <Info label="Halaqah" value={student.halaqah} />
+          <Info label="Kelas" value={student.class_id} />
+          <Info label="Status Pembayaran" value={student.payment_status} />
+          <Info label="VA SPP" value={student.VA_SPP} />
+          <Info label="Status Kelulusan" value={student.graduation_status} />
+        </div>
+
+        {/* Tombol Kembali */}
+        <div className="mt-12 text-center">
+          <Link
+            href="/admin/students"
+            className="inline-block bg-gray-100 hover:bg-gray-200 text-gray-800 px-5 py-2 rounded-full shadow-sm text-sm transition"
+          >
+            ← Kembali ke daftar santri
+          </Link>
         </div>
       </div>
+
+      {/* Modal Edit */}
+      {showEditModal && (
+        <EditStudentModal
+          student={student}
+          onClose={() => setShowEditModal(false)}
+          onUpdated={async () => {
+            const updated = await getStudentById(student.id);
+            setStudent(updated);
+            setShowEditModal(false);
+          }}
+        />
+      )}
     </div>
   );
 }
 
-const Detail = ({ label, value }: { label: string; value: string }) => (
-  <div>
-    <span className="font-medium text-[#006A71]">{label}:</span>{" "}
-    <span className="text-gray-700">{value || "-"}</span>
-  </div>
-);
+function Info({ label, value }: { label: string; value: string | null }) {
+  return (
+    <div>
+      <p className="text-sm text-gray-500 font-medium">{label}</p>
+      <p className="text-base text-gray-800 font-semibold">{value || "-"}</p>
+    </div>
+  );
+}
