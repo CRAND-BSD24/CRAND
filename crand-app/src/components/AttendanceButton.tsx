@@ -7,11 +7,15 @@ import Image from "next/image";
 interface AttendanceButtonProps {
   onSuccess?: (name: string, timestamp: string) => void;
   onError?: (message: string) => void;
+  type?: "teacher" | "admin";
+  isModalOpen?: boolean;
 }
 
 export default function AttendanceButton({
   onSuccess,
   onError,
+  type = "teacher",
+  isModalOpen = true,
 }: AttendanceButtonProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [message, setMessage] = useState("");
@@ -25,8 +29,17 @@ export default function AttendanceButton({
   const faceService = FaceRecognitionService.getInstance();
 
   useEffect(() => {
+    if (!isModalOpen) {
+      stopCamera();
+      setIsCameraActive(false);
+    }
+  }, [isModalOpen]);
+
+  useEffect(() => {
     if (isCameraActive) {
       startCamera();
+    } else {
+      stopCamera();
     }
     return () => {
       stopCamera();
@@ -50,8 +63,15 @@ export default function AttendanceButton({
   const stopCamera = () => {
     if (videoRef.current && videoRef.current.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach((track) => track.stop());
+      stream.getTracks().forEach((track) => {
+        track.stop();
+      });
+      videoRef.current.srcObject = null;
     }
+  };
+
+  const toggleCamera = () => {
+    setIsCameraActive(!isCameraActive);
   };
 
   const capturePhoto = () => {
@@ -161,6 +181,7 @@ export default function AttendanceButton({
           "faceDescriptor",
           JSON.stringify(detectionResult.descriptor)
         );
+        formData.append("type", type);
         if (isNewFace && name) {
           formData.append("name", name);
         }
@@ -177,17 +198,8 @@ export default function AttendanceButton({
 
         if (data.name) {
           setRecognizedName(data.name);
-          const timestamp = new Date().toLocaleString("id-ID", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-          });
-          setAttendanceTime(timestamp);
-          if (onSuccess) onSuccess(data.name, timestamp);
+          setAttendanceTime(data.timestamp);
+          if (onSuccess) onSuccess(data.name, data.timestamp);
         }
       };
       reader.readAsDataURL(selectedFile);
@@ -203,7 +215,7 @@ export default function AttendanceButton({
   return (
     <div className="mb-6">
       <button
-        onClick={() => setIsCameraActive(!isCameraActive)}
+        onClick={toggleCamera}
         className="w-full bg-[#48A6A7] text-white py-3 px-4 rounded-xl font-semibold hover:bg-[#3d9395] transition-all duration-300 mb-4"
       >
         {isCameraActive ? "Matikan Kamera" : "Aktifkan Kamera"}
@@ -271,16 +283,14 @@ export default function AttendanceButton({
         </div>
       )}
 
-      {recognizedName && (
+      {recognizedName && attendanceTime && (
         <div className="mt-6 text-center">
           <div className="text-lg font-semibold text-[#006A71]">
             Selamat datang, {recognizedName}!
           </div>
-          {attendanceTime && (
-            <div className="text-sm text-gray-600 mt-2">
-              Waktu absen: {attendanceTime}
-            </div>
-          )}
+          <div className="text-sm text-gray-600 mt-2">
+            Waktu absen: {attendanceTime}
+          </div>
         </div>
       )}
     </div>

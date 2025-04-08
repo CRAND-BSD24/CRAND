@@ -23,6 +23,8 @@ export default function AbsensiPage() {
         <AttendanceButton
           onSuccess={handleAttendanceSuccess}
           onError={handleAttendanceError}
+          type="admin"
+          isModalOpen={true}
         />
 
         <Link

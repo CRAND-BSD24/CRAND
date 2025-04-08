@@ -24,6 +24,7 @@ export default async function SantriDetailPage({ params }: SantriDetailPageProps
   if (!data) notFound();
 
   const student = JSON.parse(data);
+  console.log("Student Data:", student);
 
   return (
     <div className="min-h-screen bg-[#9ACBD0] p-6 md:p-10">
@@ -52,6 +53,7 @@ export default async function SantriDetailPage({ params }: SantriDetailPageProps
 
           {/* Detail */}
           <div className="space-y-2 text-gray-800 text-base">
+            <Detail label="NIS" value={student.nisn} />
             <Detail label="Nama" value={student.name} />
             <Detail label="Kelas" value={student.class} />
             <Detail label="Tingkat Akademik" value={student.academic_level} />

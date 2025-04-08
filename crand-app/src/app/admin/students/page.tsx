@@ -8,8 +8,7 @@ import AddStudentModal from "./AddStudentModal";
 interface Student {
   _id: string;
   name: string;
-  class_id: string | null;
-  class_name: string;
+  class: string;
   academic_level: string;
   gender: string;
   parent_name: string;
@@ -54,7 +53,7 @@ const StudentsPage = () => {
   }, []);
 
   const handlePromoteByClass = async () => {
-    if (!filterClass) return alert("Pilih kelas terlebih dahulu yaa 😘");
+    if (!filterClass) return alert("Pilih kelas terlebih dahulu ya");
 
     const confirmed = confirm(
       `Yakin ingin menaikkan semua santri di kelas ${filterClass}?`
@@ -63,7 +62,9 @@ const StudentsPage = () => {
 
     const success = await promoteStudentsByClass(filterClass);
     if (success) {
-      alert(`Santri di kelas ${filterClass} berhasil dinaikkan ke tingkat selanjutnya!`);
+      alert(
+        `Santri di kelas ${filterClass} berhasil dinaikkan ke tingkat selanjutnya!`
+      );
       fetchStudents();
       setFilterClass(""); // Reset filter setelah promote
     } else {
@@ -71,12 +72,13 @@ const StudentsPage = () => {
     }
   };
 
-  const filteredStudents = students.filter((s) => {
-    const matchesClass = filterClass === "" ? true : s.class_id === filterClass;
-    const matchesSearch = searchQuery === "" ? true : 
-      s.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesClass && matchesSearch;
-  });
+  const filteredStudents = students.filter((s) =>
+    filterClass === "" ? true : s.class === filterClass
+  );
+
+  const uniqueClasses = Array.from(
+    new Set(students.map((s) => s.class).filter(Boolean))
+  ).sort();
 
   return (
     <div className="p-8 bg-[#9ACBD0] min-h-screen">
@@ -99,9 +101,9 @@ const StudentsPage = () => {
             className="border p-2 rounded"
           >
             <option value="">Pilih Kelas</option>
-            {classes.map((kelas) => (
-              <option key={kelas._id} value={kelas._id}>
-                {kelas.class_name}
+            {uniqueClasses.map((kelas, index) => (
+              <option key={`${kelas}-${index}`} value={kelas}>
+                {kelas}
               </option>
             ))}
           </select>
