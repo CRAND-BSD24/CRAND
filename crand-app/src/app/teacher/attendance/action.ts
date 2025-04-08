@@ -129,3 +129,30 @@ export async function getStudentsByTeacherId(): Promise<
     throw error;
   }
 }
+
+export async function getAttendanceStatus(studentIds: string[]) {
+  const client = await getMongoClientInstance();
+  const db = client.db("pesantren_db");
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  try {
+    const attendanceRecords = await db
+      .collection("class_attendance")
+      .find({
+        student_id: { $in: studentIds.map((id) => new ObjectId(id)) },
+        date: { $gte: today },
+      })
+      .toArray();
+
+    const statusMap: Record<string, string> = {};
+    attendanceRecords.forEach((record) => {
+      statusMap[record.student_id.toString()] = record.status;
+    });
+
+    return statusMap;
+  } catch (error) {
+    console.error("Error fetching attendance status:", error);
+    throw error;
+  }
+}
