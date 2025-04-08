@@ -155,24 +155,30 @@ const TeacherDashboard = () => {
             </p>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-4">
-              {dashboardData?.topStudents.map((student, index) => (
-                <li key={index} className="flex items-center space-x-4">
-                  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-600">
-                    {student.name[0]}
-                  </div>
-                  <div>
-                    <p className="font-semibold">{student.name}</p>
-                    <p className="text-sm text-gray-500">
-                      {student.class_name}
-                    </p>
-                    <p className="text-sm text-gray-700">
-                      {student.achievement}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            {dashboardData?.topStudents.length === 0 ? (
+              <div className="flex justify-center items-center h-32 text-gray-500">
+                Tidak ada santri yang setor hafalan minggu ini
+              </div>
+            ) : (
+              <ul className="space-y-4">
+                {dashboardData?.topStudents.map((student, index) => (
+                  <li key={index} className="flex items-center space-x-4">
+                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-600">
+                      {student.name[0]}
+                    </div>
+                    <div>
+                      <p className="font-semibold">{student.name}</p>
+                      <p className="text-sm text-gray-500">
+                        {student.class_name}
+                      </p>
+                      <p className="text-sm text-gray-700">
+                        {student.achievement}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
           </CardContent>
         </Card>
       </div>
