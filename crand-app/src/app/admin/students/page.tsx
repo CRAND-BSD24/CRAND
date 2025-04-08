@@ -16,6 +16,7 @@ interface Student {
   birth_place?: string;
   address?: string;
   phone_number?: string;
+  class_name?: string;
   created_at?: string;
   updated_at?: string;
   graduation_status?: string;
