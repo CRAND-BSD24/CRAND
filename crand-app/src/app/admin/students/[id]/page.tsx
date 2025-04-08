@@ -24,6 +24,7 @@ export default async function SantriDetailPage({ params }: SantriDetailPageProps
   if (!data) notFound();
 
   const student = JSON.parse(data);
+  console.log("Student Data:", student);
 
   return (
     <div className="min-h-screen bg-[#9ACBD0] p-6 md:p-10">
@@ -52,6 +53,7 @@ export default async function SantriDetailPage({ params }: SantriDetailPageProps
 
           {/* Detail */}
           <div className="space-y-2 text-gray-800 text-base">
+            <Detail label="NIS" value={student.nisn} />
             <Detail label="Nama" value={student.name} />
             <Detail label="Kelas" value={student.class} />
             <Detail label="Tingkat Akademik" value={student.academic_level} />
@@ -60,13 +62,14 @@ export default async function SantriDetailPage({ params }: SantriDetailPageProps
             <Detail label="Tahun Angkatan" value={student.batch_year} />
             <Detail label="Tempat Lahir" value={student.birth_place} />
             <Detail label="Tanggal Lahir" value={student.birth_date} />
-            <Detail label="Alamat" value={student.address} />
-            <Detail label="Email" value={student.email} />
-            <Detail label="Nomor HP" value={student.phone_number} />
-            <Detail label="Status Kelulusan" value={student.graduation_status} />
-            <Detail label="Status Pembayaran" value={student.payment_status} />
-            <Detail label="Dibuat" value={new Date(student.created_at).toLocaleString()} />
-            <Detail label="Diperbarui" value={new Date(student.updated_at).toLocaleString()} />
+            <Detail
+              label="Tanggal Masuk"
+              value={
+                student.created_at
+                  ? new Date(student.created_at).toLocaleString()
+                  : "-"
+              }
+            />
           </div>
         </div>
       </div>

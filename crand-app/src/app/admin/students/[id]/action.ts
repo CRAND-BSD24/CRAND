@@ -19,58 +19,13 @@ export const getStudentById = async (id: string) => {
       : null;
     console.log("Class data:", classData);
 
-    // Get user data for phone number and email
-    const userData = await db.collection("users").findOne({ student_id: new ObjectId(id) });
-    console.log("User data:", userData);
-
-    // Get prospective student data for phone number, email, and academic_year
-    const prospectiveData = await db.collection("prospective_students").findOne({ 
-      $or: [
-        { student_id: new ObjectId(id) },
-        { name: student.name },
-        { email: student.email }
-      ]
-    });
-    console.log("Prospective student data:", prospectiveData);
-
-    // Get phone number with priority: users -> prospective_students
-    let phoneNumber = "-";
-    if (userData?.phone_number) {
-      phoneNumber = userData.phone_number;
-    } else if (prospectiveData?.phone_number) {
-      phoneNumber = prospectiveData.phone_number;
-      
-      // If found in prospective_students, update users table
-      if (prospectiveData.phone_number !== "-") {
-        await db.collection("users").updateOne(
-          { student_id: new ObjectId(id) },
-          {
-            $set: {
-              phone_number: prospectiveData.phone_number,
-              updated_at: new Date()
-            }
-          },
-          { upsert: true }
-        );
-      }
-    }
-
-    // Get email with priority: users -> prospective_students
-    let email = "-";
-    if (userData?.email) {
-      email = userData.email;
-    } else if (prospectiveData?.email) {
-      email = prospectiveData.email;
-    }
-
-    // Get academic year from prospective_students
-    const academicYear = prospectiveData?.academic_year || "-";
-
-    const result = {
-      _id: student._id.toString(),
+    return JSON.stringify({
+      id: student._id.toString(),
+      nisn: student.nisn || "-",
       name: student.name || "-",
-      class: classData ? classData.class_name : "-",
-      class_id: student.class_id?.toString() || null,
+      email: student.email || "-",
+      phone_number: student.phone_number || "-",
+      program: student.program || "-",
       academic_level: student.academic_level || "-",
       gender: student.gender || "-",
       parent_name: student.parent_name || "-",
@@ -78,9 +33,13 @@ export const getStudentById = async (id: string) => {
       birth_place: student.birth_place || "-",
       birth_date: student.birth_date ? new Date(student.birth_date).toISOString().split('T')[0] : "-",
       address: student.address || "-",
-      email: email,
-      phone_number: phoneNumber,
-      graduation_status: student.graduation_status || "Aktif",
+
+      class: student.class || "-",
+      parent_name: student.parent_name || "-",
+      batch_year: student.academic_year?.toString() || "-",
+      birth_place: student.birth_place || "-",
+      birth_date: student.birth_date || "-",
+      graduation_status: student.graduation_status || "-",
       payment_status: student.payment_status || "-",
       profile_picture: student.profile_picture || "/default-profile.png",
       created_at: student.created_at || new Date(),

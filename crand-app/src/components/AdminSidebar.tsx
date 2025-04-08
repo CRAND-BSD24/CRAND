@@ -18,9 +18,9 @@ const AdminSidebar = () => {
         <div className="flex-1">
           <ul>
             <li className="mb-4">
-              <a href="/admin" className="hover:text-gray-300">
+              <Link href="/admin" className="hover:text-gray-300">
                 Dashboard
-              </a>
+              </Link>
             </li>
             <li className="mb-4">
               <Link href="/admin/students" className="hover:text-gray-300">
@@ -32,25 +32,35 @@ const AdminSidebar = () => {
                 Calon Santri
               </Link>
             </li>
+            {/* <li className="mb-4">
+              <Link href="/admin/academic" className="hover:text-gray-300">
+                Akademik
+              </Link>
+            </li> */}
             <li className="mb-4">
-              <a href="/admin/teachers" className="hover:text-gray-300">
-                Ustadz
-              </a>
-            </li>
-            <li className="mb-4">
-              <a href="/admin/attendance" className="hover:text-gray-300">
+              <Link href="/admin/attendance" className="hover:text-gray-300">
                 Absensi
-              </a>
+              </Link>
             </li>
             <li className="mb-4">
-              <a href="/admin/profile" className="hover:text-gray-300">
+              <Link href="/admin/teachers" className="hover:text-gray-300">
+                Ustad
+              </Link>
+            </li>
+            {/* <li className="mb-4">
+              <Link href="/admin/memorization" className="hover:text-gray-300">
+                Hafalan
+              </Link>
+            </li> */}
+            <li className="mb-4">
+              <Link href="/admin/profile" className="hover:text-gray-300">
                 Profil
-              </a>
+              </Link>
             </li>
             <li className="mb-4">
-              <a href="/admin/pis-assistant" className="hover:text-gray-300">
+              <Link href="/admin/pis-assistant" className="hover:text-gray-300">
                 PIS Assistant
-              </a>
+              </Link>
             </li>
           </ul>
         </div>

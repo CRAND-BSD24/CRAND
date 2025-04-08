@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { getAllStudents, acceptStudent } from './action';
-import Link from 'next/link';
-import AddStudentModal from './AddStudentModal';
+import React, { useEffect, useState } from "react";
+import { getAllStudents, acceptStudent, rejectStudent } from "./action";
+import Link from "next/link";
+import AddStudentModal from "./AddStudentModal";
 
 interface Student {
   _id: string;
@@ -11,7 +11,7 @@ interface Student {
   level: string;
 }
 
-const StudentsPage = () => {
+const PsbPage = () => {
   const [students, setStudents] = useState<Student[]>([]);
 
   const fetchStudents = async () => {
@@ -27,7 +27,7 @@ const StudentsPage = () => {
   const handleAccept = async (id: string) => {
     const confirmed = confirm("Yakin ingin menerima santri ini?");
     if (!confirmed) return;
-  
+
     const result = await acceptStudent(id);
     if (result.success) {
       alert("Santri berhasil diterima.");
@@ -36,11 +36,20 @@ const StudentsPage = () => {
       alert(result.message || "Gagal menerima santri.");
     }
   };
-  
 
-  const handleReject = (id: string) => {
-    console.log(`Santri ${id} ditolak`);
-    // Tambahkan logic "reject" di sini
+  const handleReject = async (id: string) => {
+    const confirmed = confirm(
+      "Yakin ingin menolak dan menghapus data santri ini?"
+    );
+    if (!confirmed) return;
+
+    const result = await rejectStudent(id);
+    if (result.success) {
+      alert("Santri berhasil ditolak dan dihapus.");
+      fetchStudents(); // Refresh daftar
+    } else {
+      alert(result.message || "Gagal menolak santri.");
+    }
   };
 
   return (
@@ -51,7 +60,9 @@ const StudentsPage = () => {
         </h1>
 
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-[#006A71]">Daftar Calon Santri</h2>
+          <h2 className="text-xl font-semibold text-[#006A71]">
+            Daftar Calon Santri
+          </h2>
           <AddStudentModal onStudentAdded={fetchStudents} />
         </div>
 
@@ -117,4 +128,4 @@ const StudentsPage = () => {
   );
 };
 
-export default StudentsPage;
+export default PsbPage;

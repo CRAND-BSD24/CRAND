@@ -59,7 +59,7 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#E0F4F5] to-[#B1E3E5] flex items-center justify-center px-4 py-10">
+    <div className="min-h-screen bg-gradient-to-br from-[#acf9ff] to-[#124e50] flex items-center justify-center px-4 py-10">
       <div className="bg-white rounded-3xl shadow-2xl border border-[#B8E2E4] p-8 max-w-md w-full">
         <div className="flex flex-col items-center">
           <div className="relative mb-4">
@@ -87,7 +87,7 @@ export default function Profile() {
 
         <button
           onClick={handleLogout}
-          className="mt-8 w-full flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl font-semibold shadow-md transition-all duration-300"
+          className="mt-8 w-full flex items-center justify-center gap-2 bg-red-500 hover:bg-red-300 text-white py-2 rounded-xl font-semibold shadow-md transition-all duration-300"
         >
           <LogOut size={18} />
           Logout
