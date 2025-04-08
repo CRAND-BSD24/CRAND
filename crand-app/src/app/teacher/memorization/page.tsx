@@ -19,6 +19,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { getStudentMemorization, updateMemorizationData, type MemorizationStudent } from "./action";
+import { useToast } from "@/components/ui/use-toast";
 
 interface QuranMemorization {
   _id: string;
@@ -34,6 +35,7 @@ const MemorizationPage = () => {
   const [juzList, setJuzList] = useState<QuranMemorization[]>([]);
   const [selectedJuzId, setSelectedJuzId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchMemorizationData();
@@ -49,6 +51,11 @@ const MemorizationPage = () => {
     } catch (error) {
       console.error("Error fetching memorization data:", error);
       setError("Gagal memuat data hafalan");
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Gagal memuat data hafalan",
+      });
     } finally {
       setLoading(false);
     }
@@ -65,6 +72,11 @@ const MemorizationPage = () => {
     } catch (error) {
       console.error("Error fetching juz list:", error);
       setError("Gagal memuat daftar juz");
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Gagal memuat daftar juz",
+      });
     }
   };
 
@@ -96,14 +108,17 @@ const MemorizationPage = () => {
 
   const handleEditSubmit = async () => {
     if (!editingStudent || !selectedJuzId) {
-      alert("Mohon lengkapi semua field, termasuk pemilihan Juz");
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Mohon lengkapi semua field, termasuk pemilihan Juz",
+      });
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      // Update the data in MongoDB
       const result = await updateMemorizationData(editingStudent.id, {
         semester: editingStudent.semester,
         academic_year: editingStudent.academic_year,
@@ -114,22 +129,42 @@ const MemorizationPage = () => {
       });
 
       if (result.success) {
-        // Refresh the data to show updates
-        await fetchMemorizationData();
-        
-        // Close the form and reset states
+        setMemorizationData(prevData => 
+          prevData.map(student => {
+            if (student.id === editingStudent.id) {
+              const selectedJuz = juzList.find(juz => juz._id === selectedJuzId);
+              return {
+                ...student,
+                semester: editingStudent.semester,
+                academic_year: editingStudent.academic_year,
+                juz_name: selectedJuz?.name || student.juz_name,
+                pages: editingStudent.pages,
+                status: editingStudent.status,
+                notes: editingStudent.notes,
+                quran_memorization_id: selectedJuzId,
+              };
+            }
+            return student;
+          })
+        );
+
         setShowEditForm(false);
         setEditingStudent(null);
         setSelectedJuzId("");
-        
-        // Show success message
-        alert("Data berhasil disimpan");
+        toast({
+          title: "Success",
+          description: "Data berhasil disimpan",
+        });
       } else {
         throw new Error("Failed to update data");
       }
     } catch (error) {
       console.error("Error updating memorization:", error);
-      alert("Gagal mengupdate data hafalan");
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Gagal mengupdate data hafalan",
+      });
     } finally {
       setIsSubmitting(false);
     }
