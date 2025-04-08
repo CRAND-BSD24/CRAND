@@ -11,31 +11,45 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
+import { useEffect, useState } from "react";
+import { getAcademicData, AcademicData } from "./action";
 
 const AcademicPage = () => {
-  const academicData = [
-    {
-      name: "Ahmad Farhan",
-      class: "10A",
-      subject: "Matematika",
-      score: 85,
-      grade: "A",
-    },
-    {
-      name: "Fatimah Azzahra",
-      class: "10A",
-      subject: "Matematika",
-      score: 92,
-      grade: "A+",
-    },
-    {
-      name: "Muhammad Rizky",
-      class: "10A",
-      subject: "Matematika",
-      score: 78,
-      grade: "B+",
-    },
-  ];
+  const [academicData, setAcademicData] = useState<AcademicData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getAcademicData();
+        setAcademicData(data);
+      } catch (error) {
+        console.error("Error fetching academic data:", error);
+        setError("Gagal memuat data akademik");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen text-red-500">
+        {error}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 m-5">
@@ -69,10 +83,10 @@ const AcademicPage = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {academicData.map((student, index) => (
-                <TableRow key={index}>
-                  <TableCell>{student.name}</TableCell>
-                  <TableCell>{student.class}</TableCell>
+              {academicData.map((student) => (
+                <TableRow key={student.id}>
+                  <TableCell>{student.student_name}</TableCell>
+                  <TableCell>{student.class_name}</TableCell>
                   <TableCell>{student.subject}</TableCell>
                   <TableCell>{student.score}</TableCell>
                   <TableCell>
