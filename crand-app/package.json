@@ -10,6 +10,7 @@
     "seed": "node src/db/scripts/runSeed.js"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.0",
     "@headlessui/react": "^2.2.1",
     "@radix-ui/react-alert-dialog": "^1.1.7",
     "@radix-ui/react-dialog": "^1.1.6",
