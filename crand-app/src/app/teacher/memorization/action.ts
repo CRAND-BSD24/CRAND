@@ -292,9 +292,14 @@ export async function getMemorizationHistory(
 ): Promise<MemorizationHistory[]> {
   const client = await getMongoClientInstance();
   const db = client.db("pesantren_db");
-
   try {
-    const matchStage: any = {
+    const matchStage: { 
+      student_id: ObjectId;
+      created_at?: {
+        $gte: Date;
+        $lte: Date;
+      };
+    } = {
       student_id: new ObjectId(studentId)
     };
 

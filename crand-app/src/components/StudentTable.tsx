@@ -10,16 +10,17 @@ import {
 } from "@/components/ui/table";
 import { AggregatedStudentData } from "@/app/teacher/attendance/action";
 import { Button } from "@/components/ui/button";
-import { Pencil } from "lucide-react";
+import { Pencil, History } from "lucide-react";
 import StudentAttendanceModal from "./StudentAttendanceModal";
 import { useEffect, useState } from "react";
 import { getAttendanceStatus } from "@/app/teacher/attendance/actions";
 
 interface StudentTableProps {
   students: AggregatedStudentData[];
+  onHistoryClick: (student: AggregatedStudentData) => void;
 }
 
-export default function StudentTable({ students }: StudentTableProps) {
+export default function StudentTable({ students, onHistoryClick }: StudentTableProps) {
   const [attendanceStatus, setAttendanceStatus] = useState<
     Record<string, string>
   >({});
@@ -129,6 +130,15 @@ export default function StudentTable({ students }: StudentTableProps) {
                   onSuccess={handleAttendanceSuccess}
                 />
               )}
+            </TableCell>
+            <TableCell>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onHistoryClick(student)}
+              >
+                <History className="h-4 w-4" />
+              </Button>
             </TableCell>
           </TableRow>
         ))}

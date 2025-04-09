@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getMemorizationHistory, type MemorizationHistory } from "./action";
 import { useToast } from "@/components/ui/use-toast";
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks } from "date-fns";
@@ -22,7 +22,7 @@ const MemorizationPage = () => {
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const { toast } = useToast();
 
-  const fetchHistoryData = async (startDate: Date, endDate: Date) => {
+  const fetchHistoryData = useCallback(async (startDate: Date, endDate: Date) => {
     try {
       setLoading(true);
       const history = await getMemorizationHistory(startDate, endDate);
@@ -37,13 +37,13 @@ const MemorizationPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     const startOfCurrentWeek = startOfWeek(currentWeek, { weekStartsOn: 1 });
     const endOfCurrentWeek = endOfWeek(currentWeek, { weekStartsOn: 1 });
     fetchHistoryData(startOfCurrentWeek, endOfCurrentWeek);
-  }, [currentWeek]);
+  }, [currentWeek, fetchHistoryData]);
 
   const handlePreviousWeek = () => {
     setCurrentWeek(subWeeks(currentWeek, 1));
