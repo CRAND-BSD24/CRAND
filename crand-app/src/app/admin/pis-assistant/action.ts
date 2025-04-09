@@ -72,7 +72,7 @@ async function getDatabaseContextForAdmin(db: any, normalizedQuestion: string, q
           const total = attendance.length;
              const percentage = total > 0 ? (present / total * 100).toFixed(1) : '0';
              context += `Kehadiran bulan ini: ${percentage}% (${present}/${total})\n`;
-           }
+        }
           return context;
       }
     }
