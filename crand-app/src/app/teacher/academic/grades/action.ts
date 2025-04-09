@@ -96,7 +96,7 @@ export async function getStudentGrades(
 
     return grades.map((grade) => ({
       subject_name: grade.subject_name,
-      score: grade.score,
+      score: grade.score.toString(),
       semester: grade.semester,
       academic_year: grade.academic_year,
     }));
