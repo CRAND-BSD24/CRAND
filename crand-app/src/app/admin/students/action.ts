@@ -9,18 +9,37 @@ interface StudentData {
   academic_level: string;
   gender: string;
   parent_name: string;
-  birth_date: string;
-  birth_place: string;
+  birth_place_date: string;
   address: string;
   phone_number: string;
 }
 
-export const getAllStudents = async () => {
+interface FilterOptions {
+  class_id?: string;
+  academic_level?: string;
+}
+
+/**
+ * GET all students with optional filter & sorting
+ */
+export const getAllStudents = async (
+  filters?: FilterOptions,
+  sortField: string = "created_at",
+  sortOrder: "asc" | "desc" = "desc"
+) => {
   const client = await getMongoClientInstance();
   const db = client.db("pesantren_db");
 
   try {
+    const matchStage: any = {};
+    if (filters?.class_id) matchStage.class_id = new ObjectId(filters.class_id);
+    if (filters?.academic_level) matchStage.academic_level = filters.academic_level;
+
+    const sort: any = {};
+    sort[sortField] = sortOrder === "asc" ? 1 : -1;
+
     const students = await db.collection("students").aggregate([
+      { $match: matchStage },
       {
         $lookup: {
           from: "classes",
@@ -52,7 +71,8 @@ export const getAllStudents = async () => {
           created_at: 1,
           updated_at: 1
         }
-      }
+      },
+      { $sort: sort }
     ]).toArray();
 
     return JSON.stringify(students);
@@ -62,6 +82,9 @@ export const getAllStudents = async () => {
   }
 };
 
+/**
+ * CREATE student
+ */
 export const createStudent = async (formData: StudentData) => {
   const client = await getMongoClientInstance();
   const db = client.db("pesantren_db");
@@ -95,8 +118,7 @@ export const createStudent = async (formData: StudentData) => {
       academic_level: formData.academic_level,
       gender: formData.gender,
       parent_name: formData.parent_name,
-      birth_date: formData.birth_date ? new Date(formData.birth_date) : null,
-      birth_place: formData.birth_place || "",
+      birth_place_date: formData.birth_place_date || "",
       address: formData.address || "",
       phone_number: formData.phone_number || "",
       graduation_status: "Aktif",
@@ -120,69 +142,59 @@ export const createStudent = async (formData: StudentData) => {
   }
 };
 
-export const promoteStudentsByClass = async (className: string) => {
+/**
+ * BULK PROMOTE students from one class to the next by class_id
+ */
+export const promoteStudentsByClassId = async (classId: string) => {
   const client = await getMongoClientInstance();
   const db = client.db("pesantren_db");
 
   try {
+    const oldClass = await db.collection("classes").findOne({ _id: new ObjectId(classId) });
+
+    if (!oldClass) {
+      console.error("Class not found");
+      return false;
+    }
+
     const classRegex = /^(\d+)([A-Z]+)$/;
-    if (!classRegex.test(className)) {
-      console.error(`Invalid class name format: ${className}`);
+    const match = oldClass.class_name.match(classRegex);
+
+    if (!match) {
+      console.error(`Invalid class name format: ${oldClass.class_name}`);
       return false;
     }
 
-    const students = await db
-      .collection("students")
-      .find({ class: className })
-      .project({ _id: 1, class: 1 })
-      .toArray();
+    const currentLevel = parseInt(match[1]);
+    const suffix = match[2];
 
-    if (students.length === 0) {
-      console.log(`No students found in class ${className}`);
+    if (currentLevel >= 12) {
+      console.log(`Class ${oldClass.class_name} is already the highest level`);
       return false;
     }
 
-    const bulkOps: AnyBulkWriteOperation<Document>[] = [];
-    const currentDate = new Date();
+    const nextClassName = `${currentLevel + 1}${suffix}`;
+    const nextClass = await db.collection("classes").findOne({ class_name: nextClassName });
 
-    for (const student of students) {
-      const match = student.class.match(classRegex);
-      if (!match) continue;
+    if (!nextClass) {
+      console.error(`Next class not found: ${nextClassName}`);
+      return false;
+    }
 
-      const currentLevel = parseInt(match[1]);
-      const classSuffix = match[2];
-
-      if (currentLevel >= 12) {
-        console.log(`Student ${student._id} is already in the highest class (${student.class})`);
-        continue;
+    const result = await db.collection("students").updateMany(
+      { class_id: oldClass._id },
+      {
+        $set: {
+          class_id: nextClass._id,
+          updated_at: new Date()
+        }
       }
+    );
 
-      const nextClass = `${currentLevel + 1}${classSuffix}`;
-
-      bulkOps.push({
-        updateOne: {
-          filter: { _id: student._id },
-          update: {
-            $set: {
-              class: nextClass,
-              updated_at: currentDate,
-            },
-          },
-        },
-      });
-    }
-
-    if (bulkOps.length === 0) {
-      console.log(`No valid students to promote in class ${className}`);
-      return false;
-    }
-
-    const result = await db.collection("students").bulkWrite(bulkOps);
-
-    console.log(`Promoted ${result.modifiedCount} students from ${className}`);
+    console.log(`Promoted ${result.modifiedCount} students from ${oldClass.class_name} to ${nextClass.class_name}`);
     return result.modifiedCount > 0;
   } catch (error) {
-    console.error("Error promoting students:", error);
+    console.error("Error promoting students by class:", error);
     return false;
   }
 };

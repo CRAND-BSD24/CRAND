@@ -13,8 +13,10 @@ import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getAcademicData, AcademicData } from "./action";
+import { useRouter } from "next/navigation";
 
 const AcademicPage = () => {
+  const router = useRouter();
   const [academicData, setAcademicData] = useState<AcademicData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +36,10 @@ const AcademicPage = () => {
 
     fetchData();
   }, []);
+
+  const handleDetailClick = (studentId: string) => {
+    router.push(`/teacher/academic/grades/${studentId}`);
+  };
 
   if (loading) {
     return (
@@ -60,10 +66,6 @@ const AcademicPage = () => {
             Kelola nilai akademik santri di kelas Anda
           </p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700">
-          <BookOpen className="mr-2 h-4 w-4" />
-          Tambah Nilai
-        </Button>
       </div>
 
       <Card className="bg-white shadow-lg">
@@ -76,10 +78,8 @@ const AcademicPage = () => {
               <TableRow>
                 <TableHead>Nama Santri</TableHead>
                 <TableHead>Kelas</TableHead>
-                <TableHead>Mata Pelajaran</TableHead>
-                <TableHead>Nilai</TableHead>
-                <TableHead>Grade</TableHead>
-                <TableHead>Aksi</TableHead>
+                <TableHead>NISN</TableHead>
+                <TableHead>Detail Nilai</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -87,28 +87,15 @@ const AcademicPage = () => {
                 <TableRow key={student.id}>
                   <TableCell>{student.student_name}</TableCell>
                   <TableCell>{student.class_name}</TableCell>
-                  <TableCell>{student.subject}</TableCell>
-                  <TableCell>{student.score}</TableCell>
-                  <TableCell>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs ${
-                        student.grade === "A+"
-                          ? "bg-green-100 text-green-800"
-                          : student.grade === "A"
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {student.grade}
-                    </span>
-                  </TableCell>
+                  <TableCell>{student.nisn}</TableCell>
                   <TableCell>
                     <Button
                       variant="outline"
                       size="sm"
                       className="hover:bg-blue-50"
+                      onClick={() => handleDetailClick(student.student_id)}
                     >
-                      Edit
+                      Detail
                     </Button>
                   </TableCell>
                 </TableRow>

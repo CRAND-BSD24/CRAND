@@ -6,38 +6,39 @@ import { useRouter } from "next/navigation";
 
 interface Student {
   _id: string;
-  profile_picture?: string;
   name?: string;
   email?: string;
   phone_number?: string;
   program?: string;
+  academic_level?: string;
   gender?: string;
   address?: string;
-  level?: string;
   academic_year?: string;
   birth_place_date?: string;
   payment_status?: string;
+  father_name?: string;
+  mother_name?: string;
 }
+
+const programOptions = ["Reguler", "Shorhul Qurro'"];
+const academicLevelOptions = ['Ula', 'Wustho', 'Ulya', 'Aliyah Agama', 'Aliyah IPA', 'SMP Formal'];
 
 export default function EditStudentModal({ student }: { student: Student }) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+
   const [form, setForm] = useState({
-    profile_picture: student.profile_picture || "",
     name: student.name || "",
     email: student.email || "",
     phone_number: student.phone_number || "",
     program: student.program || "",
+    academic_level: student.academic_level || "",
     gender: student.gender || "",
     address: student.address || "",
-    level: student.level || "",
-    academic_level: student.academic_level || "",
     academic_year: student.academic_year || "",
-    birth_place: student.birth_place || "",
-    birth_date: student.birth_date?.split("T")[0] || "", // untuk input type date
-    nisn: student.nisn || "",
-    father_name: "",
-    mother_name: "",
+    birth_place_date: student.birth_place_date || "",
+    father_name: student.father_name || "",
+    mother_name: student.mother_name || "",
     payment_status: student.payment_status || "",
   });
 
@@ -49,7 +50,12 @@ export default function EditStudentModal({ student }: { student: Student }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = await updateStudentById(student._id, form);
+
+    const updatedData = {
+      ...form,
+    };
+
+    const success = await updateStudentById(student._id, updatedData);
 
     if (success) {
       alert("Data berhasil diperbarui.");
@@ -74,25 +80,36 @@ export default function EditStudentModal({ student }: { student: Student }) {
           <div className="bg-gray-100 p-6 rounded-lg w-full max-w-lg space-y-4 shadow-xl shadow-black">
             <h2 className="text-xl font-semibold mb-4">Edit Data Santri</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <input name="profile_picture" value={form.profile_picture} onChange={handleChange} placeholder="URL Foto Profil" className="w-full border p-2 rounded" />
               <input name="name" value={form.name} onChange={handleChange} placeholder="Nama" className="w-full border p-2 rounded" />
               <input name="email" value={form.email} onChange={handleChange} placeholder="Email" className="w-full border p-2 rounded" />
               <input name="phone_number" value={form.phone_number} onChange={handleChange} placeholder="Nomor HP" className="w-full border p-2 rounded" />
               <input name="father_name" value={form.father_name} onChange={handleChange} placeholder="Nama Bapak" className="w-full border p-2 rounded" />
               <input name="mother_name" value={form.mother_name} onChange={handleChange} placeholder="Nama Ibu" className="w-full border p-2 rounded" />
-              <input name="nisn" value={form.nisn} onChange={handleChange} placeholder="NISN" className="w-full border p-2 rounded" />
               <input name="address" value={form.address} onChange={handleChange} placeholder="Alamat" className="w-full border p-2 rounded" />
-              <input name="program" value={form.program} onChange={handleChange} placeholder="Program" className="w-full border p-2 rounded" />
+
+              <select name="program" value={form.program} onChange={handleChange} className="w-full border p-2 rounded">
+                <option value="">Pilih Program</option>
+                {programOptions.map((option) => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
+
               <select name="gender" value={form.gender} onChange={handleChange} className="w-full border p-2 rounded">
                 <option value="">Pilih Jenis Kelamin</option>
                 <option value="Laki-laki">Laki-laki</option>
                 <option value="Perempuan">Perempuan</option>
               </select>
-              <input name="level" value={form.level} onChange={handleChange} placeholder="Level" className="w-full border p-2 rounded" />
-              <input name="academic_level" value={form.academic_level} onChange={handleChange} placeholder="Tingkat Akademik" className="w-full border p-2 rounded" />
+
+              <select name="academic_level" value={form.academic_level} onChange={handleChange} className="w-full border p-2 rounded">
+                <option value="">Pilih Tingkat Akademik</option>
+                {academicLevelOptions.map((option) => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
+
               <input name="academic_year" value={form.academic_year} onChange={handleChange} placeholder="Tahun Ajaran" className="w-full border p-2 rounded" />
-              <input name="birth_place" value={form.birth_place} onChange={handleChange} placeholder="Tempat Lahir" className="w-full border p-2 rounded" />
-              <input type="date" name="birth_date" value={form.birth_date} onChange={handleChange} className="w-full border p-2 rounded" />
+              <input name="birth_place_date" value={form.birth_place_date} onChange={handleChange} placeholder="Tempat, Tanggal Lahir (contoh: Jakarta, 2005-08-12)" className="w-full border p-2 rounded" />
+              
               <select name="payment_status" value={form.payment_status} onChange={handleChange} className="w-full border p-2 rounded">
                 <option value="">Status Pembayaran</option>
                 <option value="Lunas">Lunas</option>

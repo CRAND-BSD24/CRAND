@@ -11,9 +11,7 @@ export interface AcademicData {
   student_id: string;
   student_name: string;
   class_name: string;
-  subject: string;
-  score: number;
-  grade: string;
+  nisn: string;
 }
 
 export async function getAcademicData(): Promise<AcademicData[]> {
@@ -58,16 +56,13 @@ export async function getAcademicData(): Promise<AcademicData[]> {
       .collection("students")
       .aggregate(pipeline)
       .toArray();
-    console.log(result, "tes");
 
     return result.map((doc) => ({
       id: doc._id.toString(),
       student_id: doc._id.toString(),
       student_name: doc.name || "",
       class_name: doc.class?.class_name || "",
-      subject: doc.academic_records?.subject || "",
-      score: doc.academic_records?.score || 0,
-      grade: doc.academic_records?.grade || "",
+      nisn: doc.nisn || "",
     }));
   } catch (error) {
     console.error("Error fetching academic data:", error);

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createStudent } from "./action";
 
-export default function AddStudentModal({
+export default function AddProspectiveStudentModal({
   onStudentAdded,
 }: {
   onStudentAdded: () => void;
@@ -11,7 +11,6 @@ export default function AddStudentModal({
   const [isOpen, setIsOpen] = useState(false);
   const currentYear = new Date().getFullYear();
   const [form, setForm] = useState({
-    profile_picture: "",
     name: "",
     email: "",
     phone_number: "",
@@ -19,10 +18,8 @@ export default function AddStudentModal({
     academic_level: "",
     gender: "",
     address: "",
-    level: "1",
-    academic_year: currentYear.toString(), 
-    birth_place: "",
-    birth_date: "",
+    academic_year: currentYear.toString(),
+    birth_place_date: "",
     payment_status: "Belum Lunas",
     father_name: "",
     mother_name: "",
@@ -36,18 +33,12 @@ export default function AddStudentModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const payload = {
-      ...form,
-    };
-
-    const success = await createStudent(payload);
+    const success = await createStudent(form);
 
     if (success) {
-      alert("Santri berhasil ditambahkan");
+      alert("Calon santri berhasil ditambahkan");
       setIsOpen(false);
       setForm({
-        profile_picture: "",
         name: "",
         email: "",
         phone_number: "",
@@ -55,17 +46,15 @@ export default function AddStudentModal({
         academic_level: "",
         gender: "",
         address: "",
-        level: "1",
         academic_year: currentYear.toString(),
-        birth_place: "",
-        birth_date: "",
+        birth_place_date: "",
         payment_status: "Belum Lunas",
         father_name: "",
         mother_name: "",
       });
       onStudentAdded();
     } else {
-      alert("Gagal menambahkan santri");
+      alert("Gagal menambahkan calon santri");
     }
   };
 
@@ -79,7 +68,7 @@ export default function AddStudentModal({
         onClick={() => setIsOpen(true)}
         className="bg-[#006A71] text-white px-5 py-2 rounded-lg font-semibold shadow-md hover:bg-[#04858c] transition-transform duration-200 hover:scale-105"
       >
-        + Tambah Santri
+        + Tambah Calon Santri
       </button>
 
       {isOpen && (
@@ -89,27 +78,14 @@ export default function AddStudentModal({
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-2xl font-bold text-[#006A71] mb-2 text-center">
-              Tambah Data Santri
+              Tambah Data Calon Santri
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <Input
-                name="profile_picture"
-                value={form.profile_picture}
-                onChange={handleChange}
-                placeholder="URL Foto Profil"
-              />
-              {form.profile_picture && (
-                <img
-                  src={form.profile_picture}
-                  alt="Preview Foto Profil"
-                  className="w-32 h-32 object-cover rounded-md border mx-auto"
-                />
-              )}
               <Input
                 name="name"
                 value={form.name}
                 onChange={handleChange}
-                placeholder="Nama"
+                placeholder="Nama Lengkap"
                 required
               />
               <Input
@@ -130,11 +106,7 @@ export default function AddStudentModal({
                 onChange={handleChange}
                 placeholder="Alamat"
               />
-              <Select
-                name="program"
-                value={form.program}
-                onChange={handleChange}
-              >
+              <Select name="program" value={form.program} onChange={handleChange}>
                 <option value="">Pilih Program</option>
                 <option value="Reguler">Reguler</option>
                 <option value="Shorhul Qurro">Shorhul Qurro'</option>
@@ -153,12 +125,8 @@ export default function AddStudentModal({
                 <option value="Ula">Ula</option>
                 <option value="Wustho">Wustho</option>
                 <option value="Ulya">Ulya</option>
-                <option value="Formal Aliyah Agama">
-                  Formal Aliyah Agama
-                </option>
-                <option value="Formal Aliyah IPA">
-                  Formal Aliyah IPA
-                </option>
+                <option value="Formal Aliyah Agama">Formal Aliyah Agama</option>
+                <option value="Formal Aliyah IPA">Formal Aliyah IPA</option>
               </Select>
               <Input
                 name="academic_year"
@@ -171,7 +139,7 @@ export default function AddStudentModal({
                 name="father_name"
                 value={form.father_name}
                 onChange={handleChange}
-                placeholder="Nama Bapak"
+                placeholder="Nama Ayah"
               />
               <Input
                 name="mother_name"
@@ -180,18 +148,19 @@ export default function AddStudentModal({
                 placeholder="Nama Ibu"
               />
               <Input
-                name="birth_place"
-                value={form.birth_place}
+                name="birth_place_date"
+                value={form.birth_place_date}
                 onChange={handleChange}
-                placeholder="Tempat Lahir"
+                placeholder="Tempat, Tanggal Lahir"
               />
-              <input
-                type="date"
-                name="birth_date"
-                value={form.birth_date}
+              <Select
+                name="payment_status"
+                value={form.payment_status}
                 onChange={handleChange}
-                className="w-full border border-[#9ACBD0] rounded-md px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#48A6A7] transition"
-              />
+              >
+                <option value="Belum Lunas">Belum Lunas</option>
+                <option value="Lunas">Lunas</option>
+              </Select>
 
               <div className="flex justify-end space-x-2 pt-2">
                 <button

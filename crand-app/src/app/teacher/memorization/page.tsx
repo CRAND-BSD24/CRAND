@@ -18,17 +18,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { 
-  getStudentMemorization, 
-  updateMemorizationData, 
+import {
+  getStudentMemorization,
+  updateMemorizationData,
   addMemorizationData,
   getMemorizationHistory,
   type MemorizationStudent,
-  type MemorizationHistory 
+  type MemorizationHistory,
 } from "./action";
 import { useToast } from "@/components/ui/use-toast";
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks } from "date-fns";
 import { id } from "date-fns/locale";
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 
 interface QuranMemorization {
   _id: string;
@@ -36,14 +37,18 @@ interface QuranMemorization {
 }
 
 const MemorizationPage = () => {
-  const [memorizationData, setMemorizationData] = useState<MemorizationStudent[]>([]);
+  const [memorizationData, setMemorizationData] = useState<
+    MemorizationStudent[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showEditForm, setShowEditForm] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
-  const [editingStudent, setEditingStudent] = useState<MemorizationStudent | null>(null);
-  const [selectedStudent, setSelectedStudent] = useState<MemorizationStudent | null>(null);
+  const [editingStudent, setEditingStudent] =
+    useState<MemorizationStudent | null>(null);
+  const [selectedStudent, setSelectedStudent] =
+    useState<MemorizationStudent | null>(null);
   const [historyData, setHistoryData] = useState<MemorizationHistory[]>([]);
   const [juzList, setJuzList] = useState<QuranMemorization[]>([]);
   const [selectedJuzId, setSelectedJuzId] = useState("");
@@ -115,11 +120,13 @@ const MemorizationPage = () => {
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     if (!editingStudent) return;
     const { name, value } = e.target;
-    
+
     if (name === "quran_memorization_id") {
       setSelectedJuzId(value);
     } else {
@@ -150,10 +157,12 @@ const MemorizationPage = () => {
       });
 
       if (result.success) {
-        setMemorizationData(prevData => 
-          prevData.map(student => {
+        setMemorizationData((prevData) =>
+          prevData.map((student) => {
             if (student.id === editingStudent.id) {
-              const selectedJuz = juzList.find(juz => juz._id === selectedJuzId);
+              const selectedJuz = juzList.find(
+                (juz) => juz._id === selectedJuzId
+              );
               return {
                 ...student,
                 semester: editingStudent.semester,
@@ -205,7 +214,9 @@ const MemorizationPage = () => {
   };
 
   const handleAddInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
     setNewMemorization((prev) => ({
@@ -227,6 +238,8 @@ const MemorizationPage = () => {
       setHistoryData(history);
       setSelectedStudent(student);
       setShowHistory(true);
+      console.log(selectedStudent, "selectedStudent<><>NIH");
+      console.log(memorizationData, "memorizationData<><>NIH");
     } catch (error) {
       console.error("Error fetching history:", error);
       toast({
@@ -235,7 +248,7 @@ const MemorizationPage = () => {
         description: "Gagal memuat riwayat hafalan",
       });
     } finally {
-      setLoading(false);
+      setLoading(false);  
     }
   };
 
@@ -330,8 +343,15 @@ const MemorizationPage = () => {
       return;
     }
 
+    
+
     // Validate required fields
-    if (!newMemorization.semester || !newMemorization.academic_year || !newMemorization.pages || !newMemorization.status) {
+    if (
+      !newMemorization.semester ||
+      !newMemorization.academic_year ||
+      !newMemorization.pages ||
+      !newMemorization.status
+    ) {
       toast({
         variant: "destructive",
         title: "Error",
@@ -354,10 +374,12 @@ const MemorizationPage = () => {
 
       if (result.success) {
         // Update the local state instead of refreshing
-        setMemorizationData(prevData => 
-          prevData.map(student => {
+        setMemorizationData((prevData) =>
+          prevData.map((student) => {
             if (student.id === selectedStudent.id) {
-              const selectedJuz = juzList.find(juz => juz._id === selectedJuzId);
+              const selectedJuz = juzList.find(
+                (juz) => juz._id === selectedJuzId
+              );
               return {
                 ...student,
                 semester: newMemorization.semester,
@@ -419,6 +441,135 @@ const MemorizationPage = () => {
     );
   }
 
+  // handler for sending email
+    const sendPDF = async (emailAddress: string) => {
+      if (!selectedStudent || !historyData.length) {
+        alert("Data santri atau riwayat hafalan belum tersedia.");
+        return;
+      }
+
+      if (!emailAddress) {
+        alert("Email santri tidak tersedia. Silakan lengkapi data email santri terlebih dahulu.");
+        return;
+      }
+    
+      const pdfDoc = await PDFDocument.create();
+      const page = pdfDoc.addPage([600, 900]);
+      const { width, height } = page.getSize();
+      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    
+      // Header Judul
+      page.drawText("LAPORAN RIWAYAT HAFALAN", {
+        x: width / 2 - 130,
+        y: height - 50,
+        size: 16,
+        font,
+        color: rgb(0, 0, 0),
+      });
+    
+      // Subheader Nama Santri
+      page.drawText(`Nama Santri: ${selectedStudent.name}`, {
+        x: 50,
+        y: height - 80,
+        size: 12,
+        font,
+        color: rgb(0.2, 0.2, 0.2),
+      });
+    
+      // Tabel Hafalan
+      const tableTop = height - 120;
+      const rowHeight = 24;
+      const colWidths = [70, 60, 60, 60, 60, 90, 120];
+    
+      // Header tabel
+      const headers = [
+        "Tanggal",
+        "Semester",
+        "Tahun",
+        "Juz",
+        "Halaman",
+        "Status",
+        "Catatan",
+      ];
+      headers.forEach((header, i) => {
+        const x = 50 + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
+        page.drawText(header, {
+          x,
+          y: tableTop,
+          size: 10,
+          font,
+          color: rgb(0, 0, 0),
+        });
+      });
+    
+      // Garis bawah header
+      page.drawLine({
+        start: { x: 50, y: tableTop - 5 },
+        end: { x: width - 50, y: tableTop - 5 },
+        thickness: 1,
+        color: rgb(0, 0, 0),
+      });
+    
+      // Isi tabel
+      historyData.forEach((record, index) => {
+        const y = tableTop - (index + 1) * rowHeight;
+        const row = [
+          new Date(record.created_at).toLocaleDateString("id-ID"),
+          record.semester,
+          record.academic_year,
+          record.juz_name,
+          record.pages.toString(),
+          record.status,
+          record.notes ?? "-",
+        ];
+    
+        row.forEach((text, i) => {
+          const x = 50 + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
+          page.drawText(text, {
+            x,
+            y,
+            size: 9,
+            font,
+            color: rgb(0, 0, 0),
+          });
+        });
+    
+        // Garis bawah setiap baris
+        page.drawLine({
+          start: { x: 50, y: y - 4 },
+          end: { x: width - 50, y: y - 4 },
+          thickness: 0.5,
+          color: rgb(0.7, 0.7, 0.7),
+        });
+      });
+    
+      const pdfBytes = await pdfDoc.save();
+      const pdfBase64 = Buffer.from(pdfBytes).toString("base64");
+    
+      // Kirim ke API
+      try {
+        const response = await fetch("/api/sendHafalanEmail", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            emailAddress, 
+            pdfBase64,
+            studentName: selectedStudent.name 
+          }),
+        });
+    
+        const result = await response.json();
+        if (result.message) {
+          alert(result.message);
+        } else {
+          throw new Error("Gagal mengirim email");
+        }
+      } catch (error) {
+        console.error("Gagal kirim email:", error);
+        alert("Gagal mengirim email. Coba lagi nanti.");
+      }
+    };
+
   return (
     <div className="space-y-6 m-5">
       <div className="flex justify-between items-center">
@@ -460,7 +611,11 @@ const MemorizationPage = () => {
                   <TableCell>{student.status}</TableCell>
                   <TableCell>{student.notes}</TableCell>
                   <TableCell>
-                    {student.created_at ? format(new Date(student.created_at), "dd MMMM yyyy", { locale: id }) : "-"}
+                    {student.created_at
+                      ? format(new Date(student.created_at), "dd MMMM yyyy", {
+                          locale: id,
+                        })
+                      : "-"}
                   </TableCell>
                   <TableCell className="space-x-2">
                     <Button
@@ -501,23 +656,25 @@ const MemorizationPage = () => {
           <div className="mb-4 space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1">Semester</label>
-            <input
-              type="text"
+              <input
+                type="text"
                 name="semester"
                 value={editingStudent?.semester || ""}
-              onChange={handleInputChange}
+                onChange={handleInputChange}
                 className="w-full p-2 border border-gray-300 rounded"
                 required
                 disabled={isSubmitting}
-            />
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Tahun Angkatan</label>
-            <input
-              type="text"
+              <label className="block text-sm font-medium mb-1">
+                Tahun Angkatan
+              </label>
+              <input
+                type="text"
                 name="academic_year"
                 value={editingStudent?.academic_year || ""}
-              onChange={handleInputChange}
+                onChange={handleInputChange}
                 className="w-full p-2 border border-gray-300 rounded"
                 required
                 disabled={isSubmitting}
@@ -528,7 +685,7 @@ const MemorizationPage = () => {
               <select
                 name="quran_memorization_id"
                 value={selectedJuzId}
-              onChange={handleInputChange}
+                onChange={handleInputChange}
                 className="w-full p-2 border border-gray-300 rounded"
                 required
                 disabled={isSubmitting}
@@ -543,11 +700,11 @@ const MemorizationPage = () => {
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Halaman</label>
-            <input
-              type="text"
+              <input
+                type="text"
                 name="pages"
                 value={editingStudent?.pages || ""}
-              onChange={handleInputChange}
+                onChange={handleInputChange}
                 className="w-full p-2 border border-gray-300 rounded"
                 required
                 disabled={isSubmitting}
@@ -556,9 +713,9 @@ const MemorizationPage = () => {
             <div>
               <label className="block text-sm font-medium mb-1">Status</label>
               <select
-              name="status"
+                name="status"
                 value={editingStudent?.status || ""}
-              onChange={handleInputChange}
+                onChange={handleInputChange}
                 className="w-full p-2 border border-gray-300 rounded"
                 required
                 disabled={isSubmitting}
@@ -570,15 +727,15 @@ const MemorizationPage = () => {
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Catatan</label>
-            <textarea
+              <textarea
                 name="notes"
                 value={editingStudent?.notes || ""}
-              onChange={handleInputChange}
+                onChange={handleInputChange}
                 className="w-full p-2 border border-gray-300 rounded"
                 rows={3}
                 required
                 disabled={isSubmitting}
-            />
+              />
             </div>
             <Button
               className="w-full bg-blue-600 hover:bg-blue-700"
@@ -611,7 +768,9 @@ const MemorizationPage = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Tahun Angkatan</label>
+              <label className="block text-sm font-medium mb-1">
+                Tahun Angkatan
+              </label>
               <input
                 type="text"
                 name="academic_year"
@@ -694,9 +853,7 @@ const MemorizationPage = () => {
       <Dialog open={showHistory} onOpenChange={setShowHistory}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>
-              Riwayat Hafalan {selectedStudent?.name}
-            </DialogTitle>
+            <DialogTitle>Riwayat Hafalan {selectedStudent?.name}</DialogTitle>
           </DialogHeader>
           <div className="flex justify-between items-center mb-4">
             <div className="flex gap-2">
@@ -725,9 +882,26 @@ const MemorizationPage = () => {
                 Minggu Berikutnya
               </Button>
             </div>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => sendPDF(selectedStudent?.email || "")}
+              disabled={loading || !selectedStudent}
+            >
+              Kirim Email PDF
+            </Button>
             <div className="text-sm text-gray-500">
-              {format(startOfWeek(currentWeek, { weekStartsOn: 1 }), "dd MMMM yyyy", { locale: id })} - 
-              {format(endOfWeek(currentWeek, { weekStartsOn: 1 }), "dd MMMM yyyy", { locale: id })}
+              {format(
+                startOfWeek(currentWeek, { weekStartsOn: 1 }),
+                "dd MMMM yyyy",
+                { locale: id }
+              )}{" "}
+              -
+              {format(
+                endOfWeek(currentWeek, { weekStartsOn: 1 }),
+                "dd MMMM yyyy",
+                { locale: id }
+              )}
             </div>
           </div>
           <div className="mt-4">
@@ -752,7 +926,9 @@ const MemorizationPage = () => {
                   {historyData.map((record) => (
                     <TableRow key={record.id}>
                       <TableCell>
-                        {format(new Date(record.created_at), "dd MMMM yyyy", { locale: id })}
+                        {format(new Date(record.created_at), "dd MMMM yyyy", {
+                          locale: id,
+                        })}
                       </TableCell>
                       <TableCell>{record.semester}</TableCell>
                       <TableCell>{record.academic_year}</TableCell>
