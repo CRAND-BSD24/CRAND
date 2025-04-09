@@ -3,28 +3,38 @@
 import { Student } from "@/types/student";
 import { useState, useEffect } from "react";
 import { updateStudentById } from "./action";
-import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/use-toast";
 
 interface FormData {
   name: string;
-  email: string;
-  address: string;
-  father_name: string;
-  mother_name: string;
-  gender: string;
   nisn: string;
+  email: string;
+  gender: string;
+  phone_number: string;
+  father_name: string;
   academic_year: string;
   program: string;
-  level: string;
   ekskul: string;
-  graduation_status: string;
-  phone_number: string;
-  payment_status: string;
+  class_id: string;
   VA_SPP: string;
   birth_place_date: string;
-  profile_picture: string;
-  class_id: string;
+  address: string;
+  mother_name: string;
+  academic_level: string;
+  level: string;
   halaqah_id: string;
+  graduation_status: string;
+  profile_picture: string;
+}
+
+interface Class {
+  _id: string;
+  class_name: string;
+}
+
+interface Halaqah {
+  _id: string;
+  name: string;
 }
 
 interface EditStudentModalProps {
@@ -34,341 +44,423 @@ interface EditStudentModalProps {
 }
 
 export default function EditStudentModal({ student, onClose, onUpdated }: EditStudentModalProps) {
-  const router = useRouter();
+  const { toast } = useToast();
+  const [classes, setClasses] = useState<Class[]>([]);
+  const [halaqahs, setHalaqahs] = useState<Halaqah[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // Initialize all states with proper default values
   const [formData, setFormData] = useState<FormData>({
-    name: "",
-    email: "",
-    address: "",
-    father_name: "",
-    mother_name: "",
-    gender: "",
-    nisn: "",
-    academic_year: "",
-    program: "",
-    level: "",
-    ekskul: "",
-    graduation_status: "",
-    phone_number: "",
-    payment_status: "",
-    VA_SPP: "",
-    birth_place_date: "",
-    profile_picture: "",
-    class_id: "",
-    halaqah_id: "",
+    name: student.name || "",
+    nisn: student.nisn || "",
+    email: student.email || "",
+    gender: student.gender || "",
+    phone_number: student.phone_number || "",
+    father_name: student.father_name || "",
+    academic_year: student.academic_year || "",
+    program: student.program || "",
+    ekskul: student.ekskul || "",
+    class_id: student.class_id || "",
+    VA_SPP: student.VA_SPP || "",
+    birth_place_date: student.birth_place_date || "",
+    address: student.address || "",
+    mother_name: student.mother_name || "",
+    academic_level: student.academic_level || "",
+    level: student.level || "",
+    halaqah_id: student.halaqah_id || "",
+    graduation_status: student.graduation_status || "",
+    profile_picture: student.profile_picture || "",
   });
 
-  // Set initial form data when student prop is available
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [classesRes, halaqahsRes] = await Promise.all([
+          fetch('/api/classes', { cache: 'no-store' }),
+          fetch('/api/halaqahs', { cache: 'no-store' })
+        ]);
+
+        if (!classesRes.ok || !halaqahsRes.ok) {
+          throw new Error('Failed to fetch class or halaqah data');
+        }
+
+        const classesData = await classesRes.json();
+        const halaqahsData = await halaqahsRes.json();
+
+        if (!Array.isArray(classesData) || !Array.isArray(halaqahsData)) {
+          throw new Error('Invalid data format');
+        }
+
+        setClasses(classesData);
+        setHalaqahs(halaqahsData.map((h: { _id: string; name: string }) => ({ _id: h._id, name: h.name })));
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : "Gagal memuat data dropdown.";
+        console.error('Error fetching dropdown data:', error);
+        toast({ variant: "destructive", title: "Error", description: msg });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [toast]);
+
   useEffect(() => {
     if (student) {
       setFormData({
         name: student.name || "",
-        email: student.email || "",
-        address: student.address || "",
-        father_name: student.father_name || "",
-        mother_name: student.mother_name || "",
-        gender: student.gender || "",
         nisn: student.nisn || "",
+        email: student.email || "",
+        gender: student.gender || "",
+        phone_number: student.phone_number || "",
+        father_name: student.father_name || "",
         academic_year: student.academic_year || "",
         program: student.program || "",
-        level: student.level || "",
         ekskul: student.ekskul || "",
-        graduation_status: student.graduation_status || "",
-        phone_number: student.phone_number || "",
-        payment_status: student.payment_status || "",
+        class_id: student.class_id || "",
         VA_SPP: student.VA_SPP || "",
         birth_place_date: student.birth_place_date || "",
-        profile_picture: student.profile_picture || "",
-        class_id: student.class_id || "",
+        address: student.address || "",
+        mother_name: student.mother_name || "",
+        academic_level: student.academic_level || "",
+        level: student.level || "",
         halaqah_id: student.halaqah_id || "",
+        graduation_status: student.graduation_status || "",
+        profile_picture: student.profile_picture || "",
       });
     }
   }, [student]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
     const updatedData = {
-      name: formData.name,
+      ...formData,
       class_id: formData.class_id || null,
-      academic_level: student.academic_level,
-      gender: formData.gender,
-      father_name: formData.father_name,
-      mother_name: formData.mother_name,
-      academic_year: formData.academic_year,
-      birth_place_date: formData.birth_place_date,
-      address: formData.address,
-      graduation_status: formData.graduation_status,
-      payment_status: formData.payment_status,
-      VA_SPP: formData.VA_SPP,
-      ekskul: formData.ekskul,
-      level: formData.level,
-      nisn: formData.nisn,
-      program: formData.program,
       halaqah_id: formData.halaqah_id || null,
-      profile_picture: formData.profile_picture,
-      email: formData.email,
-      phone_number: formData.phone_number,
+      payment_status: student.payment_status,
     };
 
     try {
       const success = await updateStudentById(student._id, updatedData);
       if (success) {
+        toast({ title: "Success", description: "Data santri berhasil diperbarui" });
         onUpdated();
         onClose();
       } else {
-        alert("Gagal mengupdate data");
+        toast({ variant: "destructive", title: "Error", description: "Gagal memperbarui data santri" });
       }
     } catch (error) {
+      const msg = error instanceof Error ? error.message : "Terjadi kesalahan";
       console.error("Error updating student:", error);
-      alert("Terjadi kesalahan saat mengupdate data");
+      toast({ variant: "destructive", title: "Error", description: msg });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white p-6 rounded-lg max-h-[90vh] overflow-y-auto w-full max-w-2xl">
-        <h2 className="text-xl font-bold mb-4">Edit Data Santri</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium">Nama</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium">No. HP</label>
-              <input
-                type="tel"
-                name="phone_number"
-                value={formData.phone_number}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium">Alamat</label>
-              <input
-                type="text"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium">Tempat, Tanggal Lahir</label>
-              <input
-                type="text"
-                name="birth_place_date"
-                value={formData.birth_place_date}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium">Nama Ayah</label>
-              <input
-                type="text"
-                name="father_name"
-                value={formData.father_name}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium">Nama Ibu</label>
-              <input
-                type="text"
-                name="mother_name"
-                value={formData.mother_name}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium">Jenis Kelamin</label>
-              <select
-                name="gender"
-                value={formData.gender}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-                required
-              >
-                <option value="">Pilih</option>
-                <option value="Laki-laki">Laki-laki</option>
-                <option value="Perempuan">Perempuan</option>
-              </select>
-            </div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <h2 className="text-2xl font-bold text-[#006A71] mb-4">Edit Data Santri</h2>
+
+        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="block text-sm font-medium">Nama Lengkap</label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            />
           </div>
 
-          <hr className="my-4" />
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium">NISN</label>
-              <input
-                type="text"
-                name="nisn"
-                value={formData.nisn}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium">Tahun Akademik</label>
-              <input
-                type="text"
-                name="academic_year"
-                value={formData.academic_year}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium">Program</label>
-              <input
-                type="text"
-                name="program"
-                value={formData.program}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium">Tingkat/Kelas</label>
-              <input
-                type="text"
-                name="level"
-                value={formData.level}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium">Ekskul</label>
-              <input
-                type="text"
-                name="ekskul"
-                value={formData.ekskul}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium">Status Kelulusan</label>
-              <select
-                name="graduation_status"
-                value={formData.graduation_status}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-                required
-              >
-                <option value="Lulus">Lulus</option>
-                <option value="Belum Lulus">Belum Lulus</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium">VA SPP</label>
-              <input
-                type="text"
-                name="VA_SPP"
-                value={formData.VA_SPP}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium">Status Pembayaran</label>
-              <select
-                name="payment_status"
-                value={formData.payment_status}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-                required
-              >
-                <option value="Aktif">Aktif</option>
-                <option value="Belum Aktif">Belum Aktif</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium">ID Kelas</label>
-              <input
-                type="text"
-                name="class_id"
-                value={formData.class_id}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium">ID Halaqah</label>
-              <input
-                type="text"
-                name="halaqah_id"
-                value={formData.halaqah_id}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium">Foto Profil</label>
-              <input
-                type="text"
-                name="profile_picture"
-                value={formData.profile_picture}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-              />
-            </div>
+          <div className="space-y-2">
+            <label className="block text-sm font-medium">NISN</label>
+            <input
+              type="text"
+              name="nisn"
+              value={formData.nisn}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            />
           </div>
 
-          <div className="flex justify-end mt-6">
+          <div className="space-y-2">
+            <label className="block text-sm font-medium">Jenis Kelamin</label>
+            <select
+              name="gender"
+              value={formData.gender}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            >
+              <option value="" disabled>Pilih Jenis Kelamin</option>
+              <option value="Laki-laki">Laki-laki</option>
+              <option value="Perempuan">Perempuan</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium">Tempat, Tanggal Lahir</label>
+            <input
+              type="text"
+              name="birth_place_date"
+              value={formData.birth_place_date}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium">Email</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium">No HP</label>
+            <input
+              type="tel"
+              name="phone_number"
+              value={formData.phone_number || ''}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+
+          <div className="space-y-2 col-span-2">
+            <label className="block text-sm font-medium">Alamat</label>
+            <textarea
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              rows={3}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium">Nama Ayah</label>
+            <input
+              type="text"
+              name="father_name"
+              value={formData.father_name}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium">Nama Ibu</label>
+            <input
+              type="text"
+              name="mother_name"
+              value={formData.mother_name}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium">Tahun Akademik</label>
+            <input
+              type="text"
+              name="academic_year"
+              value={formData.academic_year}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium">Tingkat Akademik</label>
+            <select
+              name="academic_level"
+              value={formData.academic_level}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            >
+              <option value="" disabled>Pilih Tingkat Akademik</option>
+              <option value="Ula">Ula</option>
+              <option value="Wustho">Wustho</option>
+              <option value="Ulya">Ulya</option>
+              <option value="SMP Formal">SMP Formal</option>
+              <option value="Aliyah Agama">Aliyah Agama</option>
+              <option value="Aliyah IPA">Aliyah IPA</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium">Program</label>
+            <select
+              name="program"
+              value={formData.program}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            >
+              <option value="" disabled>Pilih Program</option>
+              <option value="Reguler">Reguler</option>
+              <option value="Shorhul Qurro">Shorhul Qurro</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium">Kelas</label>
+            <select
+              name="class_id"
+              value={formData.class_id || ''}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            >
+              <option value="" disabled>Pilih Kelas</option>
+              {classes.length > 0 ? (
+                classes.map((kelas) => (
+                  <option key={kelas._id} value={kelas._id}>
+                    {kelas.class_name}
+                  </option>
+                ))
+              ) : (
+                <option disabled>{loading ? 'Loading...' : 'Tidak ada kelas'}</option>
+              )}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium">Halaqah</label>
+            <select
+              name="halaqah_id"
+              value={formData.halaqah_id || ''}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            >
+              <option value="" disabled>Pilih Halaqah</option>
+              {halaqahs.length > 0 ? (
+                halaqahs.map((halaqah) => (
+                  <option key={halaqah._id} value={halaqah._id}>
+                    {halaqah.name}
+                  </option>
+                ))
+              ) : (
+                <option disabled>{loading ? 'Loading...' : 'Tidak ada halaqah'}</option>
+              )}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium">Level</label>
+            <select
+              name="level"
+              value={formData.level}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            >
+              <option value="" disabled>Pilih Level</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium">VA SPP</label>
+            <input
+              type="text"
+              name="VA_SPP"
+              value={formData.VA_SPP || ''}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium">Ekskul</label>
+            <select
+              name="ekskul"
+              value={formData.ekskul}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            >
+              <option value="" disabled>Pilih Ekskul</option>
+              <option value="Memanah">Memanah</option>
+              <option value="Berkuda">Berkuda</option>
+              <option value="Renang">Renang</option>
+              <option value="Media">Media</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium">Status Santri</label>
+            <select
+              name="graduation_status"
+              value={formData.graduation_status}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            >
+              <option value="" disabled>Pilih Status</option>
+              <option value="Aktif">Aktif</option>
+              <option value="Tidak Aktif">Tidak Aktif</option>
+              <option value="Lulus">Lulus</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium">Foto Profil (URL)</label>
+            <input
+              type="text"
+              name="profile_picture"
+              value={formData.profile_picture}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              placeholder="https://example.com/image.jpg"
+            />
+          </div>
+
+          <div className="col-span-2 flex justify-end space-x-4 mt-4">
             <button
               type="button"
               onClick={onClose}
-              className="mr-4 px-4 py-2 border rounded text-gray-700"
+              disabled={loading}
+              className="px-4 py-2 border rounded hover:bg-gray-100 disabled:opacity-50"
             >
               Batal
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              disabled={loading}
+              className="px-4 py-2 bg-[#006A71] text-white rounded hover:bg-[#04858c] disabled:opacity-50"
             >
-              Simpan
+              {loading ? "Menyimpan..." : "Simpan Perubahan"}
             </button>
           </div>
         </form>

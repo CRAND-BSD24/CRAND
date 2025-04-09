@@ -27,6 +27,9 @@ interface Student {
   profile_picture: string;
   created_at: string;
   updated_at: string;
+  phone_number: string;
+  class_name: string;
+  halaqah_id?: string | null;
 }
 
 
@@ -83,17 +86,18 @@ export async function getStudentById(id: string): Promise<Student | null> {
           program: 1,
           created_at: 1,
           updated_at: 1,
-          phone_number: 1,
           user_id: 1,
           class_id: 1,
+          halaqah_id: 1,
           email: "$user.email",
+          phone_number: "$user.phone_number",
           profile_picture: {
             $ifNull: [
               "$user.profile_picture",
               "https://static.vecteezy.com/system/resources/thumbnails/021/548/095/small_2x/default-profile-picture-avatar-user-avatar-icon-person-icon-head-icon-profile-picture-icons-default-anonymous-user-male-and-female-businessman-photo-placeholder-social-network-avatar-portrait-free-vector.jpg",
             ],
           },
-          class: "$class.class_name",
+          class_name: "$class.class_name",
           halaqah: "$halaqah.name",
           payment_status: {
             $cond: {
@@ -112,15 +116,24 @@ export async function getStudentById(id: string): Promise<Student | null> {
 
     const s = student[0];
 
+    // Get class data separately to ensure we have the correct class information
+    const classData = await db.collection("classes").findOne(
+      { _id: new ObjectId(s.class_id) },
+      { projection: { class_name: 1 } }
+    );
+
     return {
       ...s,
       _id: s._id.toString(),
       user_id: s.user_id?.toString() || null,
       class_id: s.class_id?.toString() || null,
+      halaqah_id: s.halaqah_id?.toString() || null,
       created_at: s.created_at?.toISOString(),
       updated_at: s.updated_at?.toISOString(),
       email: s.email || "-",
+      phone_number: s.phone_number || "-",
       profile_picture: s.profile_picture,
+      class_name: classData?.class_name || s.class_name || "-", // Use class_name from separate query or fallback to lookup result
       halaqah: s.halaqah || "-",
       name: s.name,
       nisn: s.nisn,
@@ -144,6 +157,7 @@ export async function getStudentById(id: string): Promise<Student | null> {
   }
 }
 
+/* // Commenting out unused interface
 interface UserUpdate {
   $set: {
     phone_number?: string;
@@ -151,6 +165,7 @@ interface UserUpdate {
     updated_at: Date;
   };
 }
+*/
 
 interface StudentUpdate {
   name: string;
@@ -175,6 +190,35 @@ interface StudentUpdate {
   profile_picture: string;
 }
 
+// Define type for the student $set operation
+interface StudentSetUpdate {
+  name: string;
+  academic_level: string;
+  gender: string;
+  father_name: string;
+  mother_name: string;
+  academic_year: string;
+  birth_place_date: string;
+  address: string;
+  graduation_status: string;
+  VA_SPP: string;
+  ekskul: string;
+  level: string;
+  nisn: string;
+  program: string;
+  profile_picture: string;
+  updated_at: Date;
+  class_id?: ObjectId | null;
+  halaqah_id?: ObjectId | null;
+}
+
+// Define type for the user $set operation
+interface UserSetUpdate {
+  updated_at: Date;
+  phone_number?: string;
+  email?: string;
+}
+
 export const updateStudentById = async (id: string, updatedData: StudentUpdate) => {
   const client = await getMongoClientInstance();
   const db = client.db("pesantren_db");
@@ -186,9 +230,19 @@ export const updateStudentById = async (id: string, updatedData: StudentUpdate) 
     if (!ObjectId.isValid(id)) {
       throw new Error("Invalid student ID format");
     }
+    const studentObjectId = new ObjectId(id);
 
-    // Prepare the update object
-    const updateObj: any = {
+    // Fetch the student document first to get the user_id
+    const studentDoc = await db.collection("students").findOne(
+      { _id: studentObjectId },
+      { projection: { user_id: 1 } }
+    );
+
+    // We might need user_id later, even if email/phone aren't changing now
+    const userId = studentDoc?.user_id; // userId will be ObjectId | undefined
+
+    // Prepare the student update object
+    const updateObj: { $set: Partial<StudentSetUpdate> } = {
       $set: {
         name: updatedData.name,
         academic_level: updatedData.academic_level,
@@ -199,14 +253,12 @@ export const updateStudentById = async (id: string, updatedData: StudentUpdate) 
         birth_place_date: updatedData.birth_place_date,
         address: updatedData.address,
         graduation_status: updatedData.graduation_status,
-        payment_status: updatedData.payment_status,
         VA_SPP: updatedData.VA_SPP,
         ekskul: updatedData.ekskul,
         level: updatedData.level,
         nisn: updatedData.nisn,
         program: updatedData.program,
         profile_picture: updatedData.profile_picture,
-        phone_number: updatedData.phone_number,
         updated_at: new Date()
       }
     };
@@ -227,17 +279,19 @@ export const updateStudentById = async (id: string, updatedData: StudentUpdate) 
 
     // Update student data
     const studentResult = await db.collection("students").updateOne(
-      { _id: new ObjectId(id) },
+      { _id: studentObjectId },
       updateObj
     );
 
     console.log("Student update result:", studentResult);
 
-    // Update user data (phone number and email)
-    if (updatedData.phone_number || updatedData.email) {
-      console.log("Updating user data:", { phone: updatedData.phone_number, email: updatedData.email });
+    let userUpdateSucceeded = false; // Flag to track user update success
+
+    // Update user data (phone number and email) only if userId exists
+    if (userId && (updatedData.phone_number || updatedData.email)) {
+      console.log("Updating user data for user ID:", userId, { phone: updatedData.phone_number, email: updatedData.email });
       
-      const userUpdate: any = {
+      const userUpdate: { $set: UserSetUpdate } = {
         $set: {
           updated_at: new Date()
         }
@@ -251,14 +305,18 @@ export const updateStudentById = async (id: string, updatedData: StudentUpdate) 
       }
 
       const userResult = await db.collection("users").updateOne(
-        { student_id: new ObjectId(id) },
-        userUpdate,
-        { upsert: true }
+        { _id: userId }, // Use the correct user ID (_id)
+        userUpdate
       );
       console.log("User update result:", userResult);
+      userUpdateSucceeded = userResult.modifiedCount > 0; // Set the flag based on result
+    } else if (updatedData.phone_number || updatedData.email) {
+      // Log a warning if we intended to update user but couldn't find user_id
+      console.warn(`Student ${id} does not have a linked user_id or user_id is null. Cannot update user email/phone.`);
     }
 
-    return studentResult.modifiedCount > 0;
+    // Return true if either the student OR the user update succeeded
+    return studentResult.modifiedCount > 0 || userUpdateSucceeded;
   } catch (error) {
     console.error("Error updating student:", error);
     return false;

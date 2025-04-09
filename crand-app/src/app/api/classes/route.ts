@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import { getMongoClientInstance } from "@/db/config/connection";
 
 export async function GET() {
-  const client = await getMongoClientInstance();
-  const db = client.db("pesantren_db");
-
   try {
+    const client = await getMongoClientInstance();
+    const db = client.db("pesantren_db");
     const classes = await db.collection("classes").find({}).toArray();
+    
     return NextResponse.json(classes);
   } catch (error) {
     console.error("Error fetching classes:", error);

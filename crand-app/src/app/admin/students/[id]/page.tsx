@@ -6,6 +6,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import EditStudentModal from "./EditStudentModal";
+import { Student } from "@/types/student";
 
 interface Props {
   params: Promise<{
@@ -15,14 +16,17 @@ interface Props {
 
 export default function StudentDetailPage({ params }: Props) {
   const { id } = use(params);
-  const [student, setStudent] = useState<any | null>(null);
+  const [student, setStudent] = useState<Student | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
     const fetchStudent = async () => {
       const data = await getStudentById(id);
       if (!data) return notFound();
-      setStudent(data);
+      setStudent({
+        ...data,
+        halaqah_id: data.halaqah_id || null // Ensure halaqah_id is string | null
+      });
     };
     fetchStudent();
   }, [id]);
@@ -80,13 +84,12 @@ export default function StudentDetailPage({ params }: Props) {
           <Info label="Tahun Akademik" value={student.academic_year} />
           <Info label="Tingkat Akademik" value={student.academic_level} />
           <Info label="Program" value={student.program} />
-          <Info label="Level" value={student.level} />
-          <Info label="Ekskul" value={student.ekskul} />
+          <Info label="Kelas" value={student.class_name} />
           <Info label="Halaqah" value={student.halaqah} />
-          <Info label="Kelas" value={student.class_id} />
-          <Info label="Status Pembayaran" value={student.payment_status} />
+          <Info label="Level" value={student.level} />
           <Info label="VA SPP" value={student.VA_SPP} />
-          <Info label="Status Kelulusan" value={student.graduation_status} />
+          <Info label="Ekskul" value={student.ekskul} />
+          <Info label="Status" value={student.graduation_status} />
         </div>
 
         {/* Tombol Kembali */}
@@ -106,8 +109,9 @@ export default function StudentDetailPage({ params }: Props) {
           student={student}
           onClose={() => setShowEditModal(false)}
           onUpdated={async () => {
-            const updated = await getStudentById(student.id);
-            setStudent(updated);
+            if (!student) return;
+            const updated = await getStudentById(student._id);
+            setStudent(updated as Student);
             setShowEditModal(false);
           }}
         />
