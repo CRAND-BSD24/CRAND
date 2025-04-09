@@ -30,6 +30,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks } from "date-fns";
 import { id } from "date-fns/locale";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface QuranMemorization {
   _id: string;
@@ -561,6 +563,13 @@ const MemorizationPage = () => {
         const result = await response.json();
         if (result.message) {
           alert(result.message);
+          toast({
+            title: "Sukses!",
+            description: result.message,
+            status: "success",
+            position: "top-right",
+            duration: 3000,
+          });
         } else {
           throw new Error("Gagal mengirim email");
         }
@@ -855,6 +864,7 @@ const MemorizationPage = () => {
           <DialogHeader>
             <DialogTitle>Riwayat Hafalan {selectedStudent?.name}</DialogTitle>
           </DialogHeader>
+      <ToastContainer />
           <div className="flex justify-between items-center mb-4">
             <div className="flex gap-2">
               <Button
