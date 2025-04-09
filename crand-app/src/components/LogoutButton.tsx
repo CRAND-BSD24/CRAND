@@ -7,9 +7,10 @@ import { LogOut } from 'lucide-react';
 
 interface LogoutButtonProps {
   className?: string;
+  iconClassName?: string;
 }
 
-export default function LogoutButton({ className = '' }: LogoutButtonProps) {
+export default function LogoutButton({ className = '', iconClassName = '' }: LogoutButtonProps) {
   const router = useRouter();
   
   const handleLogout = async () => {
@@ -33,7 +34,7 @@ export default function LogoutButton({ className = '' }: LogoutButtonProps) {
       onClick={handleLogout}
       className={`flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl font-semibold shadow-md transition-all duration-300 ${className}`}
     >
-      <LogOut size={18} />
+      <LogOut size={18} className={iconClassName} />
       Logout
     </button>
   );

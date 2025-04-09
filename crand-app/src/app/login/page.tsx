@@ -45,55 +45,67 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6 text-center">Login to CRAND</h1>
-        
-        {error && (
-          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
-            {error}
-          </div>
-        )}
-        
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              required
-            />
-          </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#e0e0e0] to-[#e6e6e6] p-6">
+      <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/20 shadow-lg w-full max-w-md overflow-hidden">
+        <div className="p-8">
+          <h1 className="text-3xl font-bold text-black mb-2">Login to CRAND</h1>
+          <p className="text-black mb-8">Masuk ke sistem manajemen pesantren.</p>
           
-          <div className="mb-6">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              required
-            />
-          </div>
+          {error && (
+            <div className="mb-6 p-4 bg-black/5 border border-black/10 rounded-xl text-black">
+              {error}
+            </div>
+          )}
           
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full bg-blue-600 text-white py-2 rounded-md font-medium ${
-              loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-blue-700'
-            }`}
-          >
-            {loading ? 'Logging in...' : 'Log In'}
-          </button>
-        </form>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-black mb-2">
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3 bg-white/50 border border-white/20 rounded-xl text-black placeholder:text-black/60 focus:outline-none focus:ring-2 focus:ring-black/5 transition-all"
+                required
+                placeholder="Masukkan email Anda"
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-black mb-2">
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 bg-white/50 border border-white/20 rounded-xl text-black placeholder:text-black/60 focus:outline-none focus:ring-2 focus:ring-black/5 transition-all"
+                required
+                placeholder="Masukkan password Anda"
+              />
+            </div>
+            
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full px-4 py-3 bg-black/80 hover:bg-black text-white rounded-xl font-medium transition-all ${
+                loading ? 'opacity-70 cursor-not-allowed' : ''
+              }`}
+            >
+              {loading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                  <span>Logging in...</span>
+                </div>
+              ) : (
+                'Log In'
+              )}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

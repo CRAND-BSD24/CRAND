@@ -14,12 +14,24 @@ export const Card = ({
   );
 };
 
-export const CardHeader = ({ children }: { children: React.ReactNode }) => {
-  return <div className="p-4 border-b">{children}</div>;
+export const CardHeader = ({ 
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => {
+  return <div className={`p-4 border-b ${className || ''}`}>{children}</div>;
 };
 
-export const CardTitle = ({ children }: { children: React.ReactNode }) => {
-  return <h2 className="text-lg font-bold">{children}</h2>;
+export const CardTitle = ({ 
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => {
+  return <h2 className={`text-lg font-bold ${className || ''}`}>{children}</h2>;
 };
 
 export const CardContent = ({
