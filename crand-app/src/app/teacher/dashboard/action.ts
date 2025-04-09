@@ -8,7 +8,6 @@ import { getStudentsByTeacherId } from "../attendance/action";
 import {
   getStudentMemorization,
   getMemorizationHistory,
-  type MemorizationStudent,
   type MemorizationHistory,
 } from "../memorization/action";
 import { startOfWeek, endOfWeek, subWeeks } from "date-fns";
@@ -46,27 +45,6 @@ function countPages(pages: any): number {
 }
 
 // Fungsi untuk mengelompokkan data per siswa
-function groupByStudent(data: any[]) {
-  return data.reduce((acc, curr) => {
-    const key = curr.student_id || curr.id;
-    if (!acc[key]) {
-      acc[key] = {
-        name: curr.name,
-        class_name: curr.class_name,
-        juz_name: curr.juz_name,
-        totalPages: 0,
-        submissions: [],
-      };
-    }
-    const pageCount = countPages(curr.pages);
-    acc[key].totalPages += pageCount;
-    acc[key].submissions.push({
-      pages: curr.pages,
-      pageCount,
-    });
-    return acc;
-  }, {});
-}
 
 export interface DashboardData {
   averageMemorization: number;
