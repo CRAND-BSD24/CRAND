@@ -70,55 +70,58 @@ export default function EditStudentModal({ student }: { student: Student }) {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        className="bg-emerald-800 hover:bg-emerald-700 text-white font-medium px-4 py-2 rounded-lg shadow-md transition-all duration-200 flex items-center gap-2"
       >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+        </svg>
         Edit
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn">
-          <div className="bg-gray-100 p-6 rounded-lg w-full max-w-lg space-y-4 shadow-xl shadow-black">
-            <h2 className="text-xl font-semibold mb-4">Edit Data Santri</h2>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn">
+          <div className="bg-white p-6 rounded-xl w-full max-w-lg space-y-4 shadow-xl">
+            <h2 className="text-xl font-semibold mb-4 text-emerald-800">Edit Data Calon Santri</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <input name="name" value={form.name} onChange={handleChange} placeholder="Nama" className="w-full border p-2 rounded" />
-              <input name="email" value={form.email} onChange={handleChange} placeholder="Email" className="w-full border p-2 rounded" />
-              <input name="phone_number" value={form.phone_number} onChange={handleChange} placeholder="Nomor HP" className="w-full border p-2 rounded" />
-              <input name="father_name" value={form.father_name} onChange={handleChange} placeholder="Nama Bapak" className="w-full border p-2 rounded" />
-              <input name="mother_name" value={form.mother_name} onChange={handleChange} placeholder="Nama Ibu" className="w-full border p-2 rounded" />
-              <input name="address" value={form.address} onChange={handleChange} placeholder="Alamat" className="w-full border p-2 rounded" />
+              <input name="name" value={form.name} onChange={handleChange} placeholder="Nama" className="w-full border border-emerald-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-800 transition" />
+              <input name="email" value={form.email} onChange={handleChange} placeholder="Email" className="w-full border border-emerald-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-800 transition" />
+              <input name="phone_number" value={form.phone_number} onChange={handleChange} placeholder="Nomor HP" className="w-full border border-emerald-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-800 transition" />
+              <input name="father_name" value={form.father_name} onChange={handleChange} placeholder="Nama Bapak" className="w-full border border-emerald-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-800 transition" />
+              <input name="mother_name" value={form.mother_name} onChange={handleChange} placeholder="Nama Ibu" className="w-full border border-emerald-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-800 transition" />
+              <input name="address" value={form.address} onChange={handleChange} placeholder="Alamat" className="w-full border border-emerald-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-800 transition" />
 
-              <select name="program" value={form.program} onChange={handleChange} className="w-full border p-2 rounded">
+              <select name="program" value={form.program} onChange={handleChange} className="w-full border border-emerald-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-800 transition bg-white">
                 <option value="">Pilih Program</option>
                 {programOptions.map((option) => (
                   <option key={option} value={option}>{option}</option>
                 ))}
               </select>
 
-              <select name="gender" value={form.gender} onChange={handleChange} className="w-full border p-2 rounded">
+              <select name="gender" value={form.gender} onChange={handleChange} className="w-full border border-emerald-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-800 transition bg-white">
                 <option value="">Pilih Jenis Kelamin</option>
                 <option value="Laki-laki">Laki-laki</option>
                 <option value="Perempuan">Perempuan</option>
               </select>
 
-              <select name="academic_level" value={form.academic_level} onChange={handleChange} className="w-full border p-2 rounded">
+              <select name="academic_level" value={form.academic_level} onChange={handleChange} className="w-full border border-emerald-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-800 transition bg-white">
                 <option value="">Pilih Tingkat Akademik</option>
                 {academicLevelOptions.map((option) => (
                   <option key={option} value={option}>{option}</option>
                 ))}
               </select>
 
-              <input name="academic_year" value={form.academic_year} onChange={handleChange} placeholder="Tahun Ajaran" className="w-full border p-2 rounded" />
-              <input name="birth_place_date" value={form.birth_place_date} onChange={handleChange} placeholder="Tempat, Tanggal Lahir (contoh: Jakarta, 2005-08-12)" className="w-full border p-2 rounded" />
+              <input name="academic_year" value={form.academic_year} onChange={handleChange} placeholder="Tahun Ajaran" className="w-full border border-emerald-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-800 transition" />
+              <input name="birth_place_date" value={form.birth_place_date} onChange={handleChange} placeholder="Tempat, Tanggal Lahir (contoh: Jakarta, 2005-08-12)" className="w-full border border-emerald-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-800 transition" />
               
-              <select name="payment_status" value={form.payment_status} onChange={handleChange} className="w-full border p-2 rounded">
+              <select name="payment_status" value={form.payment_status} onChange={handleChange} className="w-full border border-emerald-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-800 transition bg-white">
                 <option value="">Status Pembayaran</option>
                 <option value="Lunas">Lunas</option>
                 <option value="Belum Lunas">Belum Lunas</option>
               </select>
 
-              <div className="flex justify-end space-x-2">
-                <button type="button" onClick={() => setIsOpen(false)} className="bg-gray-300 px-4 py-2 rounded">Batal</button>
-                <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Simpan</button>
+              <div className="flex justify-end space-x-2 pt-2">
+                <button type="button" onClick={() => setIsOpen(false)} className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition">Batal</button>
+                <button type="submit" className="bg-emerald-800 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg font-medium transition-transform duration-200 hover:scale-105">Simpan</button>
               </div>
             </form>
           </div>

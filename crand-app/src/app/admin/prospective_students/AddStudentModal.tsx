@@ -66,18 +66,21 @@ export default function AddProspectiveStudentModal({
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="bg-[#006A71] text-white px-5 py-2 rounded-lg font-semibold shadow-md hover:bg-[#04858c] transition-transform duration-200 hover:scale-105"
+        className="bg-emerald-800 text-white px-5 py-2 rounded-lg font-semibold shadow-md hover:bg-emerald-700 transition-transform duration-200 hover:scale-105 flex items-center gap-2"
       >
-        + Tambah Calon Santri
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+        </svg>
+        Tambah Calon Santri
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn">
           <div
-            className="bg-gray-100 p-6 rounded-xl w-full max-w-lg space-y-4 shadow-xl shadow-black"
+            className="bg-white p-6 rounded-xl w-full max-w-lg space-y-4 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-2xl font-bold text-[#006A71] mb-2 text-center">
+            <h2 className="text-2xl font-bold text-emerald-800 mb-2 text-center">
               Tambah Data Calon Santri
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -172,7 +175,7 @@ export default function AddProspectiveStudentModal({
                 </button>
                 <button
                   type="submit"
-                  className="bg-[#48A6A7] text-white px-5 py-2 rounded-lg font-medium hover:bg-[#359d9f] transition-transform duration-200 hover:scale-105"
+                  className="bg-emerald-800 text-white px-5 py-2 rounded-lg font-medium hover:bg-emerald-700 transition-transform duration-200 hover:scale-105"
                 >
                   Simpan
                 </button>
@@ -209,7 +212,7 @@ const Input = ({
     placeholder={placeholder}
     required={required}
     readOnly={readOnly}
-    className="w-full border border-[#9ACBD0] rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#48A6A7] transition"
+    className="w-full border border-emerald-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-800 transition"
   />
 );
 
@@ -225,7 +228,7 @@ const Select = ({ name, value, onChange, children }: SelectProps) => (
     name={name}
     value={value}
     onChange={onChange}
-    className="w-full border border-[#9ACBD0] rounded-md px-4 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#48A6A7] transition"
+    className="w-full border border-emerald-300 rounded-md px-4 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-800 transition"
   >
     {children}
   </select>

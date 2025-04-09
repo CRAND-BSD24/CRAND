@@ -35,6 +35,8 @@ const StudentsPage = () => {
   const [sortField, setSortField] = useState<SortField>("nisn");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
   const [isPromoteModalOpen, setIsPromoteModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage] = useState<number>(10);
 
   const fetchStudents = useCallback(
     async (field: SortField = sortField, order: SortOrder = sortOrder) => {
@@ -173,7 +175,7 @@ const StudentsPage = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-separate border-spacing-y-2 mb-6">
             <thead>
-              <tr className="bg-[#48A6A7] text-white">
+              <tr className="bg-emerald-800 text-white">
                 <th
                   className="px-4 py-3 cursor-pointer"
                   onClick={() => handleSort("nisn")}

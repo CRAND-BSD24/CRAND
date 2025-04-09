@@ -194,7 +194,7 @@ export default function AddStudentModal({
       <button
         onClick={() => setIsOpen(true)}
 
-        className="bg-[#006A71] text-white px-6 py-2.5 rounded-lg font-semibold shadow-md hover:bg-[#04858c] transition-all duration-300 flex items-center gap-2"
+        className="bg-emerald-800 text-white px-6 py-2.5 rounded-lg font-semibold shadow-md hover:bg-emerald-700 transition-all duration-300 flex items-center gap-2"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -215,7 +215,7 @@ export default function AddStudentModal({
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-[#006A71]">
+              <h2 className="text-2xl font-bold text-emerald-800">
                 Tambah Data Santri
               </h2>
               <button
@@ -249,12 +249,12 @@ export default function AddStudentModal({
                   name="name"
                   value={form.name}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                   required
                 />
-                
+
               </div>
-              <h2 className="text-xl font-bold text-emerald-900 mb-4">Tambah Data Santri</h2>
+              <h2 className="text-xl font-bold text-emerald-800 mb-4">Tambah Data Santri</h2>
 
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
@@ -265,7 +265,7 @@ export default function AddStudentModal({
                   name="nisn"
                   value={form.nisn}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                   required
                 />
               </div>
@@ -278,7 +278,7 @@ export default function AddStudentModal({
                   name="gender"
                   value={form.gender}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                   required
                 >
                   <option value="" disabled>
@@ -298,7 +298,7 @@ export default function AddStudentModal({
                   name="birth_place_date"
                   value={form.birth_place_date}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                   required
                 />
               </div>
@@ -312,7 +312,7 @@ export default function AddStudentModal({
                   name="email"
                   value={form.email}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                   required
                 />
               </div>
@@ -326,7 +326,7 @@ export default function AddStudentModal({
                   name="phone_number"
                   value={form.phone_number}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                   required
                 />
               </div>
@@ -339,7 +339,7 @@ export default function AddStudentModal({
                   name="address"
                   value={form.address}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                   rows={3}
                   required
                 />
@@ -354,7 +354,7 @@ export default function AddStudentModal({
                   name="father_name"
                   value={form.father_name}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                   required
                 />
               </div>
@@ -368,7 +368,7 @@ export default function AddStudentModal({
                   name="mother_name"
                   value={form.mother_name}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                   required
                 />
               </div>
@@ -382,7 +382,7 @@ export default function AddStudentModal({
                   name="academic_year"
                   value={form.academic_year}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                   required
                 />
               </div>
@@ -395,7 +395,7 @@ export default function AddStudentModal({
                   name="academic_level"
                   value={form.academic_level}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                   required
                 >
                   <option value="" disabled>
@@ -418,7 +418,7 @@ export default function AddStudentModal({
                   name="program"
                   value={form.program}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                   required
                 >
                   <option value="" disabled>
@@ -437,7 +437,7 @@ export default function AddStudentModal({
                   name="class_id"
                   value={form.class_id}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                   required
                 >
                   <option value="" disabled>
@@ -465,7 +465,7 @@ export default function AddStudentModal({
                   name="halaqah_id"
                   value={form.halaqah_id}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                   required
                 >
                   <option value="" disabled>
@@ -493,7 +493,7 @@ export default function AddStudentModal({
                   name="level"
                   value={form.level}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                   required
                 >
                   <option value="" disabled>
@@ -514,7 +514,7 @@ export default function AddStudentModal({
                   name="VA_SPP"
                   value={form.VA_SPP}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                   required
                 />
               </div>
@@ -527,7 +527,7 @@ export default function AddStudentModal({
                   name="ekskul"
                   value={form.ekskul}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                   required
                 >
                   <option value="" disabled>
@@ -548,7 +548,7 @@ export default function AddStudentModal({
                   name="graduation_status"
                   value={form.graduation_status}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                   required
                 >
                   <option value="" disabled>
@@ -571,7 +571,7 @@ export default function AddStudentModal({
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-6 py-2.5 bg-[#006A71] text-white rounded-lg hover:bg-[#04858c] transition-colors disabled:opacity-50 flex items-center gap-2"
+                  className="px-6 py-2.5 bg-emerald-800 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center gap-2"
                 >
                   {loading ? (
                     <>
