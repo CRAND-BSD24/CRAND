@@ -4,6 +4,9 @@ import React, { useEffect, useState, useCallback } from "react";
 import { getAllStudents, promoteStudentsByClassId } from "./action";
 import Link from "next/link";
 import AddStudentModal from "./AddStudentModal";
+import PromoteClassModal from "./PromoteClassModal";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface Student {
   _id: string;
@@ -32,6 +35,7 @@ const StudentsPage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortField, setSortField] = useState<SortField>('nisn');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const [isPromoteModalOpen, setIsPromoteModalOpen] = useState(false);
 
   const fetchStudents = useCallback(async (field: SortField = sortField, order: SortOrder = sortOrder) => {
     try {
@@ -40,6 +44,10 @@ const StudentsPage = () => {
       setStudents(data);
     } catch (error) {
       console.error("Gagal mengambil data santri:", error);
+      toast.error("Gagal mengambil data santri. Silakan coba lagi.", {
+        position: "top-right",
+        autoClose: 3000,
+      });
     }
   }, [sortField, sortOrder]);
 
@@ -50,6 +58,10 @@ const StudentsPage = () => {
       console.log("Classes fetched:", data);
     } catch (error) {
       console.error("Error fetching classes:", error);
+      toast.error("Gagal memuat data kelas. Silakan coba lagi.", {
+        position: "top-right",
+        autoClose: 3000,
+      });
     }
   };
 
@@ -62,19 +74,32 @@ const StudentsPage = () => {
   }, []);
 
   const handlePromoteByClass = async () => {
-    if (!filterClass) return alert("Pilih kelas terlebih dahulu ya");
+    if (!filterClass) {
+      toast.warning("Pilih kelas terlebih dahulu ya", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      return;
+    }
+    setIsPromoteModalOpen(true);
+  };
 
-    const confirmed = confirm(`Yakin ingin menaikkan semua santri di kelas ${filterClass}?`);
-    if (!confirmed) return;
-
+  const handlePromoteConfirm = async () => {
     const success = await promoteStudentsByClassId(filterClass);
     if (success) {
-      alert(`Santri di kelas ${filterClass} berhasil dinaikkan ke tingkat selanjutnya!`);
+      toast.success(`Santri di kelas ${filterClass} berhasil dinaikkan ke tingkat selanjutnya!`, {
+        position: "top-right",
+        autoClose: 3000,
+      });
       fetchStudents();
       setFilterClass("");
     } else {
-      alert("Gagal menaikkan kelas santri.");
+      toast.error("Gagal menaikkan kelas santri.", {
+        position: "top-right",
+        autoClose: 3000,
+      });
     }
+    setIsPromoteModalOpen(false);
   };
 
   const filteredStudents = students.filter((s) => {
@@ -106,6 +131,7 @@ const StudentsPage = () => {
 
   return (
     <div className="p-8 bg-[#9ACBD0] min-h-screen">
+      <ToastContainer />
       <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl p-8 mt-12">
         <h1 className="text-3xl font-bold text-[#006A71] mb-8 text-center">
           Manajemen Data Santri
@@ -206,6 +232,12 @@ const StudentsPage = () => {
           </table>
         </div>
       </div>
+      <PromoteClassModal
+        isOpen={isPromoteModalOpen}
+        onClose={() => setIsPromoteModalOpen(false)}
+        onConfirm={handlePromoteConfirm}
+        className={filterClass}
+      />
     </div>
   );
 };

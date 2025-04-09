@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createNewStudent } from "./action";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "react-toastify";
 
 interface Class {
   _id: string;
@@ -44,7 +44,6 @@ export default function AddStudentModal({
   const [classes, setClasses] = useState<Class[]>([]);
   const [halaqahs, setHalaqahs] = useState<Halaqah[]>([]);
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
 
   const [form, setForm] = useState<NewStudentFormData>({
     name: "",
@@ -116,10 +115,9 @@ export default function AddStudentModal({
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Gagal memuat data kelas dan halaqah";
         console.error('Error fetching data:', error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: errorMessage,
+        toast.error(errorMessage, {
+          position: "top-right",
+          autoClose: 3000,
         });
       }
     };
@@ -127,7 +125,7 @@ export default function AddStudentModal({
     if (isOpen) {
       fetchData();
     }
-  }, [isOpen, toast]);
+  }, [isOpen]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -150,9 +148,9 @@ export default function AddStudentModal({
       };
       
       await createNewStudent(formData);
-      toast({
-        title: "Success",
-        description: "Data santri berhasil ditambahkan",
+      toast.success("Data santri berhasil ditambahkan", {
+        position: "top-right",
+        autoClose: 3000,
       });
       setIsOpen(false);
       setForm({
@@ -178,10 +176,9 @@ export default function AddStudentModal({
       onStudentAdded();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Gagal menambahkan data santri";
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: errorMessage,
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 3000,
       });
     } finally {
       setLoading(false);

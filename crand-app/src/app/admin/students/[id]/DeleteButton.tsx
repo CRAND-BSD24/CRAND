@@ -1,30 +1,37 @@
-'use client';
+"use client";
 
-import { deleteStudentById } from "./action";
+import { deleteStudent } from "../action";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 export default function DeleteButton({ id }: { id: string }) {
   const router = useRouter();
 
   const handleDelete = async () => {
-    const confirmed = confirm("Yakin ingin menghapus santri ini?");
-    if (!confirmed) return;
-
-    const success = await deleteStudentById(id);
-    if (success) {
-      alert("Santri berhasil dihapus.");
-      router.push("/admin/students");
-    } else {
-      alert("Gagal menghapus santri.");
+    if (window.confirm("Apakah Anda yakin ingin menghapus santri ini?")) {
+      const success = await deleteStudent(id);
+      if (success) {
+        toast.success("Santri berhasil dihapus.", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+        router.push("/admin/students");
+        router.refresh();
+      } else {
+        toast.error("Gagal menghapus santri.", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+      }
     }
   };
 
   return (
     <button
       onClick={handleDelete}
-      className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+      className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
     >
-      Hapus
+      Hapus Santri
     </button>
   );
 }
