@@ -1,3 +1,5 @@
+"use client";
+
 import StudentSidebar from "@/components/StudentSidebar";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 

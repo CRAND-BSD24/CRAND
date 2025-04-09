@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { getMemorizationHistory, type MemorizationHistory } from "./action";
 import { useToast } from "@/components/ui/use-toast";
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks } from "date-fns";
-import { id } from "date-fns/locale";
+import { id as idLocale } from "date-fns/locale";
 import {
   Table,
   TableBody,
@@ -100,8 +100,8 @@ const MemorizationPage = () => {
         </CardHeader>
         <CardContent>
           <div className="text-right text-sm text-gray-500 mb-4">
-            {format(startOfWeek(currentWeek, { weekStartsOn: 1 }), "dd MMMM yyyy", { locale: id })} - 
-            {format(endOfWeek(currentWeek, { weekStartsOn: 1 }), "dd MMMM yyyy", { locale: id })}
+            {format(startOfWeek(currentWeek, { weekStartsOn: 1 }), "dd MMMM yyyy")} - 
+            {format(endOfWeek(currentWeek, { weekStartsOn: 1 }), "dd MMMM yyyy")}
           </div>
 
           <div className="mt-4">
@@ -126,7 +126,7 @@ const MemorizationPage = () => {
                   {historyData.map((record) => (
                     <TableRow key={record.id}>
                       <TableCell>
-                        {format(new Date(record.created_at), "dd MMMM yyyy", { locale: id })}
+                        {format(new Date(record.created_at), "dd MMMM yyyy")}
                       </TableCell>
                       <TableCell>{record.semester}</TableCell>
                       <TableCell>{record.academic_year}</TableCell>
