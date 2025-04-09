@@ -7,6 +7,7 @@ import {
   updateStudentGrade,
   getSubjects,
   deleteStudentGrade,
+  getGradeHistory,
 } from "../action";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -18,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Pencil, Plus, Trash2, History } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
   Dialog,
@@ -38,6 +39,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getMongoClientInstance } from "@/db/config/connection";
+import { ObjectId } from "mongodb";
 
 interface PageProps {
   params: Promise<{
@@ -80,6 +83,9 @@ const StudentGradesPage = ({ params }: PageProps) => {
   });
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [gradeToDelete, setGradeToDelete] = useState<StudentGrade | null>(null);
+  const [showHistoryDialog, setShowHistoryDialog] = useState(false);
+  const [selectedGradeHistory, setSelectedGradeHistory] = useState<StudentGrade | null>(null);
+  const [gradeHistory, setGradeHistory] = useState<StudentGrade[]>([]);
 
   const resolvedParams = use(params);
   const studentId = resolvedParams.studentId;
@@ -208,6 +214,18 @@ const StudentGradesPage = ({ params }: PageProps) => {
     }
   };
 
+  const handleHistoryClick = async (grade: StudentGrade) => {
+    setSelectedGradeHistory(grade);
+    try {
+      const history = await getGradeHistory(studentId, grade.subject_name);
+      setGradeHistory(history);
+      setShowHistoryDialog(true);
+    } catch (error) {
+      console.error("Error fetching grade history:", error);
+      setError("Gagal mengambil riwayat nilai");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -279,6 +297,14 @@ const StudentGradesPage = ({ params }: PageProps) => {
                         onClick={() => handleEditClick(grade)}
                       >
                         <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleHistoryClick(grade)}
+                        className="text-blue-500 hover:text-blue-700"
+                      >
+                        <History className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="outline"
@@ -470,6 +496,57 @@ const StudentGradesPage = ({ params }: PageProps) => {
               className="bg-red-500 hover:bg-red-600"
             >
               Hapus
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* History Dialog */}
+      <Dialog open={showHistoryDialog} onOpenChange={setShowHistoryDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Riwayat Nilai {selectedGradeHistory?.subject_name}</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nilai</TableHead>
+                  <TableHead>Semester</TableHead>
+                  <TableHead>Tahun Akademik</TableHead>
+                  <TableHead>Tanggal Update</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {gradeHistory.map((grade, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{grade.score}</TableCell>
+                    <TableCell>{grade.semester}</TableCell>
+                    <TableCell>{grade.academic_year}</TableCell>
+                    <TableCell>
+                      {grade.created_at ? new Date(grade.created_at).toLocaleDateString('id-ID', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      }) : '-'}
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {gradeHistory.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center">
+                      Tidak ada riwayat nilai
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowHistoryDialog(false)}>
+              Tutup
             </Button>
           </DialogFooter>
         </DialogContent>

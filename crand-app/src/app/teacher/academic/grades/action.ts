@@ -8,6 +8,7 @@ export interface StudentGrade {
   score: number;
   semester: string;
   academic_year: string;
+  created_at?: Date;
 }
 
 export interface Subject {
@@ -66,6 +67,26 @@ export async function getStudentGrades(
             score: 1,
             semester: 1,
             academic_year: 1,
+            created_at: 1,
+          },
+        },
+        {
+          $sort: {
+            created_at: -1,
+          },
+        },
+        {
+          $group: {
+            _id: "$subject_name",
+            latestGrade: { $first: "$$ROOT" },
+          },
+        },
+        {
+          $replaceRoot: { newRoot: "$latestGrade" },
+        },
+        {
+          $sort: {
+            subject_name: 1,
           },
         },
       ])
@@ -75,7 +96,7 @@ export async function getStudentGrades(
 
     return grades.map((grade) => ({
       subject_name: grade.subject_name,
-      score: grade.score,
+      score: grade.score.toString(),
       semester: grade.semester,
       academic_year: grade.academic_year,
     }));
@@ -105,22 +126,16 @@ export async function updateStudentGrade(
       throw new Error("Mata pelajaran tidak ditemukan");
     }
 
-    await db.collection("grades").updateOne(
-      {
-        student_id: new ObjectId(studentId),
-        subject_id: subject._id,
-      },
-      {
-        $set: {
-          score,
-          semester,
-          academic_year: academicYear,
-          updated_at: new Date(),
-          created_at: new Date(),
-        },
-      },
-      { upsert: true }
-    );
+    // Selalu buat record baru
+    await db.collection("grades").insertOne({
+      student_id: new ObjectId(studentId),
+      subject_id: subject._id,
+      score,
+      semester,
+      academic_year: academicYear,
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
   } catch (error) {
     console.error("Error updating student grade:", error);
     throw new Error("Gagal memperbarui nilai siswa");
@@ -156,5 +171,42 @@ export async function deleteStudentGrade(
   } catch (error) {
     console.error("Error deleting student grade:", error);
     throw new Error("Gagal menghapus nilai siswa");
+  }
+}
+
+export async function getGradeHistory(
+  studentId: string,
+  subjectName: string
+): Promise<StudentGrade[]> {
+  try {
+    const client = await getMongoClientInstance();
+    const db = client.db("pesantren_db");
+
+    const subject = await db.collection("subjects").findOne({
+      name: subjectName,
+    });
+
+    if (!subject) {
+      throw new Error("Mata pelajaran tidak ditemukan");
+    }
+
+    const history = await db.collection("grades")
+      .find({
+        student_id: new ObjectId(studentId),
+        subject_id: subject._id,
+      })
+      .sort({ created_at: -1 })
+      .toArray();
+
+    return history.map(item => ({
+      subject_name: subjectName,
+      score: item.score,
+      semester: item.semester,
+      academic_year: item.academic_year,
+      created_at: item.created_at
+    }));
+  } catch (error) {
+    console.error("Error fetching grade history:", error);
+    throw new Error("Gagal mengambil riwayat nilai");
   }
 }
