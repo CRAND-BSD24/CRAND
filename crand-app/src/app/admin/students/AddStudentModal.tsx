@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createNewStudent } from "./action";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "react-toastify";
 
 interface Class {
   _id: string;
@@ -44,7 +44,6 @@ export default function AddStudentModal({
   const [classes, setClasses] = useState<Class[]>([]);
   const [halaqahs, setHalaqahs] = useState<Halaqah[]>([]);
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
 
   const [form, setForm] = useState<NewStudentFormData>({
     name: "",
@@ -116,10 +115,9 @@ export default function AddStudentModal({
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Gagal memuat data kelas dan halaqah";
         console.error('Error fetching data:', error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: errorMessage,
+        toast.error(errorMessage, {
+          position: "top-right",
+          autoClose: 3000,
         });
       }
     };
@@ -127,7 +125,7 @@ export default function AddStudentModal({
     if (isOpen) {
       fetchData();
     }
-  }, [isOpen, toast]);
+  }, [isOpen]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -150,9 +148,9 @@ export default function AddStudentModal({
       };
       
       await createNewStudent(formData);
-      toast({
-        title: "Success",
-        description: "Data santri berhasil ditambahkan",
+      toast.success("Data santri berhasil ditambahkan", {
+        position: "top-right",
+        autoClose: 3000,
       });
       setIsOpen(false);
       setForm({
@@ -178,10 +176,9 @@ export default function AddStudentModal({
       onStudentAdded();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Gagal menambahkan data santri";
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: errorMessage,
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 3000,
       });
     } finally {
       setLoading(false);
@@ -192,48 +189,61 @@ export default function AddStudentModal({
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="bg-[#006A71] text-white px-5 py-2 rounded-lg font-semibold shadow-md hover:bg-[#04858c] transition-transform duration-200 hover:scale-105"
+        className="bg-[#006A71] text-white px-6 py-2.5 rounded-lg font-semibold shadow-md hover:bg-[#04858c] transition-all duration-300 flex items-center gap-2"
       >
-        + Tambah Santri
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+        </svg>
+        Tambah Santri
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold text-[#006A71] mb-4">Tambah Data Santri</h2>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-[#006A71]">Tambah Data Santri</h2>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
             
-            <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+            <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="block text-sm font-medium">Nama Lengkap</label>
+                <label className="block text-sm font-medium text-gray-700">Nama Lengkap</label>
                 <input
                   type="text"
                   name="name"
                   value={form.name}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium">NIS</label>
+                <label className="block text-sm font-medium text-gray-700">NIS</label>
                 <input
                   type="text"
                   name="nisn"
                   value={form.nisn}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium">Jenis Kelamin</label>
+                <label className="block text-sm font-medium text-gray-700">Jenis Kelamin</label>
                 <select
                   name="gender"
                   value={form.gender}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
                   required
                 >
                   <option value="" disabled>Pilih Jenis Kelamin</option>
@@ -243,96 +253,96 @@ export default function AddStudentModal({
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium">Tempat, Tanggal Lahir</label>
+                <label className="block text-sm font-medium text-gray-700">Tempat, Tanggal Lahir</label>
                 <input
                   type="text"
                   name="birth_place_date"
                   value={form.birth_place_date}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium">Email</label>
+                <label className="block text-sm font-medium text-gray-700">Email</label>
                 <input
                   type="email"
                   name="email"
                   value={form.email}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium">No HP</label>
+                <label className="block text-sm font-medium text-gray-700">No HP</label>
                 <input
                   type="tel"
                   name="phone_number"
                   value={form.phone_number}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
                   required
                 />
               </div>
 
               <div className="space-y-2 col-span-2">
-                <label className="block text-sm font-medium">Alamat</label>
+                <label className="block text-sm font-medium text-gray-700">Alamat</label>
                 <textarea
                   name="address"
                   value={form.address}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
                   rows={3}
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium">Nama Ayah</label>
+                <label className="block text-sm font-medium text-gray-700">Nama Ayah</label>
                 <input
                   type="text"
                   name="father_name"
                   value={form.father_name}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium">Nama Ibu</label>
+                <label className="block text-sm font-medium text-gray-700">Nama Ibu</label>
                 <input
                   type="text"
                   name="mother_name"
                   value={form.mother_name}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium">Tahun Akademik</label>
+                <label className="block text-sm font-medium text-gray-700">Tahun Akademik</label>
                 <input
                   type="text"
                   name="academic_year"
                   value={form.academic_year}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium">Tingkat Akademik</label>
+                <label className="block text-sm font-medium text-gray-700">Tingkat Akademik</label>
                 <select
                   name="academic_level"
                   value={form.academic_level}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
                   required
                 >
                   <option value="" disabled>Pilih Tingkat Akademik</option>
@@ -346,12 +356,12 @@ export default function AddStudentModal({
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium">Program</label>
+                <label className="block text-sm font-medium text-gray-700">Program</label>
                 <select
                   name="program"
                   value={form.program}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
                   required
                 >
                   <option value="" disabled>Pilih Program</option>
@@ -361,12 +371,12 @@ export default function AddStudentModal({
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium">Kelas</label>
+                <label className="block text-sm font-medium text-gray-700">Kelas</label>
                 <select
                   name="class_id"
                   value={form.class_id}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
                   required
                 >
                   <option value="" disabled>Pilih Kelas</option>
@@ -377,18 +387,18 @@ export default function AddStudentModal({
                     </option>
                     ))
                   ) : (
-                    <option disabled>Loading...</option>
+                    <option disabled>{loading ? 'Loading...' : 'Tidak ada kelas'}</option>
                   )}
                 </select>
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium">Halaqah</label>
+                <label className="block text-sm font-medium text-gray-700">Halaqah</label>
                 <select
                   name="halaqah_id"
                   value={form.halaqah_id}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
                   required
                 >
                   <option value="" disabled>Pilih Halaqah</option>
@@ -399,18 +409,18 @@ export default function AddStudentModal({
                       </option>
                     ))
                   ) : (
-                    <option disabled>Loading...</option>
+                    <option disabled>{loading ? 'Loading...' : 'Tidak ada halaqah'}</option>
                   )}
                 </select>
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium">Level</label>
+                <label className="block text-sm font-medium text-gray-700">Level</label>
                 <select
                   name="level"
                   value={form.level}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
                   required
                 >
                   <option value="" disabled>Pilih Level</option>
@@ -421,26 +431,24 @@ export default function AddStudentModal({
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium">VA SPP</label>
+                <label className="block text-sm font-medium text-gray-700">VA SPP</label>
                 <input
                   type="text"
                   name="VA_SPP"
                   value={form.VA_SPP}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
                   required
                 />
               </div>
 
-              
-
               <div className="space-y-2">
-                <label className="block text-sm font-medium">Ekskul</label>
+                <label className="block text-sm font-medium text-gray-700">Ekskul</label>
                 <select
                   name="ekskul"
                   value={form.ekskul}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
                   required
                 >
                   <option value="" disabled>Pilih Ekskul</option>
@@ -450,35 +458,47 @@ export default function AddStudentModal({
                   <option value="Media">Media</option>
                 </select>
               </div>
-<div className="space-y-2">
-                <label className="block text-sm font-medium">Status Santri</label>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Status Santri</label>
                 <select
                   name="graduation_status"
                   value={form.graduation_status}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
                   required
                 >
-                  <option value="" disabled>Pilih Status Kelulusan</option>
+                  <option value="" disabled>Pilih Status</option>
                   <option value="Aktif">Aktif</option>
                   <option value="Tidak Aktif">Tidak Aktif</option>
                   <option value="Lulus">Lulus</option>
                 </select>
               </div>
-              <div className="col-span-2 flex justify-end space-x-4 mt-4">
+
+              <div className="col-span-2 flex justify-end space-x-4 mt-6">
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="px-4 py-2 border rounded hover:bg-gray-100"
+                  className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-4 py-2 bg-[#006A71] text-white rounded hover:bg-[#04858c] disabled:opacity-50"
+                  className="px-6 py-2.5 bg-[#006A71] text-white rounded-lg hover:bg-[#04858c] transition-colors disabled:opacity-50 flex items-center gap-2"
                 >
-                  {loading ? "Menyimpan..." : "Simpan"}
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Menyimpan...
+                    </>
+                  ) : (
+                    'Simpan'
+                  )}
                 </button>
               </div>
             </form>

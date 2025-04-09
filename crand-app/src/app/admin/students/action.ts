@@ -2,6 +2,7 @@
 
 import { getMongoClientInstance } from "@/db/config/connection";
 import { ObjectId } from "mongodb";
+import bcrypt from "bcrypt";
 
 interface StudentData {
   name: string;
@@ -108,116 +109,134 @@ export const getAllStudents = async (
 /**
  * CREATE student
  */
-export const createStudent = async (formData: StudentData) => {
-  const client = await getMongoClientInstance();
-  const db = client.db("pesantren_db");
+// export const createStudent = async (formData: StudentData) => {
+//   const client = await getMongoClientInstance();
+//   const db = client.db("pesantren_db");
 
-  try {
-    if (
-      !formData.name ||
-      !formData.class_id ||
-      !formData.academic_level ||
-      !formData.gender ||
-      !formData.parent_name
-    ) {
-      console.error("Missing required fields");
-      return false;
-    }
+//   try {
+//     if (
+//       !formData.name ||
+//       !formData.class_id ||
+//       !formData.academic_level ||
+//       !formData.gender ||
+//       !formData.parent_name
+//     ) {
+//       console.error("Missing required fields");
+//       return false;
+//     }
 
-    const validAcademicLevels = ["Ibtidaiyah", "Tsanawiyah", "Aliyah", "SMA", "Wustho"];
-    if (!validAcademicLevels.includes(formData.academic_level)) {
-      console.error(`Invalid academic level: ${formData.academic_level}`);
-      return false;
-    }
+//     const validAcademicLevels = ["Ibtidaiyah", "Tsanawiyah", "Aliyah", "SMA", "Wustho"];
+//     if (!validAcademicLevels.includes(formData.academic_level)) {
+//       console.error(`Invalid academic level: ${formData.academic_level}`);
+//       return false;
+//     }
 
-    if (!["Laki-laki", "Perempuan"].includes(formData.gender)) {
-      console.error(`Invalid gender: ${formData.gender}`);
-      return false;
-    }
+//     if (!["Laki-laki", "Perempuan"].includes(formData.gender)) {
+//       console.error(`Invalid gender: ${formData.gender}`);
+//       return false;
+//     }
 
-    const studentDoc = {
-      name: formData.name,
-      class_id: new ObjectId(formData.class_id),
-      academic_level: formData.academic_level,
-      gender: formData.gender,
-      parent_name: formData.parent_name,
-      birth_place_date: formData.birth_place_date || "",
-      address: formData.address || "",
-      phone_number: formData.phone_number || "",
-      graduation_status: "Aktif",
-      payment_status: "Belum Lunas",
-      created_at: new Date(),
-      updated_at: new Date()
-    };
+//     // Hash password
+//     const saltRounds = 10;
+//     const hashedPassword = await bcrypt.hash("student123", saltRounds);
 
-    const result = await db.collection("students").insertOne(studentDoc);
+//     // Create user first
+//     const userDoc = {
+//       name: formData.name,
+//       email: `${formData.name.toLowerCase().replace(/\s+/g, '.')}@pesantren.com`,
+//       password: hashedPassword,
+//       role: "student",
+//       phone_number: formData.phone_number || "",
+//       profile_picture: "data:image/png;base64,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",
+//       created_at: new Date(),
+//       updated_at: new Date()
+//     };
 
-    if (!result.insertedId) {
-      console.error("Failed to insert student");
-      return false;
-    }
+//     const userResult = await db.collection("users").insertOne(userDoc);
 
-    console.log(`Created student with ID: ${result.insertedId}`);
-    return true;
-  } catch (error) {
-    console.error("Error creating student:", error);
-    return false;
-  }
-};
+//     if (!userResult.insertedId) {
+//       console.error("Failed to create user");
+//       return false;
+//     }
+
+//     const studentDoc = {
+//       name: formData.name,
+//       class_id: new ObjectId(formData.class_id),
+//       academic_level: formData.academic_level,
+//       gender: formData.gender,
+//       parent_name: formData.parent_name,
+//       birth_place_date: formData.birth_place_date || "",
+//       address: formData.address || "",
+//       phone_number: formData.phone_number || "",
+//       graduation_status: "Aktif",
+//       payment_status: "Belum Lunas",
+//       user_id: userResult.insertedId,
+//       created_at: new Date(),
+//       updated_at: new Date()
+//     };
+
+//     const result = await db.collection("students").insertOne(studentDoc);
+
+//     if (!result.insertedId) {
+//       console.error("Failed to insert student");
+//       return false;
+//     }
+
+//     console.log(`Created student with ID: ${result.insertedId}`);
+//     return true;
+//   } catch (error) {
+//     console.error("Error creating student:", error);
+//     return false;
+//   }
+// };
 
 /**
  * BULK PROMOTE students from one class to the next by class_id
  */
-export const promoteStudentsByClassId = async (classId: string) => {
+export const promoteStudentsByClassId = async (className: string) => {
   const client = await getMongoClientInstance();
   const db = client.db("pesantren_db");
 
   try {
-    const oldClass = await db.collection("classes").findOne({ _id: new ObjectId(classId) });
+    const oldClass = await db.collection("classes").findOne({ class_name: className });
 
     if (!oldClass) {
       console.error("Class not found");
       return false;
     }
 
-    const classRegex = /^(\d+)([A-Z]+)$/;
-    const match = oldClass.class_name.match(classRegex);
-
-    if (!match) {
-      console.error(`Invalid class name format: ${oldClass.class_name}`);
+    // Extract numeric part from class name
+    const numericMatch = className.match(/\d+/);
+    if (!numericMatch) {
+      console.error(`No numeric part found in class name: ${className}`);
       return false;
     }
 
-    const currentLevel = parseInt(match[1]);
-    const suffix = match[2];
+    const currentLevel = parseInt(numericMatch[0]);
 
     if (currentLevel >= 12) {
-      console.log(`Class ${oldClass.class_name} is already the highest level`);
-      return false;
-    }
-
-    const nextClassName = `${currentLevel + 1}${suffix}`;
-    const nextClass = await db.collection("classes").findOne({ class_name: nextClassName });
-
-    if (!nextClass) {
-      console.error(`Next class not found: ${nextClassName}`);
-      return false;
-    }
-
-    const result = await db.collection("students").updateMany(
-      { class_id: oldClass._id },
-      {
-        $set: {
-          class_id: nextClass._id,
-          updated_at: new Date()
+      // Handle graduation for 12th-grade students
+      const result = await db.collection("students").updateMany(
+        { class_id: oldClass._id },
+        {
+          $set: {
+            class_id: null,
+            class_name: "-",
+            graduation_status: "Lulus",
+            updated_at: new Date()
+          }
         }
-      }
-    );
+      );
 
-    console.log(`Promoted ${result.modifiedCount} students from ${oldClass.class_name} to ${nextClass.class_name}`);
-    return result.modifiedCount > 0;
+      console.log(`Graduated ${result.modifiedCount} students from class ${className}`);
+      return result.modifiedCount > 0;
+    }
+
+    // For grades below 12, return false as promotion is not allowed
+    console.log(`Promotion is not allowed for class ${className}`);
+    return false;
   } catch (error) {
-    console.error("Error promoting students by class:", error);
+    console.error("Error processing students:", error);
     return false;
   }
 };
@@ -250,12 +269,16 @@ export const createNewStudent = async (data: NewStudentData) => {
       throw new Error("Ekskul tidak valid");
     }
 
+    // Hash the default password
+    const hashedPassword = await bcrypt.hash("student123", 10);
+
     // Create user first
     const userResult = await db.collection("users").insertOne({
       name: data.name,
       email: data.email,
       phone_number: data.phone_number,
       role: "student",
+      password: hashedPassword,
       created_at: new Date(),
       updated_at: new Date()
     });
