@@ -115,6 +115,8 @@ export async function updateStudentGrade(
           score,
           semester,
           academic_year: academicYear,
+          updated_at: new Date(),
+          created_at: new Date(),
         },
       },
       { upsert: true }
