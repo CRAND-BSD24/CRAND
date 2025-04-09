@@ -61,10 +61,10 @@ export default function StudentDetailPage({ params }: Props) {
   if (!student) return <div className="p-8 text-center text-gray-600">Loading data santri...</div>;
 
   return (
-    <div className="bg-gradient-to-b from-[#DCEFF1] to-[#9ACBD0] min-h-screen p-6">
-      <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-lg p-8 mt-10">
+    <div className="bg-gradient-to-br from-emerald-50 to-teal-50 min-h-screen p-6">
+      <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-2xl p-8 mt-10">
         {/* Heading */}
-        <h1 className="text-4xl font-extrabold text-center text-[#006A71] mb-10 tracking-wide">
+        <h1 className="text-4xl font-extrabold text-center text-emerald-800 mb-10 tracking-wide">
           📘 Detail Santri
         </h1>
 
@@ -75,10 +75,10 @@ export default function StudentDetailPage({ params }: Props) {
             alt={student.name}
             width={140}
             height={140}
-            className="rounded-full border-4 border-[#006A71] shadow-md object-cover"
+            className="rounded-full border-4 border-emerald-800 shadow-md object-cover"
           />
           <div className="text-center md:text-left">
-            <h2 className="text-2xl font-bold text-[#006A71]">{student.name}</h2>
+            <h2 className="text-2xl font-bold text-emerald-800">{student.name}</h2>
             <p className="text-gray-600 mt-1 text-sm">NISN: {student.nisn}</p>
             <p className="text-gray-600 text-sm">{student.email}</p>
           </div>
@@ -88,7 +88,7 @@ export default function StudentDetailPage({ params }: Props) {
         <div className="flex gap-4 mt-8 justify-center md:justify-start">
           <button
             onClick={() => setShowEditModal(true)}
-            className="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold px-5 py-2 rounded-full shadow-md transition"
+            className="bg-emerald-800 hover:bg-emerald-700 text-white font-semibold px-5 py-2 rounded-full shadow-md transition"
           >
             ✏️ Edit
           </button>
@@ -123,7 +123,7 @@ export default function StudentDetailPage({ params }: Props) {
         <div className="mt-12 text-center">
           <Link
             href="/admin/students"
-            className="inline-block bg-gray-100 hover:bg-gray-200 text-gray-800 px-5 py-2 rounded-full shadow-sm text-sm transition"
+            className="inline-block bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-5 py-2 rounded-full shadow-sm text-sm transition"
           >
             ← Kembali ke daftar santri
           </Link>

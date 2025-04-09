@@ -119,25 +119,31 @@ const StudentsPage = () => {
     return "";
   };
 
+  // Calculate pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredStudents.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
+
   return (
-    <div className="p-8 bg-[#9ACBD0] min-h-screen">
-      <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl p-8 mt-12">
-        <h1 className="text-3xl font-bold text-[#006A71] mb-8 text-center">
+    <div className="p-8 bg-gradient-to-br from-emerald-50 to-teal-50 min-h-screen">
+      <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl p-8 mt-12">
+        <h1 className="text-3xl font-bold text-emerald-800 mb-8 text-center">
           Manajemen Data Santri
         </h1>
 
         <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-          <h2 className="text-xl font-semibold text-[#006A71]">
+          <h2 className="text-xl font-semibold text-emerald-800">
             Daftar Santri
           </h2>
           <AddStudentModal onStudentAdded={fetchStudents} />
         </div>
 
-        <div className="flex items-center gap-4 mb-4 flex-wrap">
+        <div className="flex items-center gap-4 mb-6 flex-wrap">
           <select
             value={filterClass}
             onChange={(e) => setFilterClass(e.target.value)}
-            className="border p-2 rounded"
+            className="border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
           >
             <option value="">Pilih Kelas</option>
             {uniqueClasses.map((kelas, index) => (
@@ -152,20 +158,20 @@ const StudentsPage = () => {
             placeholder="Cari nama santri..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="border p-2 rounded flex-grow max-w-md"
+            className="border-2 border-emerald-300 p-2 rounded-lg flex-grow max-w-md focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
           />
 
           <button
             onClick={handlePromoteByClass}
             disabled={!filterClass}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-emerald-800 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-md hover:shadow-lg"
           >
             Naikkan Semua di Kelas Ini
           </button>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-separate border-spacing-y-2">
+          <table className="w-full text-left border-separate border-spacing-y-2 mb-6">
             <thead>
               <tr className="bg-[#48A6A7] text-white">
                 <th
@@ -202,10 +208,10 @@ const StudentsPage = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredStudents.map((student) => (
+              {currentItems.map((student) => (
                 <tr
                   key={student._id}
-                  className="bg-[#f9fdfd] hover:bg-[#e0f4f4] transition-colors rounded-md shadow-sm"
+                  className="bg-white hover:bg-emerald-50 transition-colors rounded-md shadow-sm"
                 >
                   <td className="px-4 py-3">{student.nisn}</td>
                   <td className="px-4 py-3">{student.name}</td>
@@ -215,7 +221,7 @@ const StudentsPage = () => {
                   <td className="px-4 py-3">
                     <Link
                       href={`/admin/students/${student._id}`}
-                      className="text-[#006A71] font-semibold hover:underline transition-all"
+                      className="text-emerald-800 font-semibold hover:underline transition-all"
                     >
                       Detail
                     </Link>
@@ -226,7 +232,7 @@ const StudentsPage = () => {
                 <tr>
                   <td
                     colSpan={6}
-                    className="text-center py-6 text-[#006A71] italic bg-[#f0fafa] rounded-md"
+                    className="text-center py-6 text-emerald-800 italic bg-emerald-50 rounded-md"
                   >
                     Tidak ada data santri yang ditemukan.
                   </td>
@@ -234,6 +240,43 @@ const StudentsPage = () => {
               )}
             </tbody>
           </table>
+
+          {/* Pagination */}
+          <div className="flex justify-between items-center mt-6 pb-4">
+            <div className="text-sm text-gray-600">
+              Menampilkan {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredStudents.length)} dari {filteredStudents.length} data
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 rounded-lg bg-emerald-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-700 transition-all duration-200"
+              >
+                Previous
+              </button>
+              <div className="flex items-center gap-2 px-4">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-8 h-8 rounded-lg ${currentPage === page
+                      ? 'bg-emerald-800 text-white'
+                      : 'bg-gray-100 hover:bg-emerald-100 text-gray-700'
+                      } transition-all duration-200`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 rounded-lg bg-emerald-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-700 transition-all duration-200"
+              >
+                Next
+              </button>
+            </div>
+          </div>
         </div>
       </div>
       <PromoteClassModal

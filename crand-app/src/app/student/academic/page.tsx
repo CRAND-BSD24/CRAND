@@ -42,55 +42,71 @@ const AcademicPage = () => {
   }, []);
 
   return (
-    <div className="p-8 bg-[#9ACBD0] min-h-screen">
-      <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-8 mt-12">
-        <h1 className="text-3xl font-bold text-[#006A71] mb-6 text-center">
-          Nilai Akademik Santri
-        </h1>
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#e0e0e0] to-[#e6e6e6] p-6 space-y-8">
+      <div className="bg-white/50 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg">
+        <h1 className="text-3xl font-bold text-black mb-2">Nilai Akademik</h1>
+        <p className="text-black">
+          Pantau perkembangan nilai akademik Anda di sini.
+        </p>
+      </div>
 
-        {academics.length > 0 ? (
-          <div className="space-y-4 text-[#006A71]">
-            {academics.map((academic) => (
-              <div
-                key={academic._id}
-                className="bg-white shadow-md rounded-lg overflow-hidden"
-              >
-                <div className="p-4">
-                  <h2 className="text-xl font-semibold mb-2">
-                    {academic.student_info?.name}
-                  </h2>
-                  <table className="min-w-full bg-white">
-                    <tbody>
-                      <tr>
-                        <td className="py-2 px-4 font-medium">Semester:</td>
-                        <td className="py-2 px-4">{academic.semester}</td>
-                      </tr>
-                      <tr className="bg-gray-50">
-                        <td className="py-2 px-4 font-medium">Tahun Ajaran:</td>
-                        <td className="py-2 px-4">{academic.academic_year}</td>
-                      </tr>
-                      <tr>
-                        <td className="py-2 px-4 font-medium">Nilai:</td>
-                        <td className="py-2 px-4">{academic.score}</td>
-                      </tr>
-                      <tr className="bg-gray-50">
-                        <td className="py-2 px-4 font-medium">Diperbarui:</td>
-                        <td className="py-2 px-4">
-                          {new Date(academic.updated_at).toLocaleString()}
+        <div className="mt-8">
+          <div className="bg-white/70 backdrop-blur-sm rounded-xl border border-white/20 shadow-md overflow-hidden">
+            <div className="overflow-x-auto">
+              {academics.length > 0 ? (
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-black/10 bg-black/5">
+                      <th className="text-left py-4 px-6 font-semibold text-black">Nama</th>
+                      <th className="text-left py-4 px-6 font-semibold text-black">Semester</th>
+                      <th className="text-left py-4 px-6 font-semibold text-black">Tahun Ajaran</th>
+                      <th className="text-left py-4 px-6 font-semibold text-black">Nilai</th>
+                      <th className="text-left py-4 px-6 font-semibold text-black">Terakhir Diperbarui</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-black/5">
+                    {academics.map((academic) => (
+                      <tr 
+                        key={academic._id}
+                        className="hover:bg-black/5 transition-colors"
+                      >
+                        <td className="py-4 px-6 font-medium text-black">
+                          {academic.student_info?.name}
+                        </td>
+                        <td className="py-4 px-6 text-black">
+                          {academic.semester}
+                        </td>
+                        <td className="py-4 px-6 text-black">
+                          {academic.academic_year}
+                        </td>
+                        <td className="py-4 px-6">
+                          <span className="px-3 py-1 bg-black/10 rounded-full font-medium text-black">
+                            {academic.score}
+                          </span>
+                        </td>
+                        <td className="py-4 px-6 text-black">
+                          {new Date(academic.updated_at).toLocaleDateString('id-ID', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
                         </td>
                       </tr>
-                    </tbody>
-                  </table>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <div className="p-8 text-center">
+                  <p className="text-black/60 italic">
+                    Data nilai belum tersedia.
+                  </p>
                 </div>
-              </div>
-            ))}
+              )}
+            </div>
           </div>
-        ) : (
-          <p className="text-center text-[#006A71] italic">
-            Data nilai belum tersedia.
-          </p>
-        )}
-      </div>
+        </div>
     </div>
   );
 };

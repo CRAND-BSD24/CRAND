@@ -107,6 +107,7 @@ export default function AddStudentModal({
           throw new Error("Invalid halaqahs data format");
         }
 
+
         const formattedHalaqahs = halaqahsData.map(
           (halaqah: { _id: string; name: string }) => ({
             _id: halaqah._id,
@@ -192,6 +193,7 @@ export default function AddStudentModal({
     <>
       <button
         onClick={() => setIsOpen(true)}
+
         className="bg-[#006A71] text-white px-6 py-2.5 rounded-lg font-semibold shadow-md hover:bg-[#04858c] transition-all duration-300 flex items-center gap-2"
       >
         <svg
@@ -250,7 +252,9 @@ export default function AddStudentModal({
                   className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
                   required
                 />
+                
               </div>
+              <h2 className="text-xl font-bold text-emerald-900 mb-4">Tambah Data Santri</h2>
 
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
