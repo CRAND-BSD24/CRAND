@@ -27,6 +27,11 @@ export default function AttendanceButton({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const faceService = FaceRecognitionService.getInstance();
+  const [isWithinLocation, setIsWithinLocation] = useState<boolean | null>(
+    null
+  );
+  const [locationMessage, setLocationMessage] = useState("");
+  const [submitTime, setSubmitTime] = useState<string>("");
 
   useEffect(() => {
     if (!isModalOpen) {
@@ -129,12 +134,57 @@ export default function AttendanceButton({
     return distance <= radius;
   };
 
+  const checkAttendanceTime = (): { isValid: boolean; message: string } => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const currentTime = currentHour * 60 + currentMinute;
+
+    const startTime = 13 * 60 + 30; // 13:30
+    const endTime = 15 * 60; // 15:00
+
+    if (currentTime < startTime) {
+      return {
+        isValid: false,
+        message: "Absensi baru dimulai pukul 13.30",
+      };
+    } else if (currentTime > endTime) {
+      return {
+        isValid: false,
+        message: "Anda gagal absensi karena terlambat",
+      };
+    } else {
+      return {
+        isValid: true,
+        message: "Waktu absensi valid",
+      };
+    }
+  };
+
+  const formatTime = (date: Date): string => {
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    return `pukul ${hours}.${minutes} WIB`;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const currentTime = new Date();
+    setSubmitTime(formatTime(currentTime));
+
     if (!selectedFile) {
       setIsSuccess(false);
       setMessage("Silakan ambil foto terlebih dahulu.");
       if (onError) onError("Silakan ambil foto terlebih dahulu.");
+      return;
+    }
+
+    // Cek waktu absensi
+    const timeCheck = checkAttendanceTime();
+    if (!timeCheck.isValid) {
+      setIsSuccess(false);
+      setMessage(timeCheck.message);
+      if (onError) onError(timeCheck.message);
       return;
     }
 
@@ -145,19 +195,29 @@ export default function AttendanceButton({
       const pesantrenLng = 106.64997821247849;
       const radius = 100;
 
-      if (
-        !isWithinRadius(latitude, longitude, pesantrenLat, pesantrenLng, radius)
-      ) {
+      const isWithin = isWithinRadius(
+        latitude,
+        longitude,
+        pesantrenLat,
+        pesantrenLng,
+        radius
+      );
+      setIsWithinLocation(isWithin);
+
+      if (!isWithin) {
         setIsSuccess(false);
         setMessage(
           "Absensi hanya dapat dilakukan di dalam lingkungan pesantren."
         );
+        setLocationMessage("Anda berada di luar area pesantren");
         if (onError)
           onError(
             "Absensi hanya dapat dilakukan di dalam lingkungan pesantren."
           );
         return;
       }
+
+      setLocationMessage("Anda berada di dalam area pesantren");
 
       const reader = new FileReader();
       reader.onload = async () => {
@@ -291,6 +351,26 @@ export default function AttendanceButton({
           <div className="text-sm text-gray-600 mt-2">
             Waktu absen: {attendanceTime}
           </div>
+        </div>
+      )}
+
+      {locationMessage && (
+        <div
+          className={`mb-4 p-3 rounded-lg text-center ${
+            isWithinLocation
+              ? "bg-green-100 text-green-700"
+              : "bg-red-100 text-red-700"
+          }`}
+        >
+          <div className="text-sm font-medium">Status Lokasi</div>
+          <div className="text-lg font-semibold mt-1">{locationMessage}</div>
+        </div>
+      )}
+
+      {submitTime && (
+        <div className="mb-4 p-3 rounded-lg bg-gray-100 text-gray-700 text-center">
+          <div className="text-sm font-medium">Waktu Absensi</div>
+          <div className="text-lg font-semibold mt-1">{submitTime}</div>
         </div>
       )}
     </div>
