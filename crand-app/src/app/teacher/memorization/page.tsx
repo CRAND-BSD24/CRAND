@@ -470,20 +470,20 @@ const MemorizationPage = () => {
                     >
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button
+                      <Button
                       variant="outline"
-                      size="sm"
+                        size="sm"
                       onClick={() => handleAddClick(student)}
-                    >
+                      >
                       <Plus className="h-4 w-4" />
-                    </Button>
-                    <Button
+                      </Button>
+                      <Button
                       variant="outline"
-                      size="sm"
+                        size="sm"
                       onClick={() => handleHistoryClick(student)}
-                    >
+                      >
                       <History className="h-4 w-4" />
-                    </Button>
+                      </Button>
                   </TableCell>
                 </TableRow>
               ))}
