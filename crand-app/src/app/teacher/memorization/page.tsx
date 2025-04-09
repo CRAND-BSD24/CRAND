@@ -30,8 +30,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks } from "date-fns";
 import { id } from "date-fns/locale";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from "sonner";
 
 interface QuranMemorization {
   _id: string;
@@ -62,7 +61,6 @@ const MemorizationPage = () => {
     status: "",
     notes: "",
   });
-  const { toast } = useToast();
   const [currentWeek, setCurrentWeek] = useState(new Date());
 
   const fetchMemorizationData = useCallback(async () => {
@@ -74,15 +72,10 @@ const MemorizationPage = () => {
     } catch (error) {
       console.error("Error fetching memorization data:", error);
       setError("Gagal memuat data hafalan");
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Gagal memuat data hafalan",
-      });
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, []);
 
   const fetchJuzList = useCallback(async () => {
     try {
@@ -95,13 +88,9 @@ const MemorizationPage = () => {
     } catch (error) {
       console.error("Error fetching juz list:", error);
       setError("Gagal memuat daftar juz");
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Gagal memuat daftar juz",
-      });
+      toast.error("Gagal memuat daftar juz");
     }
-  }, [toast]);
+  }, []);
 
   useEffect(() => {
     fetchMemorizationData();
@@ -138,11 +127,7 @@ const MemorizationPage = () => {
 
   const handleEditSubmit = async () => {
     if (!editingStudent || !selectedJuzId) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Mohon lengkapi semua field, termasuk pemilihan Juz",
-      });
+      toast.error("Mohon lengkapi semua field, termasuk pemilihan Juz");
       return;
     }
 
@@ -183,20 +168,13 @@ const MemorizationPage = () => {
         setShowEditForm(false);
         setEditingStudent(null);
         setSelectedJuzId("");
-        toast({
-          title: "Success",
-          description: "Data berhasil disimpan",
-        });
+        toast.success("Data berhasil disimpan");
       } else {
         throw new Error("Failed to update data");
       }
     } catch (error) {
       console.error("Error updating memorization:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Gagal mengupdate data hafalan",
-      });
+      toast.error("Gagal mengupdate data hafalan");
     } finally {
       setIsSubmitting(false);
     }
@@ -244,13 +222,9 @@ const MemorizationPage = () => {
       console.log(memorizationData, "memorizationData<><>NIH");
     } catch (error) {
       console.error("Error fetching history:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Gagal memuat riwayat hafalan",
-      });
+      toast.error("Gagal memuat riwayat hafalan");
     } finally {
-      setLoading(false);  
+      setLoading(false);
     }
   };
 
@@ -270,11 +244,7 @@ const MemorizationPage = () => {
         setHistoryData(history);
       } catch (error) {
         console.error("Error fetching history:", error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Gagal memuat riwayat hafalan",
-        });
+        toast.error("Gagal memuat riwayat hafalan");
       } finally {
         setLoading(false);
       }
@@ -297,11 +267,7 @@ const MemorizationPage = () => {
         setHistoryData(history);
       } catch (error) {
         console.error("Error fetching history:", error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Gagal memuat riwayat hafalan",
-        });
+        toast.error("Gagal memuat riwayat hafalan");
       } finally {
         setLoading(false);
       }
@@ -324,11 +290,7 @@ const MemorizationPage = () => {
         setHistoryData(history);
       } catch (error) {
         console.error("Error fetching history:", error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Gagal memuat riwayat hafalan",
-        });
+        toast.error("Gagal memuat riwayat hafalan");
       } finally {
         setLoading(false);
       }
@@ -337,15 +299,9 @@ const MemorizationPage = () => {
 
   const handleAddSubmit = async () => {
     if (!selectedStudent || !selectedJuzId) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Mohon lengkapi semua field, termasuk pemilihan Juz",
-      });
+      toast.error("Mohon lengkapi semua field, termasuk pemilihan Juz");
       return;
     }
-
-    
 
     // Validate required fields
     if (
@@ -354,11 +310,7 @@ const MemorizationPage = () => {
       !newMemorization.pages ||
       !newMemorization.status
     ) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Mohon lengkapi semua field yang wajib diisi",
-      });
+      toast.error("Mohon lengkapi semua field yang wajib diisi");
       return;
     }
 
@@ -408,20 +360,13 @@ const MemorizationPage = () => {
           status: "",
           notes: "",
         });
-        toast({
-          title: "Success",
-          description: "Data hafalan berhasil ditambahkan",
-        });
+        toast.success("Data hafalan berhasil ditambahkan");
       } else {
         throw new Error("Failed to add data");
       }
     } catch (error) {
       console.error("Error adding memorization:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Gagal menambahkan data hafalan",
-      });
+      toast.error("Gagal menambahkan data hafalan");
     } finally {
       setIsSubmitting(false);
     }
@@ -444,140 +389,135 @@ const MemorizationPage = () => {
   }
 
   // handler for sending email
-    const sendPDF = async (emailAddress: string) => {
-      if (!selectedStudent || !historyData.length) {
-        alert("Data santri atau riwayat hafalan belum tersedia.");
-        return;
-      }
+  const sendPDF = async (emailAddress: string) => {
+    if (!selectedStudent || !historyData.length) {
+      toast.error("Data santri atau riwayat hafalan belum tersedia");
+      return;
+    }
 
-      if (!emailAddress) {
-        alert("Email santri tidak tersedia. Silakan lengkapi data email santri terlebih dahulu.");
-        return;
-      }
-    
-      const pdfDoc = await PDFDocument.create();
-      const page = pdfDoc.addPage([600, 900]);
-      const { width, height } = page.getSize();
-      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-    
-      // Header Judul
-      page.drawText("LAPORAN RIWAYAT HAFALAN", {
-        x: width / 2 - 130,
-        y: height - 50,
-        size: 16,
+    if (!emailAddress) {
+      toast.error(
+        "Email santri tidak tersedia. Silakan lengkapi data email santri terlebih dahulu"
+      );
+      return;
+    }
+
+    const pdfDoc = await PDFDocument.create();
+    const page = pdfDoc.addPage([600, 900]);
+    const { width, height } = page.getSize();
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+    // Header Judul
+    page.drawText("LAPORAN RIWAYAT HAFALAN", {
+      x: width / 2 - 130,
+      y: height - 50,
+      size: 16,
+      font,
+      color: rgb(0, 0, 0),
+    });
+
+    // Subheader Nama Santri
+    page.drawText(`Nama Santri: ${selectedStudent.name}`, {
+      x: 50,
+      y: height - 80,
+      size: 12,
+      font,
+      color: rgb(0.2, 0.2, 0.2),
+    });
+
+    // Tabel Hafalan
+    const tableTop = height - 120;
+    const rowHeight = 24;
+    const colWidths = [70, 60, 60, 60, 60, 90, 120];
+
+    // Header tabel
+    const headers = [
+      "Tanggal",
+      "Semester",
+      "Tahun",
+      "Juz",
+      "Halaman",
+      "Status",
+      "Catatan",
+    ];
+    headers.forEach((header, i) => {
+      const x = 50 + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
+      page.drawText(header, {
+        x,
+        y: tableTop,
+        size: 10,
         font,
         color: rgb(0, 0, 0),
       });
-    
-      // Subheader Nama Santri
-      page.drawText(`Nama Santri: ${selectedStudent.name}`, {
-        x: 50,
-        y: height - 80,
-        size: 12,
-        font,
-        color: rgb(0.2, 0.2, 0.2),
-      });
-    
-      // Tabel Hafalan
-      const tableTop = height - 120;
-      const rowHeight = 24;
-      const colWidths = [70, 60, 60, 60, 60, 90, 120];
-    
-      // Header tabel
-      const headers = [
-        "Tanggal",
-        "Semester",
-        "Tahun",
-        "Juz",
-        "Halaman",
-        "Status",
-        "Catatan",
+    });
+
+    // Garis bawah header
+    page.drawLine({
+      start: { x: 50, y: tableTop - 5 },
+      end: { x: width - 50, y: tableTop - 5 },
+      thickness: 1,
+      color: rgb(0, 0, 0),
+    });
+
+    // Isi tabel
+    historyData.forEach((record, index) => {
+      const y = tableTop - (index + 1) * rowHeight;
+      const row = [
+        new Date(record.created_at).toLocaleDateString("id-ID"),
+        record.semester,
+        record.academic_year,
+        record.juz_name,
+        record.pages.toString(),
+        record.status,
+        record.notes ?? "-",
       ];
-      headers.forEach((header, i) => {
+
+      row.forEach((text, i) => {
         const x = 50 + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
-        page.drawText(header, {
+        page.drawText(text, {
           x,
-          y: tableTop,
-          size: 10,
+          y,
+          size: 9,
           font,
           color: rgb(0, 0, 0),
         });
       });
-    
-      // Garis bawah header
+
+      // Garis bawah setiap baris
       page.drawLine({
-        start: { x: 50, y: tableTop - 5 },
-        end: { x: width - 50, y: tableTop - 5 },
-        thickness: 1,
-        color: rgb(0, 0, 0),
+        start: { x: 50, y: y - 4 },
+        end: { x: width - 50, y: y - 4 },
+        thickness: 0.5,
+        color: rgb(0.7, 0.7, 0.7),
       });
-    
-      // Isi tabel
-      historyData.forEach((record, index) => {
-        const y = tableTop - (index + 1) * rowHeight;
-        const row = [
-          new Date(record.created_at).toLocaleDateString("id-ID"),
-          record.semester,
-          record.academic_year,
-          record.juz_name,
-          record.pages.toString(),
-          record.status,
-          record.notes ?? "-",
-        ];
-    
-        row.forEach((text, i) => {
-          const x = 50 + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
-          page.drawText(text, {
-            x,
-            y,
-            size: 9,
-            font,
-            color: rgb(0, 0, 0),
-          });
-        });
-    
-        // Garis bawah setiap baris
-        page.drawLine({
-          start: { x: 50, y: y - 4 },
-          end: { x: width - 50, y: y - 4 },
-          thickness: 0.5,
-          color: rgb(0.7, 0.7, 0.7),
-        });
+    });
+
+    const pdfBytes = await pdfDoc.save();
+    const pdfBase64 = Buffer.from(pdfBytes).toString("base64");
+
+    // Kirim ke API
+    try {
+      const response = await fetch("/api/sendHafalanEmail", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          emailAddress,
+          pdfBase64,
+          studentName: selectedStudent.name,
+        }),
       });
-    
-      const pdfBytes = await pdfDoc.save();
-      const pdfBase64 = Buffer.from(pdfBytes).toString("base64");
-    
-      // Kirim ke API
-      try {
-        const response = await fetch("/api/sendHafalanEmail", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            emailAddress, 
-            pdfBase64,
-            studentName: selectedStudent.name 
-          }),
-        });
-    
-        const result = await response.json();
-        if (result.message) {
-          alert(result.message);
-          toast({
-            title: "Sukses!",
-            description: result.message,
-            status: "success",
-            position: "top-right",
-            duration: 3000,
-          });
-        } else {
-          throw new Error("Gagal mengirim email");
-        }
-      } catch (error) {
-        console.error("Gagal kirim email:", error);
-        alert("Gagal mengirim email. Coba lagi nanti.");
+
+      const result = await response.json();
+      if (result.message) {
+        toast.success("Berhasil mengirim email");
+      } else {
+        throw new Error("Gagal mengirim email");
       }
-    };
+    } catch (error) {
+      console.error("Gagal kirim email:", error);
+      toast.error("Gagal mengirim email. Coba lagi nanti");
+    }
+  };
 
   return (
     <div className="space-y-6 m-5">
@@ -634,20 +574,20 @@ const MemorizationPage = () => {
                     >
                       <Pencil className="h-4 w-4" />
                     </Button>
-                      <Button
+                    <Button
                       variant="outline"
-                        size="sm"
+                      size="sm"
                       onClick={() => handleAddClick(student)}
-                      >
+                    >
                       <Plus className="h-4 w-4" />
-                      </Button>
-                      <Button
+                    </Button>
+                    <Button
                       variant="outline"
-                        size="sm"
+                      size="sm"
                       onClick={() => handleHistoryClick(student)}
-                      >
+                    >
                       <History className="h-4 w-4" />
-                      </Button>
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -864,7 +804,6 @@ const MemorizationPage = () => {
           <DialogHeader>
             <DialogTitle>Riwayat Hafalan {selectedStudent?.name}</DialogTitle>
           </DialogHeader>
-      <ToastContainer />
           <div className="flex justify-between items-center mb-4">
             <div className="flex gap-2">
               <Button

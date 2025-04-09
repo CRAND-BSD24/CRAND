@@ -5,8 +5,7 @@ import { getAllStudents, promoteStudentsByClassId } from "./action";
 import Link from "next/link";
 import AddStudentModal from "./AddStudentModal";
 import PromoteClassModal from "./PromoteClassModal";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from "sonner";
 
 interface Student {
   _id: string;
@@ -26,30 +25,30 @@ interface Student {
   graduation_status?: string;
 }
 
-type SortField = 'name' | 'class_name' | 'academic_level' | 'gender' | 'nisn';
-type SortOrder = 'asc' | 'desc';
+type SortField = "name" | "class_name" | "academic_level" | "gender" | "nisn";
+type SortOrder = "asc" | "desc";
 
 const StudentsPage = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [filterClass, setFilterClass] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [sortField, setSortField] = useState<SortField>('nisn');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const [sortField, setSortField] = useState<SortField>("nisn");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
   const [isPromoteModalOpen, setIsPromoteModalOpen] = useState(false);
 
-  const fetchStudents = useCallback(async (field: SortField = sortField, order: SortOrder = sortOrder) => {
-    try {
-      const response = await getAllStudents(undefined, field, order);
-      const data = JSON.parse(response);
-      setStudents(data);
-    } catch (error) {
-      console.error("Gagal mengambil data santri:", error);
-      toast.error("Gagal mengambil data santri. Silakan coba lagi.", {
-        position: "top-right",
-        autoClose: 3000,
-      });
-    }
-  }, [sortField, sortOrder]);
+  const fetchStudents = useCallback(
+    async (field: SortField = sortField, order: SortOrder = sortOrder) => {
+      try {
+        const response = await getAllStudents(undefined, field, order);
+        const data = JSON.parse(response);
+        setStudents(data);
+      } catch (error) {
+        console.error("Gagal mengambil data santri:", error);
+        toast.error("Gagal mengambil data santri. Silakan coba lagi.");
+      }
+    },
+    [sortField, sortOrder]
+  );
 
   const fetchClasses = async () => {
     try {
@@ -58,10 +57,7 @@ const StudentsPage = () => {
       console.log("Classes fetched:", data);
     } catch (error) {
       console.error("Error fetching classes:", error);
-      toast.error("Gagal memuat data kelas. Silakan coba lagi.", {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      toast.error("Gagal memuat data kelas. Silakan coba lagi.");
     }
   };
 
@@ -75,10 +71,7 @@ const StudentsPage = () => {
 
   const handlePromoteByClass = async () => {
     if (!filterClass) {
-      toast.warning("Pilih kelas terlebih dahulu ya", {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      toast.warning("Pilih kelas terlebih dahulu ya");
       return;
     }
     setIsPromoteModalOpen(true);
@@ -87,17 +80,13 @@ const StudentsPage = () => {
   const handlePromoteConfirm = async () => {
     const success = await promoteStudentsByClassId(filterClass);
     if (success) {
-      toast.success(`Santri di kelas ${filterClass} berhasil dinaikkan ke tingkat selanjutnya!`, {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      toast.success(
+        `Santri di kelas ${filterClass} berhasil dinaikkan ke tingkat selanjutnya!`
+      );
       fetchStudents();
       setFilterClass("");
     } else {
-      toast.error("Gagal menaikkan kelas santri.", {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      toast.error("Gagal menaikkan kelas santri.");
     }
     setIsPromoteModalOpen(false);
   };
@@ -117,21 +106,21 @@ const StudentsPage = () => {
   ).sort();
 
   const handleSort = (field: SortField) => {
-    const newOrder = sortField === field && sortOrder === 'asc' ? 'desc' : 'asc';
+    const newOrder =
+      sortField === field && sortOrder === "asc" ? "desc" : "asc";
     setSortField(field);
     setSortOrder(newOrder);
   };
 
   const getSortIndicator = (field: SortField) => {
     if (sortField === field) {
-      return sortOrder === 'asc' ? ' ▲' : ' ▼';
+      return sortOrder === "asc" ? " ▲" : " ▼";
     }
-    return '';
+    return "";
   };
 
   return (
     <div className="p-8 bg-[#9ACBD0] min-h-screen">
-      <ToastContainer />
       <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl p-8 mt-12">
         <h1 className="text-3xl font-bold text-[#006A71] mb-8 text-center">
           Manajemen Data Santri
@@ -179,20 +168,35 @@ const StudentsPage = () => {
           <table className="w-full text-left border-separate border-spacing-y-2">
             <thead>
               <tr className="bg-[#48A6A7] text-white">
-                <th className="px-4 py-3 cursor-pointer" onClick={() => handleSort('nisn')}>
-                  NISN{getSortIndicator('nisn')}
+                <th
+                  className="px-4 py-3 cursor-pointer"
+                  onClick={() => handleSort("nisn")}
+                >
+                  NISN{getSortIndicator("nisn")}
                 </th>
-                <th className="px-4 py-3 cursor-pointer" onClick={() => handleSort('name')}>
-                  Nama{getSortIndicator('name')}
+                <th
+                  className="px-4 py-3 cursor-pointer"
+                  onClick={() => handleSort("name")}
+                >
+                  Nama{getSortIndicator("name")}
                 </th>
-                <th className="px-4 py-3 cursor-pointer" onClick={() => handleSort('class_name')}>
-                  Kelas{getSortIndicator('class_name')}
+                <th
+                  className="px-4 py-3 cursor-pointer"
+                  onClick={() => handleSort("class_name")}
+                >
+                  Kelas{getSortIndicator("class_name")}
                 </th>
-                <th className="px-4 py-3 cursor-pointer" onClick={() => handleSort('academic_level')}>
-                  Jenjang Akademik{getSortIndicator('academic_level')}
+                <th
+                  className="px-4 py-3 cursor-pointer"
+                  onClick={() => handleSort("academic_level")}
+                >
+                  Jenjang Akademik{getSortIndicator("academic_level")}
                 </th>
-                <th className="px-4 py-3 cursor-pointer" onClick={() => handleSort('gender')}>
-                  Jenis Kelamin{getSortIndicator('gender')}
+                <th
+                  className="px-4 py-3 cursor-pointer"
+                  onClick={() => handleSort("gender")}
+                >
+                  Jenis Kelamin{getSortIndicator("gender")}
                 </th>
                 <th className="px-4 py-3">Aksi</th>
               </tr>
