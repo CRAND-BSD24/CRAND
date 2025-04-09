@@ -10,6 +10,7 @@ export type MemorizationStudent = {
   name: string;
   class_name: string;
   semester: string;
+  email: string;
   academic_year: string;
   juz_name: string;
   pages: string;
@@ -60,6 +61,8 @@ export async function getStudentMemorization(): Promise<MemorizationStudent[]> {
     if (!teacher) {
       throw new Error("Teacher not found");
     }
+
+    console.log("Teacher found:", teacher);
 
     // Aggregate pipeline to get students with their memorization data
     const pipeline = [
@@ -114,37 +117,66 @@ export async function getStudentMemorization(): Promise<MemorizationStudent[]> {
         },
       },
       {
+        $lookup: {
+          from: "users",
+          localField: "user_id",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      {
         $addFields: {
           grades: { $arrayElemAt: ["$grades", 0] },
-          memorization: { $arrayElemAt: ["$memorization", 0] }
-        }
-      }
+          memorization: { $arrayElemAt: ["$memorization", 0] },
+          user: { $arrayElemAt: ["$user", 0] },
+        },
+      },
+      {
+        $project: {
+          id: "$_id",
+          name: 1,
+          class_name: "$class.class_name",
+          semester: "$grades.semester",
+          academic_year: "$grades.academic_year",
+          juz_name: "$memorization.name",
+          pages: "$grades.pages",
+          status: "$grades.status",
+          notes: "$grades.notes",
+          teacher_id: "$class.teacher_id",
+          quran_memorization_id: "$grades.quran_memorization_id",
+          created_at: "$grades.created_at",
+          email: "$user.email",
+          user_id: "$user_id",
+          user_data: "$user",
+        },
+      },
     ];
-
-    const result = await db
-      .collection("students")
-      .aggregate(pipeline)
-      .toArray();
-
-    return result.map((doc) => {
-      const latestGrade = doc.grades || {};
-      const memorization = doc.memorization || {};
-
+    
+    const result = await db.collection("students").aggregate(pipeline).toArray();
+    
+    console.log("Raw aggregation result:", JSON.stringify(result, null, 2));
+    
+    const mappedResult = result.map((doc) => {
       return {
         id: doc._id.toString(),
         name: doc.name || "",
+        email: doc.user_data.email || "",
         class_name: doc.class?.class_name || "",
-        semester: latestGrade.semester || "",
-        academic_year: latestGrade.academic_year || "",
-        juz_name: memorization.name || "",
-        pages: latestGrade.pages || "",
-        status: latestGrade.status || "Belum Ada",
-        notes: latestGrade.notes || "",
+        semester: doc.semester || "",
+        academic_year: doc.academic_year || "",
+        juz_name: doc.name || "",
+        pages: doc.pages || "",
+        status: doc.status || "Belum Ada",
+        notes: doc.notes || "",
         teacher_id: doc.class?.teacher_id?.toString() || "",
-        quran_memorization_id: latestGrade.quran_memorization_id?.toString() || "",
-        created_at: latestGrade.created_at || new Date(),
+        quran_memorization_id: doc.quran_memorization_id?.toString() || "",
+        created_at: doc.created_at || new Date(),
       };
     });
+
+    console.log("Mapped result:", JSON.stringify(mappedResult, null, 2));
+
+    return mappedResult;
   } catch (error) {
     console.error("Error fetching student memorization:", error);
     throw error;
