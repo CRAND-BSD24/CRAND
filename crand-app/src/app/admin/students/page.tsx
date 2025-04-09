@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { getAllStudents, promoteStudentsByClassId } from "./action";
 import Link from "next/link";
 import AddStudentModal from "./AddStudentModal";
@@ -8,7 +8,8 @@ import AddStudentModal from "./AddStudentModal";
 interface Student {
   _id: string;
   name: string;
-  class_name: string;
+  nisn: string;
+  class_id: string;
   academic_level: string;
   gender: string;
   parent_name: string;
@@ -22,34 +23,41 @@ interface Student {
   graduation_status?: string;
 }
 
+type SortField = 'name' | 'class_name' | 'academic_level' | 'gender' | 'nisn';
+type SortOrder = 'asc' | 'desc';
+
 const StudentsPage = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [filterClass, setFilterClass] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [classes, setClasses] = useState<{ _id: string; class_name: string }[]>([]);
+  const [sortField, setSortField] = useState<SortField>('nisn');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
 
-  const fetchStudents = async () => {
+  const fetchStudents = useCallback(async (field: SortField = sortField, order: SortOrder = sortOrder) => {
     try {
-      const response = await getAllStudents();
+      const response = await getAllStudents(undefined, field, order);
       const data = JSON.parse(response);
       setStudents(data);
     } catch (error) {
       console.error("Gagal mengambil data santri:", error);
     }
-  };
+  }, [sortField, sortOrder]);
 
   const fetchClasses = async () => {
     try {
       const response = await fetch("/api/classes");
       const data = await response.json();
-      setClasses(data);
+      console.log("Classes fetched:", data);
     } catch (error) {
       console.error("Error fetching classes:", error);
     }
   };
 
   useEffect(() => {
-    fetchStudents();
+    fetchStudents(sortField, sortOrder);
+  }, [sortField, sortOrder, fetchStudents]);
+
+  useEffect(() => {
     fetchClasses();
   }, []);
 
@@ -63,18 +71,18 @@ const StudentsPage = () => {
     if (success) {
       alert(`Santri di kelas ${filterClass} berhasil dinaikkan ke tingkat selanjutnya!`);
       fetchStudents();
-      setFilterClass(""); // Reset filter setelah promote
+      setFilterClass("");
     } else {
       alert("Gagal menaikkan kelas santri.");
     }
   };
 
-  // ✅ Filtering berdasarkan kelas dan search query
   const filteredStudents = students.filter((s) => {
     const matchClass = filterClass === "" || s.class_name === filterClass;
     const matchSearch =
       searchQuery === "" ||
-      s.name.toLowerCase().includes(searchQuery.toLowerCase());
+      s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.nisn.toLowerCase().includes(searchQuery.toLowerCase());
 
     return matchClass && matchSearch;
   });
@@ -82,6 +90,19 @@ const StudentsPage = () => {
   const uniqueClasses = Array.from(
     new Set(students.map((s) => s.class_name).filter(Boolean))
   ).sort();
+
+  const handleSort = (field: SortField) => {
+    const newOrder = sortField === field && sortOrder === 'asc' ? 'desc' : 'asc';
+    setSortField(field);
+    setSortOrder(newOrder);
+  };
+
+  const getSortIndicator = (field: SortField) => {
+    if (sortField === field) {
+      return sortOrder === 'asc' ? ' ▲' : ' ▼';
+    }
+    return '';
+  };
 
   return (
     <div className="p-8 bg-[#9ACBD0] min-h-screen">
@@ -132,21 +153,31 @@ const StudentsPage = () => {
           <table className="w-full text-left border-separate border-spacing-y-2">
             <thead>
               <tr className="bg-[#48A6A7] text-white">
-                <th className="px-4 py-3">#</th>
-                <th className="px-4 py-3">Nama</th>
-                <th className="px-4 py-3">Kelas</th>
-                <th className="px-4 py-3">Jenjang Akademik</th>
-                <th className="px-4 py-3">Jenis Kelamin</th>
+                <th className="px-4 py-3 cursor-pointer" onClick={() => handleSort('nisn')}>
+                  NISN{getSortIndicator('nisn')}
+                </th>
+                <th className="px-4 py-3 cursor-pointer" onClick={() => handleSort('name')}>
+                  Nama{getSortIndicator('name')}
+                </th>
+                <th className="px-4 py-3 cursor-pointer" onClick={() => handleSort('class_name')}>
+                  Kelas{getSortIndicator('class_name')}
+                </th>
+                <th className="px-4 py-3 cursor-pointer" onClick={() => handleSort('academic_level')}>
+                  Jenjang Akademik{getSortIndicator('academic_level')}
+                </th>
+                <th className="px-4 py-3 cursor-pointer" onClick={() => handleSort('gender')}>
+                  Jenis Kelamin{getSortIndicator('gender')}
+                </th>
                 <th className="px-4 py-3">Aksi</th>
               </tr>
             </thead>
             <tbody>
-              {filteredStudents.map((student, index) => (
+              {filteredStudents.map((student) => (
                 <tr
                   key={student._id}
                   className="bg-[#f9fdfd] hover:bg-[#e0f4f4] transition-colors rounded-md shadow-sm"
                 >
-                  <td className="px-4 py-3">{index + 1}</td>
+                  <td className="px-4 py-3">{student.nisn}</td>
                   <td className="px-4 py-3">{student.name}</td>
                   <td className="px-4 py-3">{student.class_name || "-"}</td>
                   <td className="px-4 py-3">{student.academic_level}</td>

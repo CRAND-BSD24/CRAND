@@ -11,7 +11,8 @@ export interface Student {
   academic_level: string;
   program: string;
   level: string;
-  class_id: string;
+  class_id: string | null;
+  class_name: string;
   ekskul: string;
   graduation_status: string;
   payment_status: string;
@@ -19,7 +20,11 @@ export interface Student {
   VA_SPP: string;
   birth_place_date: string;
   profile_picture: string;
-  halaqah_id: string;
+  halaqah_id: string | null;
+  halaqah: string;
+  user_id: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 

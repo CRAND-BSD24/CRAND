@@ -1,7 +1,7 @@
 "use server";
 
 import { getMongoClientInstance } from "@/db/config/connection";
-import { AnyBulkWriteOperation, Document, ObjectId } from "mongodb";
+import { ObjectId } from "mongodb";
 
 interface StudentData {
   name: string;
@@ -19,6 +19,27 @@ interface FilterOptions {
   academic_level?: string;
 }
 
+interface NewStudentData {
+  name: string;
+  nisn: string;
+  email: string;
+  gender: string;
+  phone_number: string;
+  father_name: string;
+  academic_year: string;
+  program: string;
+  ekskul: string;
+  class_id: string;
+  VA_SPP: string;
+  birth_place_date: string;
+  address: string;
+  mother_name: string;
+  academic_level: string;
+  level: string;
+  halaqah_id: string;
+  graduation_status: string;
+}
+
 /**
  * GET all students with optional filter & sorting
  */
@@ -31,11 +52,12 @@ export const getAllStudents = async (
   const db = client.db("pesantren_db");
 
   try {
-    const matchStage: any = {};
+    // Define a more specific type for the match stage, allowing ObjectId or string
+    const matchStage: { class_id?: ObjectId; academic_level?: string } = {};
     if (filters?.class_id) matchStage.class_id = new ObjectId(filters.class_id);
     if (filters?.academic_level) matchStage.academic_level = filters.academic_level;
 
-    const sort: any = {};
+    const sort: { [key: string]: 1 | -1 } = {};
     sort[sortField] = sortOrder === "asc" ? 1 : -1;
 
     const students = await db.collection("students").aggregate([
@@ -57,6 +79,7 @@ export const getAllStudents = async (
         $project: {
           _id: 1,
           name: 1,
+          nisn: 1,
           class_id: 1,
           class_name: 1,
           academic_level: 1,
@@ -196,5 +219,79 @@ export const promoteStudentsByClassId = async (classId: string) => {
   } catch (error) {
     console.error("Error promoting students by class:", error);
     return false;
+  }
+};
+
+export const createNewStudent = async (data: NewStudentData) => {
+  const client = await getMongoClientInstance();
+  const db = client.db("pesantren_db");
+
+  try {
+    // Validate required fields
+    if (!data.nisn || !data.email || !data.gender || !data.class_id || !data.academic_level || !data.name) {
+      throw new Error("Mohon lengkapi semua field yang wajib diisi");
+    }
+
+    // Validate academic level
+    const validAcademicLevels = ["Ula", "Wustho", "Ulya", "SMP Formal", "Aliyah Agama", "Aliyah IPA"];
+    if (!validAcademicLevels.includes(data.academic_level)) {
+      throw new Error("Tingkat akademik tidak valid");
+    }
+
+    // Validate program
+    const validPrograms = ["Reguler", "Shorhul Qurro"];
+    if (!validPrograms.includes(data.program)) {
+      throw new Error("Program tidak valid");
+    }
+
+    // Validate ekskul
+    const validEkskul = ["Memanah", "Berkuda", "Renang", "Media"];
+    if (!validEkskul.includes(data.ekskul)) {
+      throw new Error("Ekskul tidak valid");
+    }
+
+    // Create user first
+    const userResult = await db.collection("users").insertOne({
+      name: data.name,
+      email: data.email,
+      phone_number: data.phone_number,
+      role: "student",
+      created_at: new Date(),
+      updated_at: new Date()
+    });
+
+    // Create student document
+    const studentDoc = {
+      name: data.name,
+      nisn: data.nisn,
+      user_id: userResult.insertedId,
+      gender: data.gender,
+      father_name: data.father_name,
+      mother_name: data.mother_name,
+      academic_year: data.academic_year,
+      program: data.program,
+      ekskul: data.ekskul,
+      class_id: new ObjectId(data.class_id),
+      VA_SPP: data.VA_SPP,
+      birth_place_date: data.birth_place_date,
+      address: data.address,
+      academic_level: data.academic_level,
+      level: data.level,
+      halaqah_id: new ObjectId(data.halaqah_id),
+      graduation_status: data.graduation_status,
+      created_at: new Date(),
+      updated_at: new Date()
+    };
+
+    const result = await db.collection("students").insertOne(studentDoc);
+
+    if (!result.insertedId) {
+      throw new Error("Gagal menyimpan data santri");
+    }
+
+    return { success: true, id: result.insertedId.toString() };
+  } catch (error) {
+    console.error("Error creating student:", error);
+    throw error;
   }
 };
