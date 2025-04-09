@@ -1,12 +1,15 @@
 'use client';
 
 import { useState, useEffect, use } from "react";
-import { getStudentById } from "./action";
+import { getStudentById, deleteStudentById } from "./action";
 import Image from "next/image";
-import { notFound } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import Link from "next/link";
 import EditStudentModal from "./EditStudentModal";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { Student } from "@/types/student";
+import { toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 interface Props {
   params: Promise<{
@@ -18,6 +21,8 @@ export default function StudentDetailPage({ params }: Props) {
   const { id } = use(params);
   const [student, setStudent] = useState<Student | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchStudent = async () => {
@@ -30,6 +35,28 @@ export default function StudentDetailPage({ params }: Props) {
     };
     fetchStudent();
   }, [id]);
+
+  const handleDelete = async () => {
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    const success = await deleteStudentById(id);
+    if (success) {
+      toast.success("Santri berhasil dihapus", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      router.push("/admin/students");
+      router.refresh();
+    } else {
+      toast.error("Gagal menghapus santri", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    }
+    setShowDeleteModal(false);
+  };
 
   if (!student) return <div className="p-8 text-center text-gray-600">Loading data santri...</div>;
 
@@ -66,7 +93,7 @@ export default function StudentDetailPage({ params }: Props) {
             ✏️ Edit
           </button>
           <button
-            onClick={() => alert("Handler hapus belum dibuat")}
+            onClick={handleDelete}
             className="bg-red-500 hover:bg-red-600 text-white font-semibold px-5 py-2 rounded-full shadow-md transition"
           >
             🗑️ Hapus
@@ -116,6 +143,14 @@ export default function StudentDetailPage({ params }: Props) {
           }}
         />
       )}
+
+      {/* Modal Konfirmasi Hapus */}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteConfirm}
+        studentName={student.name}
+      />
     </div>
   );
 }

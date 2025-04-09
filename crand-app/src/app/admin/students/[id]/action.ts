@@ -2,6 +2,7 @@
 
 import { getMongoClientInstance } from "@/db/config/connection";
 import { ObjectId } from "mongodb";
+import { revalidatePath } from "next/cache";
 
 interface Student {
   _id: string;

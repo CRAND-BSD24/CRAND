@@ -167,42 +167,52 @@ export default function EditStudentModal({ student, onClose, onUpdated }: EditSt
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-emerald-200">
-        <h2 className="text-2xl font-bold text-emerald-800 mb-4">Edit Data Santri</h2>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-[#006A71]">Edit Data Santri</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-emerald-700">Nama Lengkap</label>
+            <label className="block text-sm font-medium text-gray-700">Nama Lengkap</label>
             <input
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all bg-white"
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-emerald-700">NISN</label>
+            <label className="block text-sm font-medium text-gray-700">NISN</label>
             <input
               type="text"
               name="nisn"
               value={formData.nisn}
               onChange={handleChange}
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all bg-white"
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-emerald-700">Jenis Kelamin</label>
+            <label className="block text-sm font-medium text-gray-700">Jenis Kelamin</label>
             <select
               name="gender"
               value={formData.gender}
               onChange={handleChange}
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all bg-white"
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
               required
             >
               <option value="" disabled>Pilih Jenis Kelamin</option>
@@ -212,96 +222,96 @@ export default function EditStudentModal({ student, onClose, onUpdated }: EditSt
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-emerald-700">Tempat, Tanggal Lahir</label>
+            <label className="block text-sm font-medium text-gray-700">Tempat, Tanggal Lahir</label>
             <input
               type="text"
               name="birth_place_date"
               value={formData.birth_place_date}
               onChange={handleChange}
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all bg-white"
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-emerald-700">Email</label>
+            <label className="block text-sm font-medium text-gray-700">Email</label>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all bg-white"
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-emerald-700">No HP</label>
+            <label className="block text-sm font-medium text-gray-700">No HP</label>
             <input
               type="tel"
               name="phone_number"
               value={formData.phone_number || ''}
               onChange={handleChange}
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all bg-white"
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
               required
             />
           </div>
 
           <div className="space-y-2 col-span-2">
-            <label className="block text-sm font-medium text-emerald-700">Alamat</label>
+            <label className="block text-sm font-medium text-gray-700">Alamat</label>
             <textarea
               name="address"
               value={formData.address}
               onChange={handleChange}
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all bg-white"
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
               rows={3}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-emerald-700">Nama Ayah</label>
+            <label className="block text-sm font-medium text-gray-700">Nama Ayah</label>
             <input
               type="text"
               name="father_name"
               value={formData.father_name}
               onChange={handleChange}
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all bg-white"
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-emerald-700">Nama Ibu</label>
+            <label className="block text-sm font-medium text-gray-700">Nama Ibu</label>
             <input
               type="text"
               name="mother_name"
               value={formData.mother_name}
               onChange={handleChange}
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all bg-white"
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-emerald-700">Tahun Akademik</label>
+            <label className="block text-sm font-medium text-gray-700">Tahun Akademik</label>
             <input
               type="text"
               name="academic_year"
               value={formData.academic_year}
               onChange={handleChange}
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all bg-white"
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-emerald-700">Tingkat Akademik</label>
+            <label className="block text-sm font-medium text-gray-700">Tingkat Akademik</label>
             <select
               name="academic_level"
               value={formData.academic_level}
               onChange={handleChange}
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all bg-white"
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
               required
             >
               <option value="" disabled>Pilih Tingkat Akademik</option>
@@ -315,12 +325,12 @@ export default function EditStudentModal({ student, onClose, onUpdated }: EditSt
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-emerald-700">Program</label>
+            <label className="block text-sm font-medium text-gray-700">Program</label>
             <select
               name="program"
               value={formData.program}
               onChange={handleChange}
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all bg-white"
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
               required
             >
               <option value="" disabled>Pilih Program</option>
@@ -330,12 +340,12 @@ export default function EditStudentModal({ student, onClose, onUpdated }: EditSt
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-emerald-700">Kelas</label>
+            <label className="block text-sm font-medium text-gray-700">Kelas</label>
             <select
               name="class_id"
               value={formData.class_id || ''}
               onChange={handleChange}
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all bg-white"
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
               required
             >
               <option value="" disabled>Pilih Kelas</option>
@@ -352,12 +362,12 @@ export default function EditStudentModal({ student, onClose, onUpdated }: EditSt
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-emerald-700">Halaqah</label>
+            <label className="block text-sm font-medium text-gray-700">Halaqah</label>
             <select
               name="halaqah_id"
               value={formData.halaqah_id || ''}
               onChange={handleChange}
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all bg-white"
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
               required
             >
               <option value="" disabled>Pilih Halaqah</option>
@@ -374,12 +384,12 @@ export default function EditStudentModal({ student, onClose, onUpdated }: EditSt
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-emerald-700">Level</label>
+            <label className="block text-sm font-medium text-gray-700">Level</label>
             <select
               name="level"
               value={formData.level}
               onChange={handleChange}
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all bg-white"
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
               required
             >
               <option value="" disabled>Pilih Level</option>
@@ -390,24 +400,24 @@ export default function EditStudentModal({ student, onClose, onUpdated }: EditSt
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-emerald-700">VA SPP</label>
+            <label className="block text-sm font-medium text-gray-700">VA SPP</label>
             <input
               type="text"
               name="VA_SPP"
               value={formData.VA_SPP || ''}
               onChange={handleChange}
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all bg-white"
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-emerald-700">Ekskul</label>
+            <label className="block text-sm font-medium text-gray-700">Ekskul</label>
             <select
               name="ekskul"
               value={formData.ekskul}
               onChange={handleChange}
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all bg-white"
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
               required
             >
               <option value="" disabled>Pilih Ekskul</option>
@@ -419,12 +429,12 @@ export default function EditStudentModal({ student, onClose, onUpdated }: EditSt
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-emerald-700">Status Santri</label>
+            <label className="block text-sm font-medium text-gray-700">Status Santri</label>
             <select
               name="graduation_status"
               value={formData.graduation_status}
               onChange={handleChange}
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all bg-white"
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
               required
             >
               <option value="" disabled>Pilih Status</option>
@@ -435,32 +445,42 @@ export default function EditStudentModal({ student, onClose, onUpdated }: EditSt
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-emerald-700">Foto Profil (URL)</label>
+            <label className="block text-sm font-medium text-gray-700">Foto Profil (URL)</label>
             <input
               type="text"
               name="profile_picture"
               value={formData.profile_picture}
               onChange={handleChange}
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all bg-white"
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
               placeholder="https://example.com/image.jpg"
             />
           </div>
 
-          <div className="col-span-2 flex justify-end space-x-4 mt-4">
+          <div className="col-span-2 flex justify-end space-x-4 mt-6">
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-800 transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50"
+              className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 text-sm font-medium text-white bg-emerald-800 border border-transparent rounded-md hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-800 transition-all duration-200 transform hover:-translate-y-0.5 shadow-sm hover:shadow-md disabled:opacity-50"
+              className="px-6 py-2.5 bg-[#006A71] text-white rounded-lg hover:bg-[#04858c] transition-colors disabled:opacity-50 flex items-center gap-2"
             >
-              {loading ? "Menyimpan..." : "Simpan Perubahan"}
+              {loading ? (
+                <>
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Menyimpan...
+                </>
+              ) : (
+                'Simpan Perubahan'
+              )}
             </button>
           </div>
         </form>

@@ -38,6 +38,7 @@ export async function POST(request: Request) {
       studentName
     );
 
+
     if (!result.success) {
       throw new Error('Failed to send email');
     }

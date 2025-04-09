@@ -1,7 +1,7 @@
-'use server';
+"use server";
 
 import { getMongoClientInstance } from "@/db/config/connection";
-import { Binary } from 'bson';
+import { Binary } from "bson";
 
 interface AttendanceResponse {
   success: boolean;
@@ -18,38 +18,46 @@ export interface AttendanceRecord {
   photo: Buffer;
 }
 
-export async function handleAbsensi(formData: FormData): Promise<AttendanceResponse> {
+export async function handleAbsensi(
+  formData: FormData
+): Promise<AttendanceResponse> {
   try {
-    const base64Image = formData.get('photo') as string;
-    const name = formData.get('name') as string;
-    const faceDescriptor = formData.get('faceDescriptor') as string;
+    const base64Image = formData.get("photo") as string;
+    const name = formData.get("name") as string;
+    const faceDescriptor = formData.get("faceDescriptor") as string;
 
     if (!base64Image) {
-      return { success: false, message: 'Tidak ada foto yang diupload' };
+      return { success: false, message: "Tidak ada foto yang diupload" };
     }
 
     if (!faceDescriptor) {
-      return { success: false, message: 'Tidak ada deskriptor wajah yang ditemukan' };
+      return {
+        success: false,
+        message: "Tidak ada deskriptor wajah yang ditemukan",
+      };
     }
 
     // Convert base64 to buffer for MongoDB storage
-    const buffer = Buffer.from(base64Image, 'base64');
+    const buffer = Buffer.from(base64Image, "base64");
 
     const client = await getMongoClientInstance();
-    const db = client.db('pesantren_db');
-    const faceDataCollection = db.collection('face_data');
-    const attendanceCollection = db.collection('attendance');
+    const db = client.db("pesantren_db");
+    const faceDataCollection = db.collection("face_data");
+    const attendanceCollection = db.collection("attendance");
 
     // Parse the face descriptor
     let descriptor: number[];
     try {
       descriptor = JSON.parse(faceDescriptor);
       if (!Array.isArray(descriptor) || descriptor.length === 0) {
-        return { success: false, message: 'Format deskriptor wajah tidak valid' };
+        return {
+          success: false,
+          message: "Format deskriptor wajah tidak valid",
+        };
       }
     } catch (error) {
-      console.error('Error parsing face descriptor:', error);
-      return { success: false, message: 'Format deskriptor wajah tidak valid' };
+      console.error("Error parsing face descriptor:", error);
+      return { success: false, message: "Format deskriptor wajah tidak valid" };
     }
 
     // Check if face is already registered
@@ -67,8 +75,11 @@ export async function handleAbsensi(formData: FormData): Promise<AttendanceRespo
         }
 
         const distance = Math.sqrt(
-          descriptor.reduce((sum: number, val: number, i: number) => 
-            sum + Math.pow(val - face.descriptor[i], 2), 0)
+          descriptor.reduce(
+            (sum: number, val: number, i: number) =>
+              sum + Math.pow(val - face.descriptor[i], 2),
+            0
+          )
         );
 
         if (distance < minDistance) {
@@ -86,12 +97,12 @@ export async function handleAbsensi(formData: FormData): Promise<AttendanceRespo
           photo: new Binary(buffer),
         });
 
-        return { 
-          success: true, 
+        return {
+          success: true,
           message: `Absensi berhasil! Selamat datang ${matchedFace.name}`,
           isNewFace: false,
           name: matchedFace.name,
-          timestamp
+          timestamp,
         };
       }
     }
@@ -102,7 +113,7 @@ export async function handleAbsensi(formData: FormData): Promise<AttendanceRespo
       await faceDataCollection.insertOne({
         descriptor,
         name,
-        createdAt: timestamp
+        createdAt: timestamp,
       });
 
       await attendanceCollection.insertOne({
@@ -111,25 +122,26 @@ export async function handleAbsensi(formData: FormData): Promise<AttendanceRespo
         photo: new Binary(buffer),
       });
 
-      return { 
-        success: true, 
+      return {
+        success: true,
         message: `Wajah berhasil didaftarkan! Selamat datang ${name}`,
         isNewFace: true,
         name,
-        timestamp
+        timestamp,
       };
     }
 
-    return { 
-      success: false, 
-      message: 'Wajah tidak dikenali. Silakan daftarkan wajah Anda terlebih dahulu.',
-      isNewFace: true
-    };
-  } catch (error) {
-    console.error('Attendance error:', error);
     return {
       success: false,
-      message: 'Terjadi kesalahan saat memproses absensi'
+      message:
+        "Wajah tidak dikenali. Silakan daftarkan wajah Anda terlebih dahulu.",
+      isNewFace: true,
+    };
+  } catch (error) {
+    console.error("Attendance error:", error);
+    return {
+      success: false,
+      message: "Terjadi kesalahan saat memproses absensi",
     };
   }
 }
@@ -137,8 +149,8 @@ export async function handleAbsensi(formData: FormData): Promise<AttendanceRespo
 export async function getAttendanceRecords(): Promise<AttendanceRecord[]> {
   try {
     const client = await getMongoClientInstance();
-    const db = client.db('pesantren_db');
-    const attendanceCollection = db.collection('attendance');
+    const db = client.db("pesantren_db");
+    const attendanceCollection = db.collection("attendance");
 
     const records = await attendanceCollection
       .find({})
@@ -146,14 +158,121 @@ export async function getAttendanceRecords(): Promise<AttendanceRecord[]> {
       .toArray();
 
     // Convert ObjectId to string and Binary photo to base64
-    return records.map(record => ({
+    return records.map((record) => ({
       _id: record._id.toString(),
       name: record.name,
       timestamp: record.timestamp,
-      photo: record.photo.buffer.toString('base64')
+      photo: record.photo.buffer.toString("base64"),
     })) as AttendanceRecord[];
   } catch (error) {
-    console.error('Error fetching attendance records:', error);
+    console.error("Error fetching attendance records:", error);
+    return [];
+  }
+}
+
+export async function getAdminAttendanceRecords(): Promise<AttendanceRecord[]> {
+  try {
+    console.log("Starting to fetch admin attendance records...");
+    const client = await getMongoClientInstance();
+    const db = client.db("pesantren_db");
+    const attendanceCollection = db.collection("admin_attendance");
+
+    console.log("Executing admin attendance aggregation...");
+    const pipeline = [
+      {
+        $lookup: {
+          from: "users",
+          localField: "admin_id",
+          foreignField: "_id",
+          as: "user_info",
+        },
+      },
+      {
+        $unwind: "$user_info",
+      },
+    ];
+
+    const records = await attendanceCollection
+      .aggregate(pipeline)
+      .sort({ date: -1 })
+      .toArray();
+
+    console.log("Raw admin records:", JSON.stringify(records, null, 2));
+
+    const mappedRecords = records.map((record) => ({
+      _id: record._id.toString(),
+      name: record.user_info.name,
+      timestamp: record.date,
+      photo: record.photo,
+    }));
+
+    console.log(
+      "Mapped admin records:",
+      JSON.stringify(mappedRecords, null, 2)
+    );
+    return mappedRecords as AttendanceRecord[];
+  } catch (error) {
+    console.error("Error fetching admin attendance records:", error);
+    return [];
+  }
+}
+
+export async function getTeacherAttendanceRecords(): Promise<
+  AttendanceRecord[]
+> {
+  try {
+    console.log("Starting to fetch teacher attendance records...");
+    const client = await getMongoClientInstance();
+    const db = client.db("pesantren_db");
+    const attendanceCollection = db.collection("teacher_attendance");
+
+    console.log("Executing teacher attendance aggregation...");
+    const pipeline = [
+      {
+        $lookup: {
+          from: "teachers",
+          localField: "teacher_id",
+          foreignField: "_id",
+          as: "teacher_info",
+        },
+      },
+      {
+        $unwind: "$teacher_info",
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "teacher_info.user_id",
+          foreignField: "_id",
+          as: "user_info",
+        },
+      },
+      {
+        $unwind: "$user_info",
+      },
+    ];
+
+    const records = await attendanceCollection
+      .aggregate(pipeline)
+      .sort({ date: -1 })
+      .toArray();
+
+    console.log("Raw teacher records:", JSON.stringify(records, null, 2));
+
+    const mappedRecords = records.map((record) => ({
+      _id: record._id.toString(),
+      name: record.user_info.name,
+      timestamp: record.date,
+      photo: record.photo,
+    }));
+
+    console.log(
+      "Mapped teacher records:",
+      JSON.stringify(mappedRecords, null, 2)
+    );
+    return mappedRecords as AttendanceRecord[];
+  } catch (error) {
+    console.error("Error fetching teacher attendance records:", error);
     return [];
   }
 }

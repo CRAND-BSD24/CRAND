@@ -13,6 +13,7 @@ interface Student {
 
 const PsbPage = () => {
   const [students, setStudents] = useState<Student[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchStudents = async () => {
     const response = await getAllStudents();
@@ -23,6 +24,10 @@ const PsbPage = () => {
   useEffect(() => {
     fetchStudents();
   }, []);
+
+  const filteredStudents = students.filter((student) =>
+    student.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleAccept = async (id: string) => {
     const confirmed = confirm("Yakin ingin menerima santri ini?");
@@ -66,26 +71,34 @@ const PsbPage = () => {
           <AddStudentModal onStudentAdded={fetchStudents} />
         </div>
 
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Cari nama santri..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-2 border border-[#9ACBD0] rounded-md focus:outline-none focus:ring-2 focus:ring-[#48A6A7] transition"
+          />
+        </div>
+
         <div className="overflow-x-auto">
           <table className="w-full text-left border-separate border-spacing-y-2">
             <thead>
               <tr className="bg-[#48A6A7] text-white">
                 <th className="px-4 py-3 rounded-l-md">#</th>
                 <th className="px-4 py-3">Nama</th>
-                <th className="px-4 py-3">Level</th>
                 <th className="px-4 py-3">Aksi</th>
                 <th className="px-4 py-3 rounded-r-md">Verifikasi</th>
               </tr>
             </thead>
             <tbody>
-              {students.map((student, index) => (
+              {filteredStudents.map((student, index) => (
                 <tr
                   key={student._id}
                   className="bg-[#f9fdfd] hover:bg-[#e0f4f4] transition-colors rounded-md shadow-sm"
                 >
                   <td className="px-4 py-3">{index + 1}</td>
                   <td className="px-4 py-3">{student.name}</td>
-                  <td className="px-4 py-3">{student.level}</td>
                   <td className="px-4 py-3">
                     <Link
                       href={`/admin/prospective_students/${student._id}`}
@@ -110,13 +123,13 @@ const PsbPage = () => {
                   </td>
                 </tr>
               ))}
-              {students.length === 0 && (
+              {filteredStudents.length === 0 && (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={4}
                     className="text-center py-6 text-[#006A71] italic bg-[#f0fafa] rounded-md"
                   >
-                    Tidak ada data santri.
+                    {searchQuery ? "Tidak ada hasil pencarian." : "Tidak ada data santri."}
                   </td>
                 </tr>
               )}
