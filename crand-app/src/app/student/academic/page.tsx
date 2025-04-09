@@ -20,17 +20,17 @@ interface AcademicData {
 }
 
 const AcademicPage = () => {
-  const [academic, setAcademic] = useState<AcademicData | null>(null);
+  const [academics, setAcademics] = useState<AcademicData[]>([]);
 
   const fetchAcademicData = async () => {
     try {
       const data = await getAcademicByStudentId();
-      console.log(data, '<<< ini data dari akademik student');
+      console.log(data, "<<< ini data dari akademik student");
 
       if (data) {
-        setAcademic(data);
+        setAcademics(data);
       } else {
-        setAcademic(null);
+        setAcademics([]);
       }
     } catch (error) {
       console.error("Gagal mengambil data akademik:", error);
@@ -48,15 +48,42 @@ const AcademicPage = () => {
           Nilai Akademik Santri
         </h1>
 
-        {academic ? (
+        {academics.length > 0 ? (
           <div className="space-y-4 text-[#006A71]">
-            <p><strong>Nama:</strong> {academic.student_info?.name}</p>
-            <p><strong>Semester:</strong> {academic.semester}</p>
-            <p><strong>Tahun Ajaran:</strong> {academic.academic_year}</p>
-            <p><strong>Nilai:</strong> {academic.score}</p>
-            <p className="text-sm text-gray-600">
-              Diperbarui: {new Date(academic.updated_at).toLocaleString()}
-            </p>
+            {academics.map((academic) => (
+              <div
+                key={academic._id}
+                className="bg-white shadow-md rounded-lg overflow-hidden"
+              >
+                <div className="p-4">
+                  <h2 className="text-xl font-semibold mb-2">
+                    {academic.student_info?.name}
+                  </h2>
+                  <table className="min-w-full bg-white">
+                    <tbody>
+                      <tr>
+                        <td className="py-2 px-4 font-medium">Semester:</td>
+                        <td className="py-2 px-4">{academic.semester}</td>
+                      </tr>
+                      <tr className="bg-gray-50">
+                        <td className="py-2 px-4 font-medium">Tahun Ajaran:</td>
+                        <td className="py-2 px-4">{academic.academic_year}</td>
+                      </tr>
+                      <tr>
+                        <td className="py-2 px-4 font-medium">Nilai:</td>
+                        <td className="py-2 px-4">{academic.score}</td>
+                      </tr>
+                      <tr className="bg-gray-50">
+                        <td className="py-2 px-4 font-medium">Diperbarui:</td>
+                        <td className="py-2 px-4">
+                          {new Date(academic.updated_at).toLocaleString()}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
           <p className="text-center text-[#006A71] italic">

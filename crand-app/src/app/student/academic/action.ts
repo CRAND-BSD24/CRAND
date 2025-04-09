@@ -21,7 +21,14 @@ interface AcademicData {
   };
 }
 
-export const getAcademicByStudentId = async (): Promise<AcademicData | null> => {
+const isValidDate = (date: any) => {
+  const parsedDate = new Date(date);
+  return !isNaN(parsedDate.getTime());
+};
+
+export const getAcademicByStudentId = async (): Promise<
+  AcademicData[] | null
+> => {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
@@ -40,55 +47,64 @@ export const getAcademicByStudentId = async (): Promise<AcademicData | null> => 
 
   if (!student) return null;
 
-  const result = await db.collection("grades").aggregate([
-    {
-      $match: {
-        student_id: student._id,
-      },
-    },
-    {
-      $lookup: {
-        from: "students",
-        localField: "student_id",
-        foreignField: "_id",
-        as: "student_info",
-      },
-    },
-    { $unwind: "$student_info" },
-    {
-      $project: {
-        _id: 1,
-        student_id: 1,
-        subject_id: 1,
-        semester: 1,
-        academic_year: 1,
-        score: 1,
-        created_at: 1,
-        updated_at: 1,
-        student_info: {
-          name: "$student_info.name",
-          class_id: "$student_info.class_id",
-          academic_level: "$student_info.academic_level",
+  const results = await db
+    .collection("grades")
+    .aggregate([
+      {
+        $match: {
+          student_id: student._id,
         },
       },
-    },
-    { $limit: 1 },
-  ]).toArray();
+      {
+        $lookup: {
+          from: "students",
+          localField: "student_id",
+          foreignField: "_id",
+          as: "student_info",
+        },
+      },
+      { $unwind: "$student_info" },
+      {
+        $project: {
+          _id: 1,
+          student_id: 1,
+          subject_id: 1,
+          semester: 1,
+          academic_year: 1,
+          score: 1,
+          created_at: 1,
+          updated_at: 1,
+          student_info: {
+            name: "$student_info.name",
+            class_id: { $toString: "$student_info.class_id" },
+            academic_level: "$student_info.academic_level",
+          },
+        },
+      },
+    ])
+    .toArray();
 
-  const doc = result[0];
-  if (!doc) return null;
+  console.log(results, "results");
 
-  const academic: AcademicData = {
+  const academics: AcademicData[] = results.map((doc) => ({
     _id: doc._id.toString(),
     student_id: doc.student_id.toString(),
     subject_id: doc.subject_id.toString(),
     semester: doc.semester,
     academic_year: doc.academic_year,
-    score: parseFloat(doc.score?.toString() || "0"), // ✅ Konversi score
-    created_at: new Date(doc.created_at).toISOString(),
-    updated_at: new Date(doc.updated_at).toISOString(),
-    student_info: doc.student_info,
-  };
+    score: parseFloat(doc.score?.toString() || "0"),
+    created_at: isValidDate(doc.created_at)
+      ? new Date(doc.created_at).toISOString()
+      : "Invalid Date",
+    updated_at: isValidDate(doc.updated_at)
+      ? new Date(doc.updated_at).toISOString()
+      : "Invalid Date",
+    student_info: {
+      name: doc.student_info.name,
+      class_id: doc.student_info.class_id,
+      academic_level: doc.student_info.academic_level,
+    },
+  }));
 
-  return academic;
+  return academics;
 };
