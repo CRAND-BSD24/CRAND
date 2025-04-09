@@ -30,6 +30,13 @@ export interface AttendanceData {
   status: "Present" | "Sick" | "Permission" | "Absent";
 }
 
+export interface AttendanceHistory {
+  id: string;
+  date: Date;
+  status: "Present" | "Sick" | "Permission" | "Absent";
+  created_at: Date;
+}
+
 export async function createAttendance(data: AttendanceData) {
   const client = await getMongoClientInstance();
   const db = client.db("pesantren_db");
@@ -153,6 +160,51 @@ export async function getAttendanceStatus(studentIds: string[]) {
     return statusMap;
   } catch (error) {
     console.error("Error fetching attendance status:", error);
+    throw error;
+  }
+}
+
+export async function getAttendanceHistory(
+  studentId: string,
+  startDate?: Date,
+  endDate?: Date
+): Promise<AttendanceHistory[]> {
+  const client = await getMongoClientInstance();
+  const db = client.db("pesantren_db");
+
+  try {
+    const matchStage: any = {
+      student_id: new ObjectId(studentId)
+    };
+
+    // Add date range filter if provided
+    if (startDate && endDate) {
+      matchStage.date = {
+        $gte: startDate,
+        $lte: endDate
+      };
+    }
+
+    const result = await db
+      .collection("class_attendance")
+      .aggregate([
+        {
+          $match: matchStage
+        },
+        {
+          $sort: { date: -1 }
+        }
+      ])
+      .toArray();
+
+    return result.map((doc) => ({
+      id: doc._id.toString(),
+      date: doc.date,
+      status: doc.status,
+      created_at: doc.created_at
+    }));
+  } catch (error) {
+    console.error("Error fetching attendance history:", error);
     throw error;
   }
 }

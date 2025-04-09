@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Pencil, History, Plus } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -63,12 +63,7 @@ const MemorizationPage = () => {
   const { toast } = useToast();
   const [currentWeek, setCurrentWeek] = useState(new Date());
 
-  useEffect(() => {
-    fetchMemorizationData();
-    fetchJuzList();
-  }, []);
-
-  const fetchMemorizationData = async () => {
+  const fetchMemorizationData = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getStudentMemorization();
@@ -85,9 +80,9 @@ const MemorizationPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
-  const fetchJuzList = async () => {
+  const fetchJuzList = useCallback(async () => {
     try {
       const response = await fetch("/api/quran-memorization");
       if (!response.ok) {
@@ -104,7 +99,12 @@ const MemorizationPage = () => {
         description: "Gagal memuat daftar juz",
       });
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchMemorizationData();
+    fetchJuzList();
+  }, [fetchMemorizationData, fetchJuzList]);
 
   const handleEditClick = (student: MemorizationStudent) => {
     setEditingStudent({
@@ -625,20 +625,20 @@ const MemorizationPage = () => {
                     >
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button
+                      <Button
                       variant="outline"
-                      size="sm"
+                        size="sm"
                       onClick={() => handleAddClick(student)}
-                    >
+                      >
                       <Plus className="h-4 w-4" />
-                    </Button>
-                    <Button
+                      </Button>
+                      <Button
                       variant="outline"
-                      size="sm"
+                        size="sm"
                       onClick={() => handleHistoryClick(student)}
-                    >
+                      >
                       <History className="h-4 w-4" />
-                    </Button>
+                      </Button>
                   </TableCell>
                 </TableRow>
               ))}
