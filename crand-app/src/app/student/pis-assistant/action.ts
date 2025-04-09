@@ -20,12 +20,10 @@ function getGenderDisplay(gender: string | undefined): string {
     default: return 'Tidak Diketahui';
   }
 }
-
 // Fetches context specifically for the logged-in student
-async function getDatabaseContextForStudent(db: any, userId: string | ObjectId, normalizedQuestion: string, question: string): Promise<string | null> {
+async function getDatabaseContextForStudent(db: Db, userId: string | ObjectId, normalizedQuestion: string): Promise<string | null> {
     try {
         const studentId = new ObjectId(userId); // Assuming student uses the user ID directly or has a link
-        // Alternatively, find student based on email/other unique identifier from session
 
         // --- Query 1: Get Logged-in Student's Basic Info --- 
         const student = await db.collection('students').findOne({ _id: studentId }); // Or based on user relationship
