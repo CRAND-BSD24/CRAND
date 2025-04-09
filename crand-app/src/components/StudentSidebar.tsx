@@ -33,6 +33,11 @@ const StudentSidebar = () => {
                                 Profil
                             </Link>
                         </li>
+                        <li className="mb-4">
+                            <Link href="/student/pis-assistant" className="hover:text-gray-300">
+                                PIS Assistant
+                            </Link>
+                        </li>
                     </ul>
                 </div>
                 <div className="mt-auto">

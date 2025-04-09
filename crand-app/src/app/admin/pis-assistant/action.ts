@@ -1,17 +1,12 @@
 'use server';
 
 import { getMongoClientInstance } from "@/db/config/connection";
-import { Student, Achievement } from '@/types/database';
-import { ObjectId, Document, WithId } from 'mongodb';
+import { AcademicRecord } from '@/types/database';
+import { ObjectId } from 'mongodb';
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 
-interface AchievementWithStudent extends Achievement {
-  student: Student;
-}
-
-interface ClassDistribution {
-  _id: string;
-  count: number;
-}
+const MODEL_NAME = "gemini-1.5-flash"; 
+const API_KEY = process.env.GOOGLE_GEMINI_API_KEY;
 
 // Helper function to get gender display text
 function getGenderDisplay(gender: string | undefined): string {
@@ -32,15 +27,14 @@ function getGenderDisplay(gender: string | undefined): string {
   }
 }
 
-export async function processQuestion(question: string): Promise<string> {
-  try {
-    const client = await getMongoClientInstance();
-    const db = client.db("pesantren_db");
-    const normalizedQuestion = question.toLowerCase();
+// Using any for db type until Db is exported from connection
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function getDatabaseContextForAdmin(db: any, normalizedQuestion: string, question: string): Promise<string | null> {
+    // This function contains the previous database querying logic
+    // It returns a formatted string with the context or null if no specific query matches
 
     // Handle questions about specific student
     if (normalizedQuestion.includes('santri bernama') || normalizedQuestion.includes('info santri')) {
-      // Extract the name more accurately
       let studentName;
       if (normalizedQuestion.includes('santri bernama')) {
         studentName = question.split('santri bernama')[1].trim();
@@ -49,90 +43,37 @@ export async function processQuestion(question: string): Promise<string> {
       }
 
       if (studentName) {
-        console.log("Searching for student:", studentName); // Debug log
+          console.log("[Admin Context] Fetching context for student:", studentName);
+          const student = await db.collection('students').findOne({ name: { $regex: `.*${studentName}.*`, $options: 'i' } });
+          if (!student) return `Tidak ada data santri dengan nama "${studentName}".`;
 
-        // Find the student with case-insensitive name search
-        const student = await db.collection('students').findOne({
-          name: { $regex: `.*${studentName}.*`, $options: 'i' }
-        });
-
-        console.log("Found student:", student); // Debug log
-
-        if (!student) {
-          return `Maaf, tidak dapat menemukan data santri dengan nama "${studentName}".`;
-        }
-
-        // Get student's achievements
-        const achievements = await db.collection('achievements')
-          .find({
-            studentId: new ObjectId(student._id)
-          })
-          .sort({ date: -1 })
-          .limit(3)
-          .toArray();
-
-        // Get student's academic records
-        const academicRecords = await db.collection('academic_records')
-          .find({
-            studentId: new ObjectId(student._id)
-          })
-          .sort({ year: -1, semester: -1 })
-          .limit(1)
-          .toArray();
-
-        // Get student's attendance
-        const currentMonth = new Date();
-        currentMonth.setDate(1);
-        const attendance = await db.collection('attendance')
-          .find({
-            studentId: new ObjectId(student._id),
-            date: { $gte: currentMonth }
-          })
-          .toArray();
-
-        let response = `Informasi tentang santri ${student.name}:\n\n`;
-        response += `Kelas: ${student.class}\n`;
-        response += `Status: ${student.status}\n`;
-        response += `Jenis Kelamin: ${getGenderDisplay(student.gender)}\n`;
-        if (student.enrollmentDate) {
-          response += `Tanggal Masuk: ${new Date(student.enrollmentDate).toLocaleDateString('id-ID')}\n`;
-        }
-        response += '\n';
-        
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const achievements: any[] = await db.collection('achievements').find({ studentId: new ObjectId(student._id) }).sort({ date: -1 }).limit(3).toArray();
+          const academicRecords: AcademicRecord[] = await db.collection('academic_records').find({ studentId: new ObjectId(student._id) }).sort({ year: -1, semester: -1 }).limit(1).toArray();
+          const currentMonth = new Date(); currentMonth.setDate(1);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const attendance: any[] = await db.collection('attendance').find({ studentId: new ObjectId(student._id), date: { $gte: currentMonth } }).toArray();
+          
+          let context = `Konteks Data Santri ${student.name}:\n`;
+          context += `Kelas: ${student.class}, Status: ${student.status}, Jenis Kelamin: ${getGenderDisplay(student.gender)}\n`;
+          if (student.enrollmentDate) context += `Tanggal Masuk: ${new Date(student.enrollmentDate).toLocaleDateString('id-ID')}\n`;
         if (achievements.length > 0) {
-          response += 'Prestasi terakhir:\n';
-          achievements.forEach((achievement, index) => {
-            response += `${index + 1}. ${achievement.title}\n`;
-            if (achievement.description) {
-              response += `   Detail: ${achievement.description}\n`;
-            }
-            response += `   Kategori: ${achievement.category}\n`;
-            response += `   Tingkat: ${achievement.level}\n`;
-            if (achievement.date) {
-              response += `   Tanggal: ${new Date(achievement.date).toLocaleDateString('id-ID')}\n`;
-            }
-          });
-          response += '\n';
-        }
-
-        if (academicRecords.length > 0) {
-          const latestRecord = academicRecords[0];
-          response += `Akademik (${latestRecord.semester} ${latestRecord.year}):\n`;
-          response += `Rata-rata: ${latestRecord.average?.toFixed(2) || 'Belum ada'}\n`;
-          if (latestRecord.rank) {
-            response += `Peringkat: ${latestRecord.rank}\n`;
+            context += 'Prestasi:\n';
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            achievements.forEach((ach: any, i: number) => context += `${i + 1}. ${ach.title} (${ach.category}, ${ach.level}, ${ach.date ? new Date(ach.date).toLocaleDateString('id-ID') : 'N/A'})\n`);
           }
-          response += '\n';
-        }
-
+        if (academicRecords.length > 0) {
+            const rec: AcademicRecord = academicRecords[0];
+            context += `Akademik (${rec.semester} ${rec.year}): Rata-rata ${rec.average?.toFixed(2) || 'N/A'}, Peringkat ${rec.rank || 'N/A'}\n`;
+          }
         if (attendance.length > 0) {
-          const present = attendance.filter(a => a.status === 'present').length;
+             // eslint-disable-next-line @typescript-eslint/no-explicit-any
+             const present = attendance.filter((a: any) => a.status === 'present').length;
           const total = attendance.length;
-          const percentage = (present / total * 100).toFixed(1);
-          response += `Kehadiran bulan ini: ${percentage}% (${present}/${total} hari)\n`;
-        }
-
-        return response;
+             const percentage = total > 0 ? (present / total * 100).toFixed(1) : '0';
+             context += `Kehadiran bulan ini: ${percentage}% (${present}/${total})\n`;
+           }
+          return context;
       }
     }
 
@@ -146,303 +87,151 @@ export async function processQuestion(question: string): Promise<string> {
       }
 
       if (teacherName) {
-        console.log("Searching for teacher:", teacherName); // Debug log
+         console.log("[Admin Context] Fetching context for teacher:", teacherName);
+         const teacher = await db.collection('teachers').findOne({ name: { $regex: `.*${teacherName}.*`, $options: 'i' } }) || 
+                         await db.collection('users').findOne({ name: { $regex: `.*${teacherName}.*`, $options: 'i' }, role: { $in: ["teacher", "ustadz", "ustadzah", "guru"] } });
+                         
+         if (!teacher) return `Tidak ada data ustadz dengan nama "${teacherName}".`;
 
-        try {
-          // Try different collections to find the teacher
-          let allTeachers: any[] = [];
-          
-          // Get collections available in the database
-          const collections = await db.listCollections().toArray();
-          const collectionNames = collections.map(c => c.name);
-          console.log("Available collections:", collectionNames);
-          
-          // Check teachers collection
-          if (collectionNames.includes("teachers")) {
-            const teachersData = await db.collection("teachers").find({}).toArray();
-            console.log(`Found ${teachersData.length} records in teachers collection`);
-            allTeachers = [...allTeachers, ...teachersData];
-          }
-          
-          // Check teacher collection (singular)
-          if (collectionNames.includes("teacher")) {
-            const teacherData = await db.collection("teacher").find({}).toArray();
-            console.log(`Found ${teacherData.length} records in teacher collection`);
-            allTeachers = [...allTeachers, ...teacherData];
-          }
-          
-          // Check users collection for teachers
-          if (collectionNames.includes("users")) {
-            // Try different strategies to find teachers in users collection
-            // Strategy 1: Look for role field
-            const teacherUsers = await db.collection("users").find({ 
-              $or: [
-                { role: { $in: ["teacher", "ustadz", "ustadzah", "guru"] } },
-                { userType: { $in: ["teacher", "ustadz", "ustadzah", "guru"] } }
-              ]
-            }).toArray();
-            
-            // Strategy 2: If no teachers found with roles, check if there's any type indicator
-            if (teacherUsers.length === 0) {
-              const allUsers = await db.collection("users").find({}).toArray();
-              const potentialTeachers = allUsers.filter(user => {
-                // Look for any field that might indicate this is a teacher
-                return Object.values(user).some(value => 
-                  typeof value === 'string' && 
-                  ["teacher", "ustadz", "ustadzah", "guru"].some(term => 
-                    value.toLowerCase().includes(term)
-                  )
-                );
-              });
-              console.log(`Found ${potentialTeachers.length} potential teachers in users collection`);
-              allTeachers = [...allTeachers, ...potentialTeachers];
-            } else {
-              console.log(`Found ${teacherUsers.length} teachers in users collection`);
-              allTeachers = [...allTeachers, ...teacherUsers];
-            }
-          }
-          
-          console.log(`Combined total of ${allTeachers.length} teachers from all collections`);
-          
-          // Remove duplicates (if any) based on _id or name
-          const uniqueTeachers = allTeachers.filter((teacher, index, self) => {
-            if (!teacher._id && !teacher.name) return false;
-            
-            // If we have _id, use that for uniqueness
-            if (teacher._id) {
-              return index === self.findIndex(t => 
-                t._id && t._id.toString() === teacher._id.toString()
-              );
-            }
-            
-            // Otherwise use name
-            return index === self.findIndex(t => 
-              t.name && teacher.name && t.name.toLowerCase() === teacher.name.toLowerCase()
-            );
-          });
-          
-          console.log(`Found ${uniqueTeachers.length} unique teachers after deduplication`);
-          
-          // Try multiple search strategies
-          let matchedTeacher = null;
-          
-          if (uniqueTeachers.length > 0) {
-            matchedTeacher = uniqueTeachers.find(t => {
-              if (!t.name) return false;
-              
-              // Try exact match first
-              if (t.name.toLowerCase() === teacherName.toLowerCase()) {
-                return true;
-              }
-              
-              // Try partial match
-              if (t.name.toLowerCase().includes(teacherName.toLowerCase())) {
-                return true;
-              }
-              
-              // Try splitting the name and matching parts
-              const nameParts = t.name.toLowerCase().split(' ');
-              const searchParts = teacherName.toLowerCase().split(' ');
-              return nameParts.some((part: string) => searchParts.includes(part));
-            });
-          }
-          
-          if (!matchedTeacher) {
-            console.log("No teacher found with name:", teacherName);
-            if (uniqueTeachers.length > 0) {
-              console.log("Available teachers:", uniqueTeachers.map(t => t.name).join(', '));
-            } else {
-              console.log("No teachers found in any collection");
-            }
-            return `Maaf, tidak dapat menemukan data ustadz dengan nama "${teacherName}".`;
-          }
-          
-          console.log("Matched teacher:", JSON.stringify(matchedTeacher, null, 2));
-          
-          let response = `Informasi tentang ${matchedTeacher.name}:\n\n`;
-          
-          // Create a normalized object with standard field names
-          const teacher = {
-            name: matchedTeacher.name,
-            position: matchedTeacher.position || matchedTeacher.jabatan || matchedTeacher.title || matchedTeacher.role || "Guru",
-            status: matchedTeacher.status || "Aktif",
-            joinDate: matchedTeacher.joinDate || matchedTeacher.join_date || matchedTeacher.tanggalBergabung || matchedTeacher.created_at,
-            phone: matchedTeacher.phone || matchedTeacher.phoneNumber || matchedTeacher.telepon || matchedTeacher.noTelepon,
-            email: matchedTeacher.email,
-            specialization: matchedTeacher.specialization || matchedTeacher.keahlian || matchedTeacher.expertise || matchedTeacher.subject,
-            address: matchedTeacher.address || matchedTeacher.alamat,
-          };
-          
-          // Add all available fields from the teacher object
-          if (teacher.position) {
-            response += `Jabatan: ${teacher.position}\n`;
-          }
-          
-          if (teacher.status) {
-            response += `Status: ${teacher.status}\n`;
-          }
-          
-          if (teacher.joinDate) {
-            const date = new Date(teacher.joinDate);
-            if (!isNaN(date.getTime())) {
-              response += `Tanggal Bergabung: ${date.toLocaleDateString('id-ID')}\n`;
-            }
-          }
-          
-          if (teacher.phone) {
-            response += `Nomor Telepon: ${teacher.phone}\n`;
-          }
-          
-          if (teacher.email) {
-            response += `Email: ${teacher.email}\n`;
-          }
-          
-          if (teacher.specialization) {
-            response += `Spesialisasi: ${teacher.specialization}\n`;
-          }
-          
-          if (teacher.address) {
-            response += `Alamat: ${teacher.address}\n`;
-          }
-
-          return response;
-        } catch (error) {
-          console.error("Error fetching teacher data:", error);
-          return `Maaf, terjadi kesalahan saat mencari data ustadz dengan nama "${teacherName}".`;
-        }
+         let context = `Konteks Data Ustadz ${teacher.name}:\n`;
+         if (teacher.position) context += `Jabatan: ${teacher.position}\n`;
+         if (teacher.status) context += `Status: ${teacher.status}\n`;
+         if (teacher.joinDate) context += `Tanggal Bergabung: ${new Date(teacher.joinDate).toLocaleDateString('id-ID')}\n`;
+         if (teacher.phone) context += `Telepon: ${teacher.phone}\n`;
+         if (teacher.email) context += `Email: ${teacher.email}\n`;
+         if (teacher.specialization) context += `Spesialisasi: ${teacher.specialization}\n`;
+         return context;
       }
     }
 
     // Handle questions about total students
     if (normalizedQuestion.includes('jumlah santri') || normalizedQuestion.includes('total santri')) {
+      console.log("[Admin Context] Fetching context for total students");
       const totalStudents = await db.collection('students').countDocuments();
-      const statusCounts = await db.collection('students').aggregate([
-        {
-          $group: {
-            _id: '$status',
-            count: { $sum: 1 }
-          }
-        }
-      ]).toArray();
-
-      let response = `Total santri terdaftar: ${totalStudents} orang\n\n`;
-      response += "Detail status santri:\n";
-      statusCounts.forEach(status => {
-        response += `${status._id}: ${status.count} orang\n`;
-      });
-
-      return response;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const statusCounts: any[] = await db.collection('students').aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]).toArray();
+      let context = `Konteks Jumlah Santri: Total ${totalStudents} orang.\n`;
+      context += "Detail Status:\n";
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      statusCounts.forEach((s: any) => context += `${s._id}: ${s.count}\n`);
+      return context;
     }
 
     // Handle questions about total teachers
     if (normalizedQuestion.includes('jumlah ustadz') || normalizedQuestion.includes('total ustadz')) {
-      try {
-        // Count teachers from multiple collections
-        let totalTeachers = 0;
-        const statusMap = new Map();
-        
-        // Get collections available in the database
-        const collections = await db.listCollections().toArray();
-        const collectionNames = collections.map(c => c.name);
-        
-        // Check teachers collection
-        if (collectionNames.includes("teachers")) {
-          const teachers = await db.collection("teachers").find({}).toArray();
-          totalTeachers += teachers.length;
-          
-          // Count by status
-          teachers.forEach(teacher => {
-            const status = teacher.status || 'Aktif';
-            statusMap.set(status, (statusMap.get(status) || 0) + 1);
-          });
-        }
-        
-        // Check teacher collection (singular)
-        if (collectionNames.includes("teacher")) {
-          const teachers = await db.collection("teacher").find({}).toArray();
-          totalTeachers += teachers.length;
-          
-          // Count by status
-          teachers.forEach(teacher => {
-            const status = teacher.status || 'Aktif';
-            statusMap.set(status, (statusMap.get(status) || 0) + 1);
-          });
-        }
-        
-        // Check users collection for teachers
-        if (collectionNames.includes("users")) {
-          const teacherUsers = await db.collection("users").find({ 
-            $or: [
-              { role: { $in: ["teacher", "ustadz", "ustadzah", "guru"] } },
-              { userType: { $in: ["teacher", "ustadz", "ustadzah", "guru"] } }
-            ]
-          }).toArray();
-          
-          totalTeachers += teacherUsers.length;
-          
-          // Count by status
-          teacherUsers.forEach(teacher => {
-            const status = teacher.status || 'Aktif';
-            statusMap.set(status, (statusMap.get(status) || 0) + 1);
-          });
-        }
-        
-        let response = `Total ustadz terdaftar: ${totalTeachers} orang\n\n`;
-        
-        if (statusMap.size > 0) {
-          response += "Detail status ustadz:\n";
-          statusMap.forEach((count, status) => {
-            response += `${status}: ${count} orang\n`;
-          });
-        }
-        
-        return response;
-      } catch (error) {
-        console.error("Error fetching teacher count:", error);
-        return "Maaf, terjadi kesalahan saat mengambil data jumlah ustadz.";
-      }
+      console.log("[Admin Context] Fetching context for total teachers");
+      const totalTeachers = await db.collection('teachers').countDocuments() + await db.collection('users').countDocuments({ role: { $in: ["teacher", "ustadz", "ustadzah", "guru"] } });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const statusCounts: any[] = await db.collection('teachers').aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]).toArray();
+      let context = `Konteks Jumlah Ustadz: Total ${totalTeachers} orang.\n`;
+      context += "Detail Status (dari collection 'teachers'):\n";
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      statusCounts.forEach((s: any) => context += `${s._id || 'Aktif'}: ${s.count}\n`);
+      return context;
     }
 
     // Handle questions about class distribution
     if (normalizedQuestion.includes('kelas') || normalizedQuestion.includes('tingkat')) {
-      const classDistribution = await db.collection('students')
-        .aggregate<ClassDistribution>([
-          {
-            $group: {
-              _id: '$class',
-              count: { $sum: 1 }
-            }
-          },
-          {
-            $sort: { _id: 1 }
-          }
-        ]).toArray();
-
-      if (classDistribution.length === 0) {
-        return "Tidak ada data distribusi kelas yang tersedia.";
-      }
-
-      let response = "Distribusi santri per kelas:\n\n";
+      console.log("[Admin Context] Fetching context for class distribution");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const classDistribution: any[] = await db.collection('students').aggregate([ { $group: { _id: '$class', count: { $sum: 1 } } }, { $sort: { _id: 1 } } ]).toArray();
+      if (classDistribution.length === 0) return "Tidak ada data distribusi kelas.";
+      let context = "Konteks Distribusi Kelas:\n";
       let totalSantri = 0;
-      classDistribution.forEach(cls => {
-        response += `Kelas ${cls._id}: ${cls.count} santri\n`;
-        totalSantri += cls.count;
-      });
-      response += `\nTotal santri: ${totalSantri} orang`;
-
-      return response;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      classDistribution.forEach((cls: any) => { context += `Kelas ${cls._id}: ${cls.count}\n`; totalSantri += cls.count; });
+      context += `Total Santri: ${totalSantri}`;
+      return context;
     }
 
-    // Default response for unrecognized questions
-    return `Maaf, saya tidak dapat memahami pertanyaan Anda. Anda dapat menanyakan tentang:
-1. Jumlah total santri dan status
-2. Jumlah total ustadz dan status
-3. Distribusi kelas
-4. Informasi santri tertentu (contoh: "info santri bernama Ahmad")
-5. Informasi ustadz tertentu (contoh: "info ustadz bernama Umar")`;
+    return null; // No specific context found
+}
 
-  } catch (error) {
-    console.error('Error processing question:', error);
-    throw error;
+export async function processQuestion(question: string): Promise<string> {
+  // --- IMPORTANT: Add session validation here for production --- 
+  // Example (needs adjustment based on your auth setup):
+  // const session = await getServerSession(authOptions); 
+  // if (!session || session.user.role !== 'admin') { 
+  //   return "❌ Error: Akses ditolak.";
+  // }
+  // console.log(`Processing question for admin: ${session.user.email}`);
+  // --------------------------------------------------------------
+
+  if (!API_KEY) {
+    return "❌ Error: GOOGLE_GEMINI_API_KEY tidak ditemukan di environment variables.";
+  }
+
+  try {
+    const client = await getMongoClientInstance();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const db: any = client.db("pesantren_db");
+    const normalizedQuestion = question.toLowerCase();
+
+    // 1. Get context from database (using admin/unrestricted function)
+    const dbContext = await getDatabaseContextForAdmin(db, normalizedQuestion, question);
+
+    // 2. Initialize Gemini AI
+    const genAI = new GoogleGenerativeAI(API_KEY);
+    const model = genAI.getGenerativeModel({ model: MODEL_NAME });
+
+    const generationConfig = {
+      temperature: 0.8, // Adjust for creativity vs factualness
+      topK: 1,
+      topP: 1,
+      maxOutputTokens: 2048,
+    };
+
+     const safetySettings = [
+       { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+       { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+       { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+       { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+     ];
+
+    // 3. Construct the prompt for Gemini (Admin specific potentially)
+    const systemPrompt = `Anda adalah PIS Assistant (Admin Access), asisten AI untuk sistem informasi pesantren. 
+Tugas Anda adalah menjawab pertanyaan pengguna (Admin) terkait data santri dan ustadz berdasarkan informasi yang ada di database pesantren.
+Anda memiliki akses penuh ke data. Gunakan konteks yang diberikan jika relevan.
+Selalu jawab dalam Bahasa Indonesia yang baik dan sopan.`;
+
+    let userPrompt = `Pertanyaan Pengguna (Admin): "${question}"`;
+    if (dbContext) {
+       userPrompt += `\n\nKonteks dari Database (Full Access):\n${dbContext}`;
+       console.log("[Admin Action] Sending context to Gemini:\n", dbContext);
+    } else {
+        console.log("[Admin Action] No specific database context found for Gemini.");
+    }
+
+    // 4. Call Gemini API
+    const chat = model.startChat({
+      generationConfig,
+      safetySettings,
+      history: [
+        { role: "user", parts: [{ text: systemPrompt }] },
+        { role: "model", parts: [{ text: "Baik, saya PIS Assistant (Admin). Siap membantu Anda." }] },
+      ],
+    });
+
+    console.log("[Admin Action] Sending prompt to Gemini:", userPrompt);
+    const result = await chat.sendMessage(userPrompt);
+    const response = result.response;
+    const assistantResponse = response.text();
+
+    console.log("[Admin Action] Gemini Raw Response:", JSON.stringify(response, null, 2));
+    console.log("[Admin Action] Gemini Text Response:", assistantResponse);
+
+    return assistantResponse || "Maaf, saya tidak dapat memproses permintaan Anda saat ini.";
+
+
+  } catch (error: unknown) { // Use unknown instead of any
+    console.error('[Admin Action] Error processing question with Gemini:', error);
+    let errorMessage = 'Error tidak diketahui';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+       if (errorMessage.includes('API key not valid')) {
+         return "❌ Error: Kunci API Google Gemini tidak valid. Silakan periksa konfigurasi.";
+       }
+    }
+    return `❌ Maaf, terjadi kesalahan saat menghubungi AI Assistant: ${errorMessage}`;
   }
 } 
