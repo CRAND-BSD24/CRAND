@@ -213,30 +213,35 @@ export const promoteStudentsByClassId = async (className: string) => {
     }
 
     const currentLevel = parseInt(numericMatch[0]);
+    const suffix = className.replace(numericMatch[0], ''); // Get the non-numeric part
 
     if (currentLevel >= 12) {
-      // Handle graduation for 12th-grade students
-      const result = await db.collection("students").updateMany(
-        { class_id: oldClass._id },
-        {
-          $set: {
-            class_id: null,
-            class_name: "-",
-            graduation_status: "Lulus",
-            updated_at: new Date()
-          }
-        }
-      );
-
-      console.log(`Graduated ${result.modifiedCount} students from class ${className}`);
-      return result.modifiedCount > 0;
+      console.log(`Class ${className} is already the highest level`);
+      return false;
     }
 
-    // For grades below 12, return false as promotion is not allowed
-    console.log(`Promotion is not allowed for class ${className}`);
-    return false;
+    const nextClassName = `${currentLevel + 1}${suffix}`;
+    const nextClass = await db.collection("classes").findOne({ class_name: nextClassName });
+
+    if (!nextClass) {
+      console.error(`Next class not found: ${nextClassName}`);
+      return false;
+    }
+
+    const result = await db.collection("students").updateMany(
+      { class_id: oldClass._id },
+      {
+        $set: {
+          class_id: nextClass._id,
+          updated_at: new Date()
+        }
+      }
+    );
+
+    console.log(`Promoted ${result.modifiedCount} students from ${className} to ${nextClassName}`);
+    return result.modifiedCount > 0;
   } catch (error) {
-    console.error("Error processing students:", error);
+    console.error("Error promoting students by class:", error);
     return false;
   }
 };
