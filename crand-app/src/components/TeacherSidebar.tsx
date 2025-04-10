@@ -108,7 +108,7 @@ const TeacherSidebar = () => {
         <div className="p-4 mt-auto" onClick={handleLinkClick}>
           <button
             onClick={handleLogout}
-            className="flex items-center px-3 py-2 rounded-md text-emerald-100/80 hover:bg-white/5 hover:text-white transition-all duration-200 w-full"
+            className="flex items-center bg-red-500 hover:bg-red-400 px-3 py-2 rounded-md text-emerald-100/80  hover:text-white transition-all duration-200 w-full"
           >
             <div className="flex items-center justify-center w-5 h-5 mr-3">
               <LogOut className="w-4 h-4" />
