@@ -276,9 +276,23 @@ export default function AttendanceButton({
     <div className="mb-6">
       <button
         onClick={toggleCamera}
-        className="w-full bg-[#48A6A7] text-white py-3 px-4 rounded-xl font-semibold hover:bg-[#3d9395] transition-all duration-300 mb-4"
+        className="w-full bg-emerald-800 text-white py-3 px-4 rounded-xl font-semibold hover:bg-emerald-700 transition-all duration-300 mb-4 flex items-center justify-center gap-2 shadow-md transform hover:scale-[1.02] active:scale-[0.98]"
       >
-        {isCameraActive ? "Matikan Kamera" : "Aktifkan Kamera"}
+        {isCameraActive ? (
+          <>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
+            </svg>
+            Matikan Kamera
+          </>
+        ) : (
+          <>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
+            </svg>
+            Aktifkan Kamera
+          </>
+        )}
       </button>
 
       {isCameraActive && (
@@ -287,25 +301,35 @@ export default function AttendanceButton({
             ref={videoRef}
             autoPlay
             playsInline
-            className="w-full rounded-xl border-2 border-gray-200"
+            className="w-full rounded-xl border-2 border-emerald-300 shadow-md bg-emerald-50"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent rounded-xl pointer-events-none"></div>
           <button
             onClick={capturePhoto}
-            className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white p-3 rounded-full hover:bg-red-600 transition-all duration-300"
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-emerald-800 text-white p-3 rounded-full hover:bg-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center w-14 h-14 hover:scale-105 active:scale-95"
+            aria-label="Ambil Foto"
           >
-            Ambil Foto
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+            </svg>
           </button>
+          <div className="absolute top-3 right-3 bg-emerald-800/80 text-white px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm">
+            Kamera Aktif
+          </div>
         </div>
       )}
 
       {selectedFile && (
-        <div className="mb-6 relative w-full h-64">
+        <div className="mb-6 mt-5 relative w-full h-64 group">
           <Image
             src={URL.createObjectURL(selectedFile)}
             alt="Preview"
             fill
-            className="rounded-xl border-2 border-gray-200 object-cover"
+            className="rounded-xl border-2 border-emerald-300 object-cover shadow-md transition-all duration-300 group-hover:shadow-lg"
           />
+          <div className="absolute top-3 right-3 bg-emerald-800/80 text-white px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm">
+            Foto Siap
+          </div>
         </div>
       )}
 
@@ -319,36 +343,57 @@ export default function AttendanceButton({
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full border-2 border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#48A6A7] focus:border-transparent"
+              className="w-full border-2 border-emerald-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all duration-200"
               required
+              placeholder="Masukkan nama lengkap Anda"
             />
           </div>
         )}
 
         <button
           type="submit"
-          className="w-full bg-[#48A6A7] text-white py-3 px-4 rounded-xl font-semibold hover:bg-[#3d9395] transition-all duration-300"
+          className="w-full bg-emerald-800 text-white py-3 px-4 rounded-xl font-semibold hover:bg-emerald-700 transition-all duration-300 flex items-center justify-center gap-2 shadow-md transform hover:scale-[1.02] active:scale-[0.98]"
         >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+          </svg>
           Submit Absensi
         </button>
       </form>
 
       {message && (
         <div
-          className={`mt-6 text-center text-sm font-semibold ${
-            isSuccess ? "text-green-600" : "text-red-500"
+          className={`mt-6 p-3 rounded-lg text-center text-sm font-semibold ${
+            isSuccess ? "bg-green-50 text-green-700 border border-green-200" : "bg-red-50 text-red-700 border border-red-200"
           }`}
         >
-          {message}
+          <div className="flex items-center justify-center gap-2">
+            {isSuccess ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            )}
+            {message}
+          </div>
         </div>
       )}
 
       {recognizedName && attendanceTime && (
-        <div className="mt-6 text-center">
-          <div className="text-lg font-semibold text-[#006A71]">
+        <div className="mt-6 p-4 text-center bg-emerald-50 rounded-xl border border-emerald-200 shadow-sm">
+          <div className="text-lg font-semibold text-emerald-800 flex items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
+            </svg>
             Selamat datang, {recognizedName}!
           </div>
-          <div className="text-sm text-gray-600 mt-2">
+          <div className="flex items-center justify-center gap-1 text-sm text-emerald-700 mt-2">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+            </svg>
             Waktu absen: {attendanceTime}
           </div>
         </div>
@@ -356,20 +401,41 @@ export default function AttendanceButton({
 
       {locationMessage && (
         <div
-          className={`mb-4 p-3 rounded-lg text-center ${
+          className={`mb-4 p-4 rounded-xl text-center shadow-sm border ${
             isWithinLocation
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
+              ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+              : "bg-red-50 text-red-700 border-red-200"
           }`}
         >
-          <div className="text-sm font-medium">Status Lokasi</div>
-          <div className="text-lg font-semibold mt-1">{locationMessage}</div>
+          <div className="text-sm font-medium flex items-center justify-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+            </svg>
+            Status Lokasi
+          </div>
+          <div className="text-lg font-semibold mt-1 flex items-center justify-center gap-2">
+            {isWithinLocation ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            )}
+            {locationMessage}
+          </div>
         </div>
       )}
 
       {submitTime && (
-        <div className="mb-4 p-3 rounded-lg bg-gray-100 text-gray-700 text-center">
-          <div className="text-sm font-medium">Waktu Absensi</div>
+        <div className="mb-4 p-4 rounded-xl bg-emerald-50 text-emerald-800 text-center border border-emerald-200 shadow-sm">
+          <div className="text-sm font-medium flex items-center justify-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+            </svg>
+            Waktu Absensi
+          </div>
           <div className="text-lg font-semibold mt-1">{submitTime}</div>
         </div>
       )}
