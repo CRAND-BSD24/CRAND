@@ -31,7 +31,7 @@ export default async function SantriDetailPage({ params }: SantriDetailPageProps
 
   return (
     <div className="bg-gradient-to-br from-emerald-50 to-teal-50 min-h-screen p-6">
-      <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-2xl p-8 mt-10">
+      <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl p-4 sm:p-8 sm:mt-12 relative z-0 mt-13">
         {/* Header with back button */}
         <div className="flex justify-between items-center mb-8">
           <Link
@@ -41,7 +41,7 @@ export default async function SantriDetailPage({ params }: SantriDetailPageProps
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
             </svg>
-            Kembali ke daftar calon santri
+            Kembali
           </Link>
           <div className="flex gap-3">
             <EditStudentModal student={student} />

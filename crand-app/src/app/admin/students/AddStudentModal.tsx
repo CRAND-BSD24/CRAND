@@ -193,8 +193,7 @@ export default function AddStudentModal({
     <>
       <button
         onClick={() => setIsOpen(true)}
-
-        className="bg-emerald-800 text-white px-6 py-2.5 rounded-lg font-semibold shadow-md hover:bg-emerald-700 transition-all duration-300 flex items-center gap-2"
+        className="bg-emerald-800 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-semibold shadow-md hover:bg-emerald-700 transition-all duration-300 flex items-center gap-2 w-full sm:w-auto justify-center"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -213,9 +212,9 @@ export default function AddStudentModal({
 
       {isOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-2xl p-4 sm:p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto mx-4 mt-20">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-emerald-800">
+              <h2 className="text-xl sm:text-2xl font-bold text-emerald-800">
                 Tambah Data Santri
               </h2>
               <button
@@ -239,7 +238,7 @@ export default function AddStudentModal({
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-6">
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
                   Nama Lengkap
@@ -249,57 +248,22 @@ export default function AddStudentModal({
                   name="name"
                   value={form.name}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                   required
+                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                 />
-
               </div>
-              <h2 className="text-xl font-bold text-emerald-800 mb-4">Tambah Data Santri</h2>
 
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
-                  NIS
+                  NISN
                 </label>
                 <input
                   type="text"
                   name="nisn"
                   value={form.nisn}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                   required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Jenis Kelamin
-                </label>
-                <select
-                  name="gender"
-                  value={form.gender}
-                  onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
-                  required
-                >
-                  <option value="" disabled>
-                    Pilih Jenis Kelamin
-                  </option>
-                  <option value="Laki-laki">Laki-laki</option>
-                  <option value="Perempuan">Perempuan</option>
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Tempat, Tanggal Lahir
-                </label>
-                <input
-                  type="text"
-                  name="birth_place_date"
-                  value={form.birth_place_date}
-                  onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
-                  required
+                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                 />
               </div>
 
@@ -312,36 +276,37 @@ export default function AddStudentModal({
                   name="email"
                   value={form.email}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
-                  required
+                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                 />
               </div>
 
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
-                  No HP
+                  Jenis Kelamin
+                </label>
+                <select
+                  name="gender"
+                  value={form.gender}
+                  onChange={handleChange}
+                  required
+                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
+                >
+                  <option value="">Pilih Jenis Kelamin</option>
+                  <option value="Laki-laki">Laki-laki</option>
+                  <option value="Perempuan">Perempuan</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Nomor Telepon
                 </label>
                 <input
                   type="tel"
                   name="phone_number"
                   value={form.phone_number}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2 col-span-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Alamat
-                </label>
-                <textarea
-                  name="address"
-                  value={form.address}
-                  onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
-                  rows={3}
-                  required
+                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                 />
               </div>
 
@@ -354,22 +319,7 @@ export default function AddStudentModal({
                   name="father_name"
                   value={form.father_name}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Nama Ibu
-                </label>
-                <input
-                  type="text"
-                  name="mother_name"
-                  value={form.mother_name}
-                  onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
-                  required
+                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                 />
               </div>
 
@@ -382,32 +332,8 @@ export default function AddStudentModal({
                   name="academic_year"
                   value={form.academic_year}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
-                  required
+                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                 />
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Tingkat Akademik
-                </label>
-                <select
-                  name="academic_level"
-                  value={form.academic_level}
-                  onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
-                  required
-                >
-                  <option value="" disabled>
-                    Pilih Tingkat Akademik
-                  </option>
-                  <option value="Ula">Ula</option>
-                  <option value="Wustho">Wustho</option>
-                  <option value="Ulya">Ulya</option>
-                  <option value="SMP Formal">SMP Formal</option>
-                  <option value="Aliyah Agama">Aliyah Agama</option>
-                  <option value="Aliyah IPA">Aliyah IPA</option>
-                </select>
               </div>
 
               <div className="space-y-2">
@@ -418,16 +344,30 @@ export default function AddStudentModal({
                   name="program"
                   value={form.program}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
-                  required
+                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                 >
-                  <option value="" disabled>
-                    Pilih Program
-                  </option>
+                  <option value="">Pilih Program</option>
                   <option value="Reguler">Reguler</option>
                   <option value="Shorhul Qurro">Shorhul Qurro</option>
                 </select>
               </div>
+
+              <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">Ekstrakurikuler</label>
+            <select
+              name="ekskul"
+              value={form.ekskul}
+              onChange={handleChange}
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
+              required
+            >
+              <option value="" disabled>Pilih Ekskul</option>
+              <option value="Memanah">Memanah</option>
+              <option value="Berkuda">Berkuda</option>
+              <option value="Renang">Renang</option>
+              <option value="Media">Media</option>
+            </select>
+          </div>
 
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
@@ -437,71 +377,14 @@ export default function AddStudentModal({
                   name="class_id"
                   value={form.class_id}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
-                  required
+                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                 >
-                  <option value="" disabled>
-                    Pilih Kelas
-                  </option>
-                  {classes.length > 0 ? (
-                    classes.map((kelas) => (
-                      <option key={kelas._id} value={kelas._id}>
-                        {kelas.class_name}
-                      </option>
-                    ))
-                  ) : (
-                    <option disabled>
-                      {loading ? "Loading..." : "Tidak ada kelas"}
+                  <option value="">Pilih Kelas</option>
+                  {classes.map((kelas) => (
+                    <option key={kelas._id} value={kelas._id}>
+                      {kelas.class_name}
                     </option>
-                  )}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Halaqah
-                </label>
-                <select
-                  name="halaqah_id"
-                  value={form.halaqah_id}
-                  onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
-                  required
-                >
-                  <option value="" disabled>
-                    Pilih Halaqah
-                  </option>
-                  {halaqahs.length > 0 ? (
-                    halaqahs.map((halaqah) => (
-                      <option key={halaqah._id} value={halaqah._id}>
-                        {halaqah.name}
-                      </option>
-                    ))
-                  ) : (
-                    <option disabled>
-                      {loading ? "Loading..." : "Tidak ada halaqah"}
-                    </option>
-                  )}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Level
-                </label>
-                <select
-                  name="level"
-                  value={form.level}
-                  onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
-                  required
-                >
-                  <option value="" disabled>
-                    Pilih Level
-                  </option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
+                  ))}
                 </select>
               </div>
 
@@ -514,92 +397,152 @@ export default function AddStudentModal({
                   name="VA_SPP"
                   value={form.VA_SPP}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
-                  required
+                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                 />
               </div>
 
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
-                  Ekskul
+                  Tempat, Tanggal Lahir
+                </label>
+                <input
+                  type="text"
+                  name="birth_place_date"
+                  value={form.birth_place_date}
+                  onChange={handleChange}
+                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Alamat
+                </label>
+                <textarea
+                  name="address"
+                  value={form.address}
+                  onChange={handleChange}
+                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Nama Ibu
+                </label>
+                <input
+                  type="text"
+                  name="mother_name"
+                  value={form.mother_name}
+                  onChange={handleChange}
+                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
+                />
+              </div>
+
+              {/* <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Jenjang Akademik
                 </label>
                 <select
-                  name="ekskul"
-                  value={form.ekskul}
+                  name="academic_level"
+                  value={form.academic_level}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
-                  required
+                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                 >
-                  <option value="" disabled>
-                    Pilih Ekskul
-                  </option>
-                  <option value="Memanah">Memanah</option>
-                  <option value="Berkuda">Berkuda</option>
-                  <option value="Renang">Renang</option>
-                  <option value="Media">Media</option>
+                  <option value="">Pilih Jenjang</option>
+                  <option value="SD">SD</option>
+                  <option value="SMP">SMP</option>
+                  <option value="SMA">SMA</option>
+                </select>
+              </div> */}
+
+              <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">Tingkat Akademik</label>
+            <select
+              name="academic_level"
+              value={form.academic_level}
+              onChange={handleChange}
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
+              required
+            >
+              <option value="" disabled>Pilih Tingkat Akademik</option>
+              <option value="Ula">Ula</option>
+              <option value="Wustho">Wustho</option>
+              <option value="Ulya">Ulya</option>
+              <option value="SMP Formal">SMP Formal</option>
+              <option value="Aliyah Agama">Aliyah Agama</option>
+              <option value="Aliyah IPA">Aliyah IPA</option>
+            </select>
+          </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Level
+                </label>
+                <select
+                  name="level"
+                  value={form.level}
+                  onChange={handleChange}
+                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
+                >
+                  <option value="">Pilih Level</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
                 </select>
               </div>
 
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
-                  Status Santri
+                  Halaqah
+                </label>
+                <select
+                  name="halaqah_id"
+                  value={form.halaqah_id}
+                  onChange={handleChange}
+                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
+                >
+                  <option value="">Pilih Halaqah</option>
+                  {halaqahs.map((halaqah) => (
+                    <option key={halaqah._id} value={halaqah._id}>
+                      {halaqah.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Status Kelulusan
                 </label>
                 <select
                   name="graduation_status"
                   value={form.graduation_status}
                   onChange={handleChange}
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
-                  required
+                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                 >
-                  <option value="" disabled>
-                    Pilih Status
-                  </option>
+                  <option value="">Pilih Status</option>
                   <option value="Aktif">Aktif</option>
-                  <option value="Tidak Aktif">Tidak Aktif</option>
                   <option value="Lulus">Lulus</option>
+                  <option value="Drop Out">Drop Out</option>
                 </select>
               </div>
 
-              <div className="col-span-2 flex justify-end space-x-4 mt-6">
+              <div className="col-span-1 md:col-span-2 flex justify-end gap-4 mt-6">
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  className="px-6 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all duration-200"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-6 py-2.5 bg-emerald-800 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                  className="px-6 py-2 rounded-lg bg-emerald-800 text-white hover:bg-emerald-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? (
-                    <>
-                      <svg
-                        className="animate-spin h-5 w-5 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                      Menyimpan...
-                    </>
-                  ) : (
-                    "Simpan"
-                  )}
+                  {loading ? "Menyimpan..." : "Simpan"}
                 </button>
               </div>
             </form>

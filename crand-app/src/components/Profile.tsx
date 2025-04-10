@@ -169,20 +169,20 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center px-4 py-10">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center mt-16 p-4 sm:p-6 md:p-10">
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-20 w-64 h-64 bg-emerald-200 rounded-full opacity-10 blur-3xl"></div>
-        <div className="absolute bottom-20 right-20 w-64 h-64 bg-teal-200 rounded-full opacity-10 blur-3xl"></div>
+        <div className="absolute top-20 left-20 w-32 sm:w-64 h-32 sm:h-64 bg-emerald-200 rounded-full opacity-10 blur-3xl"></div>
+        <div className="absolute bottom-20 right-20 w-32 sm:w-64 h-32 sm:h-64 bg-teal-200 rounded-full opacity-10 blur-3xl"></div>
       </div>
 
-      <div className="relative animate-fade-in">
+      <div className="relative animate-fade-in z-0 w-full">
         <div className="absolute -inset-1 bg-emerald-800/20 rounded-3xl blur-md"></div>
-        <div className="bg-white rounded-3xl shadow-2xl p-12 max-w-4xl w-full relative z-10 transition-all duration-300 hover:shadow-emerald-200/50 border border-emerald-100">
+        <div className="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 md:p-12 max-w-4xl mx-auto relative z-10 transition-all duration-300 hover:shadow-emerald-200/50 border border-emerald-100">
           <div className="flex flex-col items-center">
-            <div className="relative mb-8">
+            <div className="relative mb-6 sm:mb-8">
               {/* Hexagonal frame for profile photo */}
-              <div className="relative h-48 w-48">
+              <div className="relative h-32 w-32 sm:h-40 sm:w-40 md:h-48 md:w-48">
                 <svg className="absolute top-0 left-0 w-full h-full" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <defs>
                     <linearGradient id="profileGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -200,28 +200,28 @@ export default function Profile() {
                 </svg>
                 <div className="absolute inset-5 flex items-center justify-center overflow-hidden">
                   <div className="w-full h-full flex items-center justify-center rounded-full bg-emerald-100 overflow-hidden">
-                    <UserCircle2 className="w-32 h-32 text-emerald-800 transform transition-transform hover:scale-110 duration-300" />
+                    <UserCircle2 className="w-20 sm:w-24 md:w-32 h-20 sm:h-24 md:h-32 text-emerald-800 transform transition-transform hover:scale-110 duration-300" />
                   </div>
                 </div>
                 {/* Decorative elements */}
-                <div className="absolute -top-1 -right-1 bg-emerald-500 h-6 w-6 rounded-full shadow-lg animate-pulse"></div>
-                <div className="absolute -bottom-1 -left-1 bg-emerald-300 h-5 w-5 rounded-full shadow-lg"></div>
+                <div className="absolute -top-1 -right-1 bg-emerald-500 h-4 sm:h-6 w-4 sm:w-6 rounded-full shadow-lg animate-pulse"></div>
+                <div className="absolute -bottom-1 -left-1 bg-emerald-300 h-3 sm:h-5 w-3 sm:w-5 rounded-full shadow-lg"></div>
               </div>
 
               <div className="absolute -bottom-2 right-0 transform translate-x-1/4 bg-white rounded-full shadow-lg p-2 border border-emerald-100">
-                <div className="bg-emerald-500 rounded-full h-5 w-5 animate-pulse"></div>
+                <div className="bg-emerald-500 rounded-full h-3 sm:h-5 w-3 sm:w-5 animate-pulse"></div>
               </div>
             </div>
-            <h2 className="text-4xl font-bold text-emerald-800 mb-2">{profile.name}</h2>
-            <div className="bg-emerald-50 rounded-full px-8 py-3 text-lg text-emerald-600 font-medium border border-emerald-100 shadow-sm mb-8">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-emerald-800 mb-2 text-center">{profile.name}</h2>
+            <div className="bg-emerald-50 rounded-full px-4 sm:px-6 md:px-8 py-2 sm:py-3 text-base sm:text-lg text-emerald-600 font-medium border border-emerald-100 shadow-sm mb-6 sm:mb-8 w-full sm:w-auto text-center">
               {profile.email}
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-6 text-base">
-            <div className="flex items-center p-5 rounded-xl bg-gradient-to-r from-emerald-50 to-emerald-100/40 border border-emerald-100 shadow-sm hover:shadow transition-all duration-200 group">
-              <div className="bg-white p-4 rounded-full mr-4 shadow-sm group-hover:shadow group-hover:bg-emerald-50 transition-all duration-200">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 text-sm sm:text-base">
+            <div className="flex items-center p-4 sm:p-5 rounded-xl bg-gradient-to-r from-emerald-50 to-emerald-100/40 border border-emerald-100 shadow-sm hover:shadow transition-all duration-200 group">
+              <div className="bg-white p-3 sm:p-4 rounded-full mr-3 sm:mr-4 shadow-sm group-hover:shadow group-hover:bg-emerald-50 transition-all duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 sm:h-7 w-5 sm:w-7 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
@@ -231,9 +231,9 @@ export default function Profile() {
               </div>
             </div>
 
-            <div className="flex items-center p-5 rounded-xl bg-gradient-to-r from-emerald-50 to-emerald-100/40 border border-emerald-100 shadow-sm hover:shadow transition-all duration-200 group">
-              <div className="bg-white p-4 rounded-full mr-4 shadow-sm group-hover:shadow group-hover:bg-emerald-50 transition-all duration-200">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="flex items-center p-4 sm:p-5 rounded-xl bg-gradient-to-r from-emerald-50 to-emerald-100/40 border border-emerald-100 shadow-sm hover:shadow transition-all duration-200 group">
+              <div className="bg-white p-3 sm:p-4 rounded-full mr-3 sm:mr-4 shadow-sm group-hover:shadow group-hover:bg-emerald-50 transition-all duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 sm:h-7 w-5 sm:w-7 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
               </div>
@@ -243,38 +243,33 @@ export default function Profile() {
               </div>
             </div>
 
-            <div className="flex items-center p-5 rounded-xl bg-gradient-to-r from-emerald-50 to-emerald-100/40 border border-emerald-100 shadow-sm hover:shadow transition-all duration-200 group">
-              <div className="bg-white p-4 rounded-full mr-4 shadow-sm group-hover:shadow group-hover:bg-emerald-50 transition-all duration-200">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="flex items-center p-4 sm:p-5 rounded-xl bg-gradient-to-r from-emerald-50 to-emerald-100/40 border border-emerald-100 shadow-sm hover:shadow transition-all duration-200 group sm:col-span-2 lg:col-span-1">
+              <div className="bg-white p-3 sm:p-4 rounded-full mr-3 sm:mr-4 shadow-sm group-hover:shadow group-hover:bg-emerald-50 transition-all duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 sm:h-7 w-5 sm:w-7 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
               <div className="flex-1">
-                <span className="font-medium text-emerald-700 block">Tanggal Bergabung</span>
-                <span className="text-gray-800 block mt-1">{new Date(profile.created_at).toLocaleDateString('id-ID')}</span>
+                <span className="font-medium text-emerald-700 block">Bergabung Sejak</span>
+                <span className="text-gray-800 block mt-1">{new Date(profile.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
               </div>
             </div>
           </div>
 
-          <div className="mt-12 flex justify-between gap-4">
+          <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row justify-center gap-4 sm:gap-6">
             <button
               onClick={() => setShowPasswordModal(true)}
-              className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-800 to-emerald-700 text-white py-3 rounded-xl font-semibold shadow-md transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-lg hover:shadow-emerald-600/20 text-base"
+              className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 transition-all duration-200 text-sm sm:text-base font-medium"
             >
-              <div className="bg-white/20 p-1.5 rounded-lg">
-                <Lock size={18} />
-              </div>
-              <span>Ubah Password</span>
+              <Lock className="w-4 h-4 sm:w-5 sm:h-5" />
+              Ubah Password
             </button>
-
             <button
               onClick={handleLogout}
-              className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-red-600 to-red-500 text-white py-3 rounded-xl font-semibold shadow-md transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-lg hover:shadow-red-600/20 text-base"
+              className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-all duration-200 text-sm sm:text-base font-medium"
             >
-              <div className="bg-white/20 p-1.5 rounded-lg">
-                <LogOut size={18} />
-              </div>
-              <span>Logout</span>
+              <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
+              Logout
             </button>
           </div>
         </div>

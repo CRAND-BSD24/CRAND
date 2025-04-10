@@ -15,7 +15,7 @@ export default function AbsensiPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 flex flex-col items-center px-4 py-10">
-      <div className="bg-white shadow-2xl rounded-2xl p-8 w-full max-w-lg border-t-4 border-emerald-800 mb-8 transition-all duration-300 hover:shadow-emerald-200/50">
+      <div className="bg-white shadow-2xl rounded-2xl mt-10 p-8 w-full max-w-lg border-t-4 border-emerald-800 mb-8 transition-all duration-300 hover:shadow-emerald-200/50">
         <h2 className="text-3xl font-bold text-emerald-800 text-center mb-6 flex items-center justify-center gap-3">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
