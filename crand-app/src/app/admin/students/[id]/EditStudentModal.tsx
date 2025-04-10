@@ -168,7 +168,7 @@ export default function EditStudentModal({ student, onClose, onUpdated }: EditSt
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto mx-3">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-[#006A71]">Edit Data Santri</h2>
           <button
