@@ -22,16 +22,16 @@ export function useAuth(requiredRole?: 'admin' | 'teacher' | 'student') {
     
     // If authenticated and there is a required role that doesn't match, redirect
     if (isAuthenticated && requiredRole && userRole !== requiredRole) {
-      // Redirect based on the actual role
-      if (userRole === 'admin') {
+      // Check if we're already on the correct path to prevent redirect loops
+      if (userRole === 'admin' && !pathname.startsWith('/admin')) {
         router.push('/admin');
-      } else if (userRole === 'teacher') {
+      } else if (userRole === 'teacher' && !pathname.startsWith('/teacher')) {
         router.push('/teacher');
-      } else if (userRole === 'student') {
+      } else if (userRole === 'student' && !pathname.startsWith('/student')) {
         router.push('/student');
       }
     }
-  }, [isLoading, isAuthenticated, userRole, requiredRole, router]);
+  }, [isLoading, isAuthenticated, userRole, requiredRole, router, pathname]);
   
   return {
     isLoading,

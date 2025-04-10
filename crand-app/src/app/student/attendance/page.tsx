@@ -101,12 +101,19 @@ export default function AttendanceHistoryPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#9ACBD0] flex flex-col items-center px-4 py-10">
-      <div className="bg-white shadow-2xl rounded-2xl p-8 w-full max-w-7xl border border-[#48A6A7]">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#e0e0e0] to-[#e6e6e6] p-6 space-y-8">
+      <div className="bg-white/50 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg">
+        <h1 className="text-3xl font-bold text-black mb-2">Rekap Absensi Bulanan</h1>
+        <p className="text-black">
+          Pantau riwayat kehadiran Anda per bulan di sini.
+        </p>
+      </div>
+
+      <div className="bg-white/70 backdrop-blur-sm rounded-xl border border-white/20 shadow-md overflow-hidden p-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-[#006A71]">
-            Rekap Absensi Bulanan
-          </h1>
+          <h2 className="text-xl font-semibold text-black">
+            {monthName}
+          </h2>
           <div className="flex items-center space-x-4">
             <button
               onClick={() => {
@@ -114,20 +121,17 @@ export default function AttendanceHistoryPage() {
                 newDate.setMonth(newDate.getMonth() - 1);
                 setSelectedMonth(newDate);
               }}
-              className="p-2 rounded-lg bg-[#48A6A7] text-white hover:bg-[#3d9395]"
+              className="px-4 py-2 rounded-lg bg-black/10 text-black hover:bg-black/20 transition-colors"
             >
               Bulan Sebelumnya
             </button>
-            <span className="text-xl font-semibold text-[#004D4D]">
-              {monthName}
-            </span>
             <button
               onClick={() => {
                 const newDate = new Date(selectedMonth);
                 newDate.setMonth(newDate.getMonth() + 1);
                 setSelectedMonth(newDate);
               }}
-              className="p-2 rounded-lg bg-[#48A6A7] text-white hover:bg-[#3d9395]"
+              className="px-4 py-2 rounded-lg bg-black/10 text-black hover:bg-black/20 transition-colors"
             >
               Bulan Selanjutnya
             </button>
@@ -136,30 +140,30 @@ export default function AttendanceHistoryPage() {
 
         {isLoading ? (
           <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#48A6A7] mx-auto"></div>
-            <p className="mt-4 text-gray-600">Memuat data absensi...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black/50 mx-auto"></div>
+            <p className="mt-4 text-black/60">Memuat data absensi...</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             {monthlyAttendance.map((student) => (
               <div key={student._id} className="mb-8">
                 <div className="mb-4">
-                  <h2 className="text-xl font-semibold text-[#02676C]">
+                  <h2 className="text-xl font-semibold text-black">
                     {student.name}
                   </h2>
-                  <p className="text-gray-600">Kelas: {student.class}</p>
+                  <p className="text-black/70">Kelas: {student.class}</p>
                 </div>
-                <div className="grid grid-cols-7 gap-1">
+                <div className="grid grid-cols-7 gap-1 border border-black/10 rounded-xl overflow-hidden">
                   {dayNames.map((day) => (
                     <div
                       key={day}
-                      className="text-center font-semibold py-2 bg-[#B5DAD6] text-[#004D4D] rounded-t-lg"
+                      className="text-center font-semibold py-2 bg-black/5 text-black"
                     >
                       {day}
                     </div>
                   ))}
                   {Array.from({ length: firstDayOfMonth }).map((_, index) => (
-                    <div key={`empty-${index}`} className="h-24" />
+                    <div key={`empty-${index}`} className="h-24 bg-white" />
                   ))}
                   {Array.from({ length: daysInMonth }, (_, dayIndex) => {
                     const date = new Date(
@@ -177,9 +181,9 @@ export default function AttendanceHistoryPage() {
                     return (
                       <div
                         key={dayIndex + 1}
-                        className={`h-24 p-2 border border-gray-200 ${dayClass}`}
+                        className={`h-24 p-2 border border-black/5 ${dayClass} hover:bg-black/5 transition-colors`}
                       >
-                        <div className="text-sm font-semibold mb-1">
+                        <div className="text-sm font-semibold mb-1 text-black">
                           {dayIndex + 1}
                         </div>
                         {attendance && (
@@ -200,7 +204,7 @@ export default function AttendanceHistoryPage() {
               </div>
             ))}
             {monthlyAttendance.length === 0 && (
-              <div className="text-center py-6 text-gray-500">
+              <div className="text-center py-6 text-black/60 italic">
                 Tidak ada data absensi untuk bulan ini
               </div>
             )}

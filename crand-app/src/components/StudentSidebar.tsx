@@ -61,7 +61,7 @@ const StudentSidebar = () => {
         </nav>
       </div>
 
-      <div className="p-4 mt-auto">
+      <div className="p-4 mt-auto z-10">
         <LogoutButton
           className={cn(
             'w-full flex items-center justify-center gap-2 px-3 py-2.5',

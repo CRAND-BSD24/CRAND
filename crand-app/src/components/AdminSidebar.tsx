@@ -1,13 +1,15 @@
 'use client';
 
 import { cn } from "@/lib/utils";
-import LogoutButton from "./LogoutButton";
 import logo from "@/assets/logo.png";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
-import { Home, Users, UserPlus, CalendarCheck, GraduationCap, BookOpen, User, Bot, Menu, X } from 'lucide-react';
+import { Home, Users, UserPlus, CalendarCheck, GraduationCap, BookOpen, User, Bot, Menu, X, LogOut } from 'lucide-react';
 import { useState, useCallback, useEffect } from 'react';
+import { signOut } from 'next-auth/react';
+import { toast } from 'sonner';
+import { logout } from '@/app/actions/auth';
 
 const AdminSidebar = () => {
   const pathname = usePathname();
@@ -20,6 +22,27 @@ const AdminSidebar = () => {
     }
   }, []);
 
+  const handleLogout = async () => {
+    try {
+      // First call the server action to clear cookies
+      await logout();
+      
+      // Show a success toast message
+      toast.success("Berhasil logout");
+      
+      // Use a combined approach for more reliable redirects
+      await signOut({
+        redirect: false,
+      });
+      
+      // Force a hard redirect to the landing page to bypass middleware complexities
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error("Gagal logout, silakan coba lagi");
+    }
+  };
+
   // Close sidebar when route changes
   useEffect(() => {
     handleLinkClick();
@@ -27,7 +50,7 @@ const AdminSidebar = () => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 h-16 bg-emerald-800 border-b border-emerald-700/50 z-50 flex items-center px-4 z-10">
+      <header className="fixed top-0 left-0 right-0 h-16 bg-emerald-800 border-b border-emerald-700/50 z-50 flex items-center px-4">
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="p-2 rounded-lg text-white hover:bg-emerald-700 transition-colors lg:hidden"
@@ -44,15 +67,15 @@ const AdminSidebar = () => {
       </header>
 
       <aside className={cn(
-        'fixed top-16 lg:top-0 lg:left-0 w-64 min-h-screen mt-16 bg-emerald-800 flex flex-col transition-all duration-300 ease-in-out border-r border-emerald-700/50 z-10',
+        'fixed top-16 lg:top-0 lg:pt-16 left-0 w-64 h-screen bg-emerald-800 flex flex-col transition-all duration-300 ease-in-out border-r border-emerald-700/50 z-40',
         isCollapsed ? '-translate-x-full lg:translate-x-0' : 'translate-x-0'
       )}>
-        <div className="flex flex-col flex-1 px-4 py-6">
+        <div className="flex flex-col h-[calc(100vh-7rem)] overflow-y-auto py-6 px-4">
           <div className="lg:hidden">
             <hr className="my-4 border-emerald-800/50" />
           </div>
 
-          <nav className="mt-2 space-y-2">
+          <nav className="space-y-2">
             {[
               { href: '/admin', icon: Home, label: 'Dashboard' },
               { href: '/admin/students', icon: Users, label: 'Santri' },
@@ -91,25 +114,28 @@ const AdminSidebar = () => {
           </nav>
         </div>
 
-        <div className="p-4 mt-auto" onClick={handleLinkClick}>
-          <LogoutButton
+        {/* Fixed logout button at bottom of sidebar */}
+        <div className="sticky bottom-0 p-4 bg-emerald-800 border-t border-emerald-700/50">
+          <button
+            onClick={handleLogout}
             className={cn(
               'w-full flex items-center justify-center gap-2 px-3 py-2.5',
-              'bg-white/10 hover:bg-white/15 active:bg-white/20',
-              'text-emerald-100/70 hover:text-white',
+              'bg-red-500 hover:bg-red-600 active:bg-red-700',
+              'text-white font-medium',
               'rounded-xl transition-all duration-200',
-              'shadow-lg shadow-emerald-900/10',
-              'backdrop-blur-sm'
+              'shadow-lg'
             )}
-            iconClassName="w-4 h-4"
-          />
+          >
+            <LogOut className="w-4 h-4" />
+            Logout
+          </button>
         </div>
       </aside>
 
       {/* Overlay untuk menutup sidebar saat klik di luar */}
       {!isCollapsed && (
         <div 
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-0 lg:hidden"
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden"
           onClick={() => setIsCollapsed(true)}
         />
       )}

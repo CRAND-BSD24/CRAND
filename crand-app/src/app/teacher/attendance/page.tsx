@@ -140,41 +140,58 @@ const AttendancePage = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        Loading...
+      <div className="min-h-screen bg-[#e2f6f4] flex items-center justify-center px-4 lg:pl-64 pt-16">
+        <div className="flex flex-col items-center">
+          <div className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-800 rounded-full animate-spin mb-4"></div>
+          <div className="text-emerald-800 text-base font-medium">Loading data...</div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex justify-center items-center h-screen text-red-500">
+      <div className="min-h-screen bg-[#e2f6f4] flex items-center justify-center px-4 lg:pl-64 pt-16 text-red-500 font-medium">
         {error}
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 m-5">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold">Manajemen Kehadiran</h1>
-          <p className="text-gray-600">Kelola kehadiran santri di kelas Anda</p>
-        </div>
-        <TeacherAttendanceModal />
-      </div>
+    <main className="min-h-screen bg-[#e2f6f4] pt-16">
+      <div className="lg:pl-1">
+        <div className="pl-4 pr-4 sm:pl-6 lg:pl-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 bg-white rounded-xl shadow-sm p-4">
+            <div className="flex items-center">
+              <div className="p-2 bg-emerald-700 text-white rounded-lg mr-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-emerald-800">Manajemen Kehadiran</h1>
+                <p className="text-emerald-600 text-sm">Kelola kehadiran santri di kelas Anda</p>
+              </div>
+            </div>
+            <TeacherAttendanceModal />
+          </div>
 
-      <Card className="bg-white shadow-lg">
-        <CardHeader>
-          <CardTitle>Daftar Kehadiran Santri</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <StudentTable 
-            students={students} 
-            onHistoryClick={handleHistoryClick}
-          />
-        </CardContent>
-      </Card>
+          <div className="bg-white rounded-xl shadow-sm mb-4 overflow-hidden">
+            <div className="p-4 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-emerald-800 flex items-center">
+                <div className="w-1 h-5 bg-emerald-600 rounded-full mr-2"></div>
+                Daftar Kehadiran Santri
+              </h3>
+            </div>
+            <div className="p-4">
+              <StudentTable 
+                students={students} 
+                onHistoryClick={handleHistoryClick}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* History Dialog */}
       <Dialog open={showHistory} onOpenChange={setShowHistory}>
@@ -226,7 +243,7 @@ const AttendancePage = () => {
           <div className="mt-4">
             {loading ? (
               <div className="flex justify-center items-center h-32">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                <div className="w-8 h-8 border-4 border-emerald-200 border-t-emerald-800 rounded-full animate-spin"></div>
               </div>
             ) : historyData.length > 0 ? (
               <Table>
@@ -263,7 +280,7 @@ const AttendancePage = () => {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </main>
   );
 };
 

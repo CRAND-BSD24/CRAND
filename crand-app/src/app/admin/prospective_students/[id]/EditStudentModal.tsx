@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { updateStudentById } from "./action";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface Student {
   _id: string;
@@ -58,11 +59,11 @@ export default function EditStudentModal({ student }: { student: Student }) {
     const success = await updateStudentById(student._id, updatedData);
 
     if (success) {
-      alert("Data berhasil diperbarui.");
+      toast.success("Data berhasil diperbarui");
       setIsOpen(false);
       router.refresh();
     } else {
-      alert("Gagal memperbarui data.");
+      toast.error("Gagal memperbarui data");
     }
   };
 

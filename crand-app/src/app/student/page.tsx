@@ -83,17 +83,6 @@ const StudentDashboard = () => {
     ],
   };
 
-  const akademikData = {
-    labels: ["Minggu 1", "Minggu 2", "Minggu 3", "Minggu 4"],
-    datasets: [
-      {
-        label: "Akademik (nilai)",
-        data: dashboardData?.weeklyProgress.academic || [0, 0, 0, 0],
-        backgroundColor: "#22C55E",
-      },
-    ],
-  };
-
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#e0e0e0] to-[#e6e6e6] p-6 space-y-8">
       <div className="bg-white/50 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg">
@@ -142,7 +131,7 @@ const StudentDashboard = () => {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1">
+      <div className="grid grid-cols-1 lg:grid-cols-1 gap-6 flex-1">
         <Card className="flex-1 flex flex-col bg-white/70 backdrop-blur-sm hover:bg-white/90 transition-all duration-300 border-none hover:shadow-lg">
           <CardHeader>
             <CardTitle>Perkembangan Hafalan Mingguan</CardTitle>
@@ -192,70 +181,6 @@ const StudentDashboard = () => {
                         font: {
                           weight: 'bold'
                         }
-                      },
-                    },
-                    x: {
-                      grid: { display: false },
-                      ticks: { color: 'black' },
-                      title: {
-                        display: true,
-                        text: "Minggu",
-                        color: 'black',
-                        font: {
-                          weight: 'bold'
-                        }
-                      },
-                    },
-                  },
-                }}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="flex-1 flex flex-col bg-white/70 backdrop-blur-sm hover:bg-white/90 transition-all duration-300 border-none hover:shadow-lg">
-          <CardHeader>
-            <CardTitle>Perkembangan Akademik Mingguan</CardTitle>
-            <p className="text-sm text-[#9ca3af]">
-              Rata-rata capaian akademik santri per minggu
-            </p>
-          </CardHeader>
-          <CardContent className="flex-1">
-            <div className="h-full">
-              <Bar
-                data={akademikData}
-                options={{
-                  maintainAspectRatio: false,
-                  responsive: true,
-                  animation: {
-                    duration: 1000,
-                    easing: 'easeInOutQuart'
-                  },
-                  plugins: {
-                    legend: {
-                      labels: {
-                        color: 'black',
-                        font: {
-                          family: 'system-ui'
-                        }
-                      }
-                    },
-                    tooltip: {
-                      backgroundColor: 'white',
-                      titleColor: 'black',
-                      bodyColor: 'black',
-                      borderColor: '#e5e7eb',
-                      borderWidth: 1,
-                      padding: 16,
-                      displayColors: false
-                    }
-                  },
-                  scales: {
-                    y: {
-                      beginAtZero: true,
-                      title: {
-                        display: true,
-                        text: "Nilai",
                       },
                     },
                     x: {

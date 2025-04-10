@@ -17,6 +17,9 @@ interface AcademicData {
     class_id: string;
     academic_level: string;
   };
+  subject_info?: {
+    name: string;
+  };
 }
 
 const AcademicPage = () => {
@@ -57,7 +60,7 @@ const AcademicPage = () => {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-black/10 bg-black/5">
-                      <th className="text-left py-4 px-6 font-semibold text-black">Nama</th>
+                      <th className="text-left py-4 px-6 font-semibold text-black">Mata Pelajaran</th>
                       <th className="text-left py-4 px-6 font-semibold text-black">Semester</th>
                       <th className="text-left py-4 px-6 font-semibold text-black">Tahun Ajaran</th>
                       <th className="text-left py-4 px-6 font-semibold text-black">Nilai</th>
@@ -71,7 +74,7 @@ const AcademicPage = () => {
                         className="hover:bg-black/5 transition-colors"
                       >
                         <td className="py-4 px-6 font-medium text-black">
-                          {academic.student_info?.name}
+                          {academic.subject_info?.name}
                         </td>
                         <td className="py-4 px-6 text-black">
                           {academic.semester}

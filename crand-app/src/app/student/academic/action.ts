@@ -19,6 +19,9 @@ interface AcademicData {
     class_id: string;
     academic_level: string;
   };
+  subject_info?: {
+    name: string;
+  };
 }
 
 const isValidDate = (date: any) => {
@@ -65,6 +68,15 @@ export const getAcademicByStudentId = async (): Promise<
       },
       { $unwind: "$student_info" },
       {
+        $lookup: {
+          from: "subjects",
+          localField: "subject_id",
+          foreignField: "_id",
+          as: "subject_info",
+        },
+      },
+      { $unwind: "$subject_info" },
+      {
         $project: {
           _id: 1,
           student_id: 1,
@@ -78,6 +90,9 @@ export const getAcademicByStudentId = async (): Promise<
             name: "$student_info.name",
             class_id: { $toString: "$student_info.class_id" },
             academic_level: "$student_info.academic_level",
+          },
+          subject_info: {
+            name: "$subject_info.name",
           },
         },
       },
@@ -103,6 +118,9 @@ export const getAcademicByStudentId = async (): Promise<
       name: doc.student_info.name,
       class_id: doc.student_info.class_id,
       academic_level: doc.student_info.academic_level,
+    },
+    subject_info: {
+      name: doc.subject_info.name,
     },
   }));
 
