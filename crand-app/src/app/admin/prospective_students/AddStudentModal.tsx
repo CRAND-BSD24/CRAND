@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createStudent } from "./action";
+import { toast } from "sonner";
 
 export default function AddProspectiveStudentModal({
   onStudentAdded,
@@ -36,7 +37,7 @@ export default function AddProspectiveStudentModal({
     const success = await createStudent(form);
 
     if (success) {
-      alert("Calon santri berhasil ditambahkan");
+      toast.success("Calon santri berhasil ditambahkan");
       setIsOpen(false);
       setForm({
         name: "",
@@ -54,7 +55,7 @@ export default function AddProspectiveStudentModal({
       });
       onStudentAdded();
     } else {
-      alert("Gagal menambahkan calon santri");
+      toast.error("Gagal menambahkan calon santri");
     }
   };
 

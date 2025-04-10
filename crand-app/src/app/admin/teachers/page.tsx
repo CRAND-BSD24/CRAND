@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import { getAllTeachers, deleteTeacher } from "./action";
 import { AddTeacherModal, EditTeacherModal } from "@/components/AddTeacherModal";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { toast } from "sonner";
+import ConfirmModal from "../prospective_students/ConfirmModal";
 
 interface Teacher {
   _id: string;
@@ -22,6 +24,10 @@ const TeachersPage = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [confirmDelete, setConfirmDelete] = useState<{ isOpen: boolean; teacherId: string }>({
+    isOpen: false,
+    teacherId: ""
+  });
   const itemsPerPage = 5;
 
   const fetchTeachers = async () => {
@@ -32,7 +38,7 @@ const TeachersPage = () => {
       setFilteredTeachers(data);
       setCurrentPage(1); // Reset to first page when data changes
     } catch (error) {
-      console.error("Gagal mengambil data ustadz:", error);
+      toast.error("Gagal mengambil data ustadz");
     }
   };
 
@@ -49,14 +55,19 @@ const TeachersPage = () => {
   };
 
   const handleDelete = async (id: string) => {
-    const confirmed = confirm("Yakin ingin menghapus ustadz ini?");
-    if (!confirmed) return;
+    setConfirmDelete({
+      isOpen: true,
+      teacherId: id
+    });
+  };
 
+  const handleConfirmDelete = async () => {
     try {
-      await deleteTeacher(id);
+      await deleteTeacher(confirmDelete.teacherId);
+      toast.success("Ustadz berhasil dihapus");
       fetchTeachers();
     } catch (error) {
-      console.error("Gagal hapus ustadz:", error);
+      toast.error("Gagal menghapus ustadz");
     }
   };
 
@@ -76,6 +87,16 @@ const TeachersPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 p-4 sm:p-8">
+      <ConfirmModal
+        isOpen={confirmDelete.isOpen}
+        onClose={() => setConfirmDelete({ isOpen: false, teacherId: "" })}
+        onConfirm={handleConfirmDelete}
+        title="Konfirmasi Hapus"
+        message="Apakah Anda yakin ingin menghapus ustadz ini?"
+        confirmText="Hapus"
+        type="danger"
+      />
+
       <div className="max-w-7xl mx-auto mt-13">
         <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-8 border-t-4 border-emerald-800 transition-all duration-300 hover:shadow-emerald-200/50">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">

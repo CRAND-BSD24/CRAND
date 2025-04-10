@@ -2,6 +2,7 @@
 
 import { createTeacher, updateTeacher } from "@/app/admin/teachers/action";
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 interface Teacher {
   _id?: string;
@@ -27,9 +28,19 @@ export function AddTeacherModal({ onClose, onSuccess }: { onClose: () => void; o
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await createTeacher(form);
-    onSuccess();
-    onClose();
+    try {
+      await createTeacher({
+        ...form,
+        email: form.email || '',
+        address: form.address || '',
+        nip: form.nip || ''
+      });
+      toast.success("Ustadz berhasil ditambahkan");
+      onSuccess();
+      onClose();
+    } catch (error) {
+      toast.error("Gagal menambahkan ustadz");
+    }
   };
 
   return (
@@ -114,9 +125,14 @@ export function EditTeacherModal({ teacher, onClose, onSuccess }: {
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       if (!form._id) return;
-      await updateTeacher(form as Required<Teacher>);
-      onSuccess();
-      onClose();
+      try {
+        await updateTeacher(form as Required<Teacher>);
+        toast.success("Data ustadz berhasil diperbarui");
+        onSuccess();
+        onClose();
+      } catch (error) {
+        toast.error("Gagal memperbarui data ustadz");
+      }
     };
   
     return (

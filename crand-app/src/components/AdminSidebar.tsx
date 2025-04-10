@@ -44,7 +44,7 @@ const AdminSidebar = () => {
       </header>
 
       <aside className={cn(
-        'fixed top-16 lg:top-0 lg:left-0 w-64 min-h-screen bg-emerald-800 flex flex-col transition-all duration-300 ease-in-out border-r border-emerald-700/50 z-10',
+        'fixed top-16 lg:top-0 lg:left-0 w-64 min-h-screen mt-16 bg-emerald-800 flex flex-col transition-all duration-300 ease-in-out border-r border-emerald-700/50 z-10',
         isCollapsed ? '-translate-x-full lg:translate-x-0' : 'translate-x-0'
       )}>
         <div className="flex flex-col flex-1 px-4 py-6">

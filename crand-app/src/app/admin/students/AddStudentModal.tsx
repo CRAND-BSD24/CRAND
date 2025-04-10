@@ -347,24 +347,27 @@ export default function AddStudentModal({
                   className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                 >
                   <option value="">Pilih Program</option>
-                  <option value="Tahfidz">Tahfidz</option>
-                  <option value="Tahsin">Tahsin</option>
-                  <option value="Umum">Umum</option>
+                  <option value="Reguler">Reguler</option>
+                  <option value="Shorhul Qurro">Shorhul Qurro</option>
                 </select>
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Ekstrakurikuler
-                </label>
-                <input
-                  type="text"
-                  name="ekskul"
-                  value={form.ekskul}
-                  onChange={handleChange}
-                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
-                />
-              </div>
+            <label className="block text-sm font-medium text-gray-700">Ekstrakurikuler</label>
+            <select
+              name="ekskul"
+              value={form.ekskul}
+              onChange={handleChange}
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
+              required
+            >
+              <option value="" disabled>Pilih Ekskul</option>
+              <option value="Memanah">Memanah</option>
+              <option value="Berkuda">Berkuda</option>
+              <option value="Renang">Renang</option>
+              <option value="Media">Media</option>
+            </select>
+          </div>
 
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
@@ -437,7 +440,7 @@ export default function AddStudentModal({
                 />
               </div>
 
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
                   Jenjang Akademik
                 </label>
@@ -452,7 +455,26 @@ export default function AddStudentModal({
                   <option value="SMP">SMP</option>
                   <option value="SMA">SMA</option>
                 </select>
-              </div>
+              </div> */}
+
+              <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">Tingkat Akademik</label>
+            <select
+              name="academic_level"
+              value={form.academic_level}
+              onChange={handleChange}
+              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
+              required
+            >
+              <option value="" disabled>Pilih Tingkat Akademik</option>
+              <option value="Ula">Ula</option>
+              <option value="Wustho">Wustho</option>
+              <option value="Ulya">Ulya</option>
+              <option value="SMP Formal">SMP Formal</option>
+              <option value="Aliyah Agama">Aliyah Agama</option>
+              <option value="Aliyah IPA">Aliyah IPA</option>
+            </select>
+          </div>
 
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
