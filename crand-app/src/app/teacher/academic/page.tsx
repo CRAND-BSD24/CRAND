@@ -43,68 +43,83 @@ const AcademicPage = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        Loading...
+      <div className="min-h-screen bg-[#e2f6f4] flex items-center justify-center px-4 lg:pl-64 pt-16">
+        <div className="flex flex-col items-center">
+          <div className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-800 rounded-full animate-spin mb-4"></div>
+          <div className="text-emerald-800 text-base font-medium">Loading data...</div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex justify-center items-center h-screen text-red-500">
+      <div className="min-h-screen bg-[#e2f6f4] flex items-center justify-center px-4 lg:pl-64 pt-16 text-red-500 font-medium">
         {error}
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 m-5">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold">Manajemen Akademik</h1>
-          <p className="text-gray-600">
-            Kelola nilai akademik santri di kelas Anda
-          </p>
+    <main className="min-h-screen bg-[#e2f6f4] pt-16">
+      <div className="lg:pl-1">
+        <div className="pl-4 pr-4 sm:pl-6 lg:pl-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 bg-white rounded-xl shadow-sm p-4">
+            <div className="flex items-center">
+              <div className="p-2 bg-emerald-700 text-white rounded-lg mr-3">
+                <BookOpen className="h-6 w-6" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-emerald-800">Manajemen Akademik</h1>
+                <p className="text-emerald-600 text-sm">
+                  Kelola nilai akademik santri di kelas Anda
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm mb-4 overflow-hidden">
+            <div className="p-4 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-emerald-800 flex items-center">
+                <div className="w-1 h-5 bg-emerald-600 rounded-full mr-2"></div>
+                Daftar Nilai Santri
+              </h3>
+            </div>
+            <div className="p-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nama Santri</TableHead>
+                    <TableHead>Kelas</TableHead>
+                    <TableHead>NISN</TableHead>
+                    <TableHead>Detail Nilai</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {academicData.map((student) => (
+                    <TableRow key={student.id}>
+                      <TableCell>{student.student_name}</TableCell>
+                      <TableCell>{student.class_name}</TableCell>
+                      <TableCell>{student.nisn}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="hover:bg-emerald-50 text-emerald-600 border-emerald-200"
+                          onClick={() => handleDetailClick(student.student_id)}
+                        >
+                          Detail
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
         </div>
       </div>
-
-      <Card className="bg-white shadow-lg">
-        <CardHeader>
-          <CardTitle>Daftar Nilai Santri</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nama Santri</TableHead>
-                <TableHead>Kelas</TableHead>
-                <TableHead>NISN</TableHead>
-                <TableHead>Detail Nilai</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {academicData.map((student) => (
-                <TableRow key={student.id}>
-                  <TableCell>{student.student_name}</TableCell>
-                  <TableCell>{student.class_name}</TableCell>
-                  <TableCell>{student.nisn}</TableCell>
-                  <TableCell>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="hover:bg-blue-50"
-                      onClick={() => handleDetailClick(student.student_id)}
-                    >
-                      Detail
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </div>
+    </main>
   );
 };
 
