@@ -1,8 +1,8 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bar } from "react-chartjs-2";
-import { User, Users, BookOpen, Calendar } from "lucide-react";
+import { Bar, Line } from "react-chartjs-2";
+import { User, Users, Calendar } from "lucide-react";
 
 // Import dan daftarkan elemen Chart.js
 import {
@@ -10,18 +10,26 @@ import {
   CategoryScale,
   LinearScale,
   BarElement,
+  LineElement,
+  PointElement,
   Title,
   Tooltip,
   Legend,
 } from "chart.js";
 import { useEffect, useState } from "react";
-import { getAllTeachers, getAllStudents } from "./action";
-
+import {
+  getAllTeachers,
+  getAllStudents,
+  getTeacherAttendanceStats,
+  getMonthlyStats,
+} from "./action";
 
 ChartJS.register(
   CategoryScale,
   LinearScale,
   BarElement,
+  LineElement,
+  PointElement,
   Title,
   Tooltip,
   Legend
@@ -30,61 +38,70 @@ ChartJS.register(
 const AdminDashboard = () => {
   const [students, setStudents] = useState([]);
   const [teachers, setTeachers] = useState([]);
-  
+  const [attendanceStats, setAttendanceStats] = useState({
+    averageAttendance: 0,
+    chartData: {
+      labels: [],
+      data: [],
+    },
+  });
+  const [monthlyStats, setMonthlyStats] = useState({
+    labels: [],
+    teacherData: [],
+    studentData: [],
+  });
+
   useEffect(() => {
-    
-    const fetchStudents = async () => {
-      const response = await getAllStudents();
-      const data = JSON.parse(response);
-      console.log(data);
-      
-      setStudents(data);
+    const fetchData = async () => {
+      const studentsResponse = await getAllStudents();
+      const teachersResponse = await getAllTeachers();
+      const attendanceResponse = await getTeacherAttendanceStats();
+      const monthlyStatsResponse = await getMonthlyStats();
+
+      const studentsData = JSON.parse(studentsResponse);
+      const teachersData = JSON.parse(teachersResponse);
+      const attendanceData = JSON.parse(attendanceResponse);
+      const monthlyData = JSON.parse(monthlyStatsResponse);
+
+      setStudents(studentsData);
+      setTeachers(teachersData);
+      setAttendanceStats(attendanceData);
+      setMonthlyStats(monthlyData);
     };
 
-    const fetchTeachers = async () => {
-      const response = await getAllTeachers();
-      const data = JSON.parse(response);
-      
-      setTeachers(data);
-    };
-
-    fetchStudents();
-    fetchTeachers();
-  }, [])
+    fetchData();
+  }, []);
 
   const weeklyData = {
-    labels: ["Minggu 1", "Minggu 2", "Minggu 3", "Minggu 4"],
+    labels: attendanceStats.chartData.labels,
     datasets: [
       {
-        label: "Hafalan (halaman)",
-        data: [2.0, 3.0, 2.5, 3.8],
+        label: "Persentase Kehadiran Guru",
+        data: attendanceStats.chartData.data,
         backgroundColor: "#4F46E5",
-      },
-      {
-        label: "Belajar (nilai)",
-        data: [1.8, 2.9, 2.7, 3.5],
-        backgroundColor: "#22C55E",
       },
     ],
   };
 
-  const topStudents = [
-    {
-      name: "Ahmad Farhan",
-      class: "Kelas 10A",
-      achievement: "7 halaman hafalan",
-    },
-    {
-      name: "Fatimah Azzahra",
-      class: "Kelas 11B",
-      achievement: "Nilai ujian 98",
-    },
-    {
-      name: "Muhammad Rizky",
-      class: "Kelas 12A",
-      achievement: "5 halaman hafalan",
-    },
-  ];
+  const monthlyData = {
+    labels: monthlyStats.labels,
+    datasets: [
+      {
+        label: "Total Guru",
+        data: monthlyStats.teacherData,
+        borderColor: "#22C55E",
+        backgroundColor: "#22C55E",
+        tension: 0.4,
+      },
+      {
+        label: "Total Santri",
+        data: monthlyStats.studentData,
+        borderColor: "#4F46E5",
+        backgroundColor: "#4F46E5",
+        tension: 0.4,
+      },
+    ],
+  };
 
   return (
     <div className="p-8 min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50">
@@ -96,13 +113,17 @@ const AdminDashboard = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card className="group hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="space-y-3">
-                  <p className="text-sm font-medium text-gray-500">Total Santri</p>
-                  <p className="text-3xl font-bold text-gray-900">{students.length}</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Total Santri
+                  </p>
+                  <p className="text-3xl font-bold text-gray-900">
+                    {students.length}
+                  </p>
                 </div>
                 <div className="p-3 bg-blue-100 rounded-xl group-hover:scale-110 transition-transform duration-200">
                   <Users className="w-8 h-8 text-blue-600" />
@@ -115,8 +136,12 @@ const AdminDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="space-y-3">
-                  <p className="text-sm font-medium text-gray-500">Total Ustadz</p>
-                  <p className="text-3xl font-bold text-gray-900">{teachers.length}</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Total Ustadz
+                  </p>
+                  <p className="text-3xl font-bold text-gray-900">
+                    {teachers.length}
+                  </p>
                 </div>
                 <div className="p-3 bg-emerald-100 rounded-xl group-hover:scale-110 transition-transform duration-200">
                   <User className="w-8 h-8 text-emerald-600" />
@@ -129,27 +154,14 @@ const AdminDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="space-y-3">
-                  <p className="text-sm font-medium text-gray-500">Rata-rata Hafalan</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Rata-rata Kehadiran Guru
+                  </p>
                   <div className="space-y-1">
-                    <p className="text-3xl font-bold text-gray-900">3.2</p>
-                    <p className="text-sm text-gray-500">halaman/minggu</p>
-                  </div>
-                </div>
-                <div className="p-3 bg-purple-100 rounded-xl group-hover:scale-110 transition-transform duration-200">
-                  <BookOpen className="w-8 h-8 text-purple-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="group hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-3">
-                  <p className="text-sm font-medium text-gray-500">Kehadiran</p>
-                  <div className="space-y-1">
-                    <p className="text-3xl font-bold text-gray-900">98.2%</p>
-                    <p className="text-sm text-emerald-600 font-medium">+2.1% dari minggu lalu</p>
+                    <p className="text-3xl font-bold text-gray-900">
+                      {attendanceStats.averageAttendance}%
+                    </p>
+                    <p className="text-sm text-gray-500">per hari</p>
                   </div>
                 </div>
                 <div className="p-3 bg-orange-100 rounded-xl group-hover:scale-110 transition-transform duration-200">
@@ -164,64 +176,116 @@ const AdminDashboard = () => {
           <Card className="hover:shadow-lg transition-all duration-200">
             <CardHeader className="p-6 pb-0">
               <div className="space-y-1">
-                <CardTitle className="text-xl font-bold text-gray-900">Perkembangan Mingguan</CardTitle>
+                <CardTitle className="text-xl font-bold text-gray-900">
+                  Statistik Kehadiran Guru
+                </CardTitle>
                 <p className="text-sm text-gray-500">
-                  Rata-rata capaian hafalan dan belajar santri per minggu
+                  Persentase kehadiran guru dalam 7 hari terakhir
                 </p>
               </div>
             </CardHeader>
             <CardContent className="p-6">
-              <Bar data={weeklyData} options={{
-                responsive: true,
-                plugins: {
-                  legend: {
-                    position: 'bottom' as const,
-                  },
-                },
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    grid: {
-                      display: true,
-                      color: 'rgba(0,0,0,0.05)',
+              <Bar
+                data={weeklyData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      position: "bottom" as const,
                     },
                   },
-                  x: {
-                    grid: {
-                      display: false,
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      max: 100,
+                      grid: {
+                        display: true,
+                        color: "rgba(0,0,0,0.05)",
+                      },
+                      ticks: {
+                        callback: function (value) {
+                          return value + "%";
+                        },
+                        font: {
+                          size: 12,
+                        },
+                      },
+                    },
+                    x: {
+                      grid: {
+                        display: false,
+                      },
+                      ticks: {
+                        font: {
+                          size: 12,
+                        },
+                      },
                     },
                   },
-                },
-              }} />
+                }}
+                className="h-[300px]"
+              />
             </CardContent>
           </Card>
 
           <Card className="hover:shadow-lg transition-all duration-200">
             <CardHeader className="p-6 pb-0">
               <div className="space-y-1">
-                <CardTitle className="text-xl font-bold text-gray-900">Santri Berprestasi Minggu Ini</CardTitle>
+                <CardTitle className="text-xl font-bold text-gray-900">
+                  Statistik Total Guru dan Santri
+                </CardTitle>
                 <p className="text-sm text-gray-500">
-                  Santri dengan pencapaian terbaik
+                  Perkembangan jumlah guru dan santri dalam 12 bulan terakhir
                 </p>
               </div>
             </CardHeader>
             <CardContent className="p-6">
-              <ul className="divide-y divide-gray-100">
-                {topStudents.map((student, index) => (
-                  <li key={index} className="flex items-center gap-4 py-3 group first:pt-0 last:pb-0">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-teal-400 flex items-center justify-center text-white font-medium text-lg group-hover:scale-105 transition-transform duration-200">
-                      {student.name[0]}
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <p className="font-medium text-gray-900">{student.name}</p>
-                      <p className="text-sm text-gray-500">{student.class}</p>
-                      <p className="text-sm font-medium text-emerald-600">
-                        {student.achievement}
-                      </p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              <Line
+                data={monthlyData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      position: "bottom" as const,
+                      labels: {
+                        font: {
+                          size: 12,
+                        },
+                        padding: 20,
+                      },
+                    },
+                  },
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      grid: {
+                        display: true,
+                        color: "rgba(0,0,0,0.05)",
+                      },
+                      ticks: {
+                        font: {
+                          size: 12,
+                        },
+                      },
+                    },
+                    x: {
+                      grid: {
+                        display: false,
+                      },
+                      ticks: {
+                        font: {
+                          size: 12,
+                        },
+                        maxRotation: 45,
+                        minRotation: 45,
+                      },
+                    },
+                  },
+                }}
+                className="h-[300px]"
+              />
             </CardContent>
           </Card>
         </div>
