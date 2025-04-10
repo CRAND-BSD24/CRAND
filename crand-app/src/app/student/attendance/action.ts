@@ -16,7 +16,7 @@ export interface MonthlyAttendance {
   class: string;
   attendance: {
     date: Date;
-    status: "Present" | "Absent" | "Sick" | "Permission" | "Holiday";
+    status: "Present" | "Absent" | "Sick" | "Permission" | "Holiday" | "";
   }[];
 }
 
@@ -162,6 +162,13 @@ export async function getMonthlyAttendance(
 
       // Jika tidak ada record, anggap Absent
       if (!record) {
+        // Jika tanggal lebih dari hari ini, biarkan status kosong
+        if (date > new Date()) {
+          return {
+            date,
+            status: "" as const,
+          };
+        }
         return {
           date,
           status: "Absent" as const,
@@ -195,7 +202,7 @@ export async function getMonthlyAttendance(
 
     // console.log("Returning result:", result);
     // console.log(kelas, "kelas");
-    
+
     return result;
   } catch (error) {
     console.error("Error fetching monthly attendance:", error);
