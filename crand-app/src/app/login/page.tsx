@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { signIn, useSession } from 'next-auth/react';
+import Image from 'next/image';
+import logo from '@/assets/logo.png';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -10,6 +12,25 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams?.get('callbackUrl') || '';
+  const { status, data: session } = useSession();
+
+  // If user is already authenticated, redirect to the appropriate page
+  useEffect(() => {
+    if (status === 'authenticated') {
+      const userRole = session?.user?.role;
+      if (userRole === 'admin') {
+        router.push('/admin');
+      } else if (userRole === 'teacher') {
+        router.push('/teacher');
+      } else if (userRole === 'student') {
+        router.push('/student');
+      } else {
+        router.push(callbackUrl || '/');
+      }
+    }
+  }, [status, router, callbackUrl, session]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,28 +52,61 @@ export default function Login() {
       
       if (result?.error) {
         setError('Invalid email or password');
+        setLoading(false);
         return;
       }
       
-      // Role-based redirect is handled by middleware
+      // Explicitly check session and redirect based on role
+      // The refresh here is important to ensure the session is updated
       router.refresh();
+      
+      // Poll for session update after successful login
+      const checkSession = setInterval(() => {
+        if (status === 'authenticated' && session?.user?.role) {
+          clearInterval(checkSession);
+          const userRole = session.user.role;
+          
+          if (userRole === 'admin') {
+            router.push('/admin');
+          } else if (userRole === 'teacher') {
+            router.push('/teacher');
+          } else if (userRole === 'student') {
+            router.push('/student');
+          }
+        }
+      }, 300);
+      
+      // Clear interval after 5 seconds if no redirect happened
+      setTimeout(() => clearInterval(checkSession), 5000);
+      
     } catch (err) {
       console.error('Login error:', err);
       setError('An error occurred during login');
-    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#e0e0e0] to-[#e6e6e6] p-6">
-      <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/20 shadow-lg w-full max-w-md overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-r from-green-700 to-green-800 flex items-center justify-center p-6">
+      <div className="bg-white rounded-xl shadow-lg w-full max-w-md overflow-hidden">
         <div className="p-8">
-          <h1 className="text-3xl font-bold text-black mb-2">Login to CRAND</h1>
-          <p className="text-black mb-8">Masuk ke sistem manajemen pesantren.</p>
+          <div className="flex flex-col items-center mb-8">
+            <div className="rounded-full bg-[#e2f6f4] p-3 mb-6 shadow-sm">
+              <Image 
+                src={logo} 
+                alt="CRAND Logo" 
+                width={100} 
+                height={100} 
+                priority
+                className="bg-[#e2f6f4]" 
+              />
+            </div>
+            <h1 className="text-2xl font-bold text-black">Welcome</h1>
+            <p className="text-black text-sm">Please Login to continue.</p>
+          </div>
           
           {error && (
-            <div className="mb-6 p-4 bg-black/5 border border-black/10 rounded-xl text-black">
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600">
               {error}
             </div>
           )}
@@ -67,7 +121,7 @@ export default function Login() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-white/50 border border-white/20 rounded-xl text-black placeholder:text-black/60 focus:outline-none focus:ring-2 focus:ring-black/5 transition-all"
+                className="w-full px-4 py-3 border border-emerald-100 rounded-xl text-black placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
                 required
                 placeholder="Masukkan email Anda"
               />
@@ -82,7 +136,7 @@ export default function Login() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-white/50 border border-white/20 rounded-xl text-black placeholder:text-black/60 focus:outline-none focus:ring-2 focus:ring-black/5 transition-all"
+                className="w-full px-4 py-3 border border-emerald-100 rounded-xl text-black placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
                 required
                 placeholder="Masukkan password Anda"
               />
@@ -91,13 +145,13 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full px-4 py-3 bg-black/80 hover:bg-black text-white rounded-xl font-medium transition-all ${
+              className={`w-full px-4 py-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-medium transition-all ${
                 loading ? 'opacity-70 cursor-not-allowed' : ''
               }`}
             >
               {loading ? (
                 <div className="flex items-center justify-center gap-2">
-                  <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                  <div className="w-5 h-5 border-2 border-emerald-200 border-t-white rounded-full animate-spin"></div>
                   <span>Logging in...</span>
                 </div>
               ) : (

@@ -60,7 +60,7 @@ export default function Profile() {
 
   const handleLogout = async () => {
     await signOut({ redirect: false });
-    router.push('/login');
+    router.push('/');
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {

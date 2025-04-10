@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Pencil, History, Plus } from "lucide-react";
+import { Pencil, History, Plus, BookOpen } from "lucide-react";
 import React, { useEffect, useState, useCallback } from "react";
 import {
   Dialog,
@@ -374,15 +374,18 @@ const MemorizationPage = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        Loading...
+      <div className="min-h-screen bg-[#e2f6f4] flex items-center justify-center px-4 lg:pl-64 pt-16">
+        <div className="flex flex-col items-center">
+          <div className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-800 rounded-full animate-spin mb-4"></div>
+          <div className="text-emerald-800 text-base font-medium">Loading data...</div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex justify-center items-center h-screen text-red-500">
+      <div className="min-h-screen bg-[#e2f6f4] flex items-center justify-center px-4 lg:pl-64 pt-16 text-red-500 font-medium">
         {error}
       </div>
     );
@@ -520,81 +523,96 @@ const MemorizationPage = () => {
   };
 
   return (
-    <div className="space-y-6 m-5">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold">Manajemen Hafalan</h1>
-          <p className="text-gray-600">
-            Kelola progress hafalan santri di kelas Anda
-          </p>
+    <main className="min-h-screen bg-[#e2f6f4] pt-16">
+      <div className="lg:pl-1">
+        <div className="pl-4 pr-4 sm:pl-6 lg:pl-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 bg-white rounded-xl shadow-sm p-4">
+            <div className="flex items-center">
+              <div className="p-2 bg-emerald-700 text-white rounded-lg mr-3">
+                <BookOpen className="h-6 w-6" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-emerald-800">Manajemen Hafalan</h1>
+                <p className="text-emerald-600 text-sm">
+                  Kelola progress hafalan santri di kelas Anda
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm mb-4 overflow-hidden">
+            <div className="p-4 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-emerald-800 flex items-center">
+                <div className="w-1 h-5 bg-emerald-600 rounded-full mr-2"></div>
+                Daftar Hafalan Santri
+              </h3>
+            </div>
+            <div className="p-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nama Santri</TableHead>
+                    <TableHead>Semester</TableHead>
+                    <TableHead>Tahun Angkatan</TableHead>
+                    <TableHead>Juz</TableHead>
+                    <TableHead>Halaman</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Catatan</TableHead>
+                    <TableHead>Tanggal</TableHead>
+                    <TableHead>Aksi</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {memorizationData.map((student) => (
+                    <TableRow key={student.id}>
+                      <TableCell>{student.name}</TableCell>
+                      <TableCell>{student.semester}</TableCell>
+                      <TableCell>{student.academic_year}</TableCell>
+                      <TableCell>{student.juz_name}</TableCell>
+                      <TableCell>{student.pages}</TableCell>
+                      <TableCell>{student.status}</TableCell>
+                      <TableCell>{student.notes}</TableCell>
+                      <TableCell>
+                        {student.created_at
+                          ? format(new Date(student.created_at), "dd MMMM yyyy", {
+                              locale: id,
+                            })
+                          : "-"}
+                      </TableCell>
+                      <TableCell className="space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="hover:bg-emerald-50 text-emerald-600 border-emerald-200"
+                          onClick={() => handleEditClick(student)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="hover:bg-emerald-50 text-emerald-600 border-emerald-200"
+                          onClick={() => handleAddClick(student)}
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="hover:bg-emerald-50 text-emerald-600 border-emerald-200"
+                          onClick={() => handleHistoryClick(student)}
+                        >
+                          <History className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
         </div>
       </div>
-
-      <Card className="bg-white shadow-lg">
-        <CardHeader>
-          <CardTitle>Daftar Hafalan Santri</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nama Santri</TableHead>
-                <TableHead>Semester</TableHead>
-                <TableHead>Tahun Angkatan</TableHead>
-                <TableHead>Juz</TableHead>
-                <TableHead>Halaman</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Catatan</TableHead>
-                <TableHead>Tanggal</TableHead>
-                <TableHead>Aksi</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {memorizationData.map((student) => (
-                <TableRow key={student.id}>
-                  <TableCell>{student.name}</TableCell>
-                  <TableCell>{student.semester}</TableCell>
-                  <TableCell>{student.academic_year}</TableCell>
-                  <TableCell>{student.juz_name}</TableCell>
-                  <TableCell>{student.pages}</TableCell>
-                  <TableCell>{student.status}</TableCell>
-                  <TableCell>{student.notes}</TableCell>
-                  <TableCell>
-                    {student.created_at
-                      ? format(new Date(student.created_at), "dd MMMM yyyy", {
-                          locale: id,
-                        })
-                      : "-"}
-                  </TableCell>
-                  <TableCell className="space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditClick(student)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleAddClick(student)}
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleHistoryClick(student)}
-                    >
-                      <History className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
 
       {/* Edit Dialog */}
       <Dialog open={showEditForm} onOpenChange={setShowEditForm}>
@@ -604,19 +622,19 @@ const MemorizationPage = () => {
           </DialogHeader>
           <div className="mb-4 space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Semester</label>
+              <label className="block text-sm font-medium text-emerald-800 mb-1">Semester</label>
               <input
                 type="text"
                 name="semester"
                 value={editingStudent?.semester || ""}
                 onChange={handleInputChange}
-                className="w-full p-2 border border-gray-300 rounded"
+                className="w-full p-2 border border-emerald-200 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
                 required
                 disabled={isSubmitting}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">
+              <label className="block text-sm font-medium text-emerald-800 mb-1">
                 Tahun Angkatan
               </label>
               <input
@@ -624,18 +642,18 @@ const MemorizationPage = () => {
                 name="academic_year"
                 value={editingStudent?.academic_year || ""}
                 onChange={handleInputChange}
-                className="w-full p-2 border border-gray-300 rounded"
+                className="w-full p-2 border border-emerald-200 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
                 required
                 disabled={isSubmitting}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Juz</label>
+              <label className="block text-sm font-medium text-emerald-800 mb-1">Juz</label>
               <select
                 name="quran_memorization_id"
                 value={selectedJuzId}
                 onChange={handleInputChange}
-                className="w-full p-2 border border-gray-300 rounded"
+                className="w-full p-2 border border-emerald-200 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
                 required
                 disabled={isSubmitting}
               >
@@ -648,24 +666,24 @@ const MemorizationPage = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Halaman</label>
+              <label className="block text-sm font-medium text-emerald-800 mb-1">Halaman</label>
               <input
                 type="text"
                 name="pages"
                 value={editingStudent?.pages || ""}
                 onChange={handleInputChange}
-                className="w-full p-2 border border-gray-300 rounded"
+                className="w-full p-2 border border-emerald-200 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
                 required
                 disabled={isSubmitting}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Status</label>
+              <label className="block text-sm font-medium text-emerald-800 mb-1">Status</label>
               <select
                 name="status"
                 value={editingStudent?.status || ""}
                 onChange={handleInputChange}
-                className="w-full p-2 border border-gray-300 rounded"
+                className="w-full p-2 border border-emerald-200 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
                 required
                 disabled={isSubmitting}
               >
@@ -675,19 +693,19 @@ const MemorizationPage = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Catatan</label>
+              <label className="block text-sm font-medium text-emerald-800 mb-1">Catatan</label>
               <textarea
                 name="notes"
                 value={editingStudent?.notes || ""}
                 onChange={handleInputChange}
-                className="w-full p-2 border border-gray-300 rounded"
+                className="w-full p-2 border border-emerald-200 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
                 rows={3}
                 required
                 disabled={isSubmitting}
               />
             </div>
             <Button
-              className="w-full bg-blue-600 hover:bg-blue-700"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
               onClick={handleEditSubmit}
               disabled={isSubmitting}
             >
@@ -705,19 +723,19 @@ const MemorizationPage = () => {
           </DialogHeader>
           <div className="mb-4 space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Semester</label>
+              <label className="block text-sm font-medium text-emerald-800 mb-1">Semester</label>
               <input
                 type="text"
                 name="semester"
                 value={newMemorization.semester}
                 onChange={handleAddInputChange}
-                className="w-full p-2 border border-gray-300 rounded"
+                className="w-full p-2 border border-emerald-200 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
                 required
                 disabled={isSubmitting}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">
+              <label className="block text-sm font-medium text-emerald-800 mb-1">
                 Tahun Angkatan
               </label>
               <input
@@ -725,18 +743,18 @@ const MemorizationPage = () => {
                 name="academic_year"
                 value={newMemorization.academic_year}
                 onChange={handleAddInputChange}
-                className="w-full p-2 border border-gray-300 rounded"
+                className="w-full p-2 border border-emerald-200 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
                 required
                 disabled={isSubmitting}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Juz</label>
+              <label className="block text-sm font-medium text-emerald-800 mb-1">Juz</label>
               <select
                 name="quran_memorization_id"
                 value={selectedJuzId}
                 onChange={(e) => setSelectedJuzId(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded"
+                className="w-full p-2 border border-emerald-200 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
                 required
                 disabled={isSubmitting}
               >
@@ -749,24 +767,24 @@ const MemorizationPage = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Halaman</label>
+              <label className="block text-sm font-medium text-emerald-800 mb-1">Halaman</label>
               <input
                 type="text"
                 name="pages"
                 value={newMemorization.pages}
                 onChange={handleAddInputChange}
-                className="w-full p-2 border border-gray-300 rounded"
+                className="w-full p-2 border border-emerald-200 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
                 required
                 disabled={isSubmitting}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Status</label>
+              <label className="block text-sm font-medium text-emerald-800 mb-1">Status</label>
               <select
                 name="status"
                 value={newMemorization.status}
                 onChange={handleAddInputChange}
-                className="w-full p-2 border border-gray-300 rounded"
+                className="w-full p-2 border border-emerald-200 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
                 required
                 disabled={isSubmitting}
               >
@@ -776,19 +794,19 @@ const MemorizationPage = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Catatan</label>
+              <label className="block text-sm font-medium text-emerald-800 mb-1">Catatan</label>
               <textarea
                 name="notes"
                 value={newMemorization.notes}
                 onChange={handleAddInputChange}
-                className="w-full p-2 border border-gray-300 rounded"
+                className="w-full p-2 border border-emerald-200 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
                 rows={3}
                 required
                 disabled={isSubmitting}
               />
             </div>
             <Button
-              className="w-full bg-blue-600 hover:bg-blue-700"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
               onClick={handleAddSubmit}
               disabled={isSubmitting}
             >
@@ -809,6 +827,7 @@ const MemorizationPage = () => {
               <Button
                 variant="outline"
                 size="sm"
+                className="hover:bg-emerald-50 text-emerald-600 border-emerald-200"
                 onClick={handlePreviousWeek}
                 disabled={loading}
               >
@@ -817,6 +836,7 @@ const MemorizationPage = () => {
               <Button
                 variant="outline"
                 size="sm"
+                className="hover:bg-emerald-50 text-emerald-600 border-emerald-200"
                 onClick={handleCurrentWeek}
                 disabled={loading}
               >
@@ -825,6 +845,7 @@ const MemorizationPage = () => {
               <Button
                 variant="outline"
                 size="sm"
+                className="hover:bg-emerald-50 text-emerald-600 border-emerald-200"
                 onClick={handleNextWeek}
                 disabled={loading}
               >
@@ -832,14 +853,14 @@ const MemorizationPage = () => {
               </Button>
             </div>
             <Button
-              variant="default"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
               size="sm"
               onClick={() => sendPDF(selectedStudent?.email || "")}
               disabled={loading || !selectedStudent}
             >
               Kirim Email PDF
             </Button>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-emerald-600">
               {format(
                 startOfWeek(currentWeek, { weekStartsOn: 1 }),
                 "dd MMMM yyyy",
@@ -856,7 +877,7 @@ const MemorizationPage = () => {
           <div className="mt-4">
             {loading ? (
               <div className="flex justify-center items-center h-32">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-800"></div>
               </div>
             ) : historyData.length > 0 ? (
               <Table>
@@ -890,14 +911,14 @@ const MemorizationPage = () => {
                 </TableBody>
               </Table>
             ) : (
-              <div className="flex justify-center items-center h-32 text-gray-500">
+              <div className="flex justify-center items-center h-32 text-emerald-600">
                 Tidak ada setoran hafalan di minggu ini
               </div>
             )}
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </main>
   );
 };
 

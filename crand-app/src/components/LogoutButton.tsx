@@ -4,6 +4,7 @@ import { signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { logout } from '@/app/actions/auth';
 import { LogOut } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface LogoutButtonProps {
   className?: string;
@@ -18,14 +19,23 @@ export default function LogoutButton({ className = '', iconClassName = '' }: Log
       // First call the server action to clear cookies
       await logout();
       
-      // Then call the client-side signOut
-      await signOut({ redirect: false });
+      // Show a success toast message
+      toast.success("Berhasil logout");
       
-      // Redirect to login page
-      router.push('/login');
-      router.refresh();
+      // Use a combined approach for more reliable redirects
+      await signOut({
+        redirect: false,
+      });
+      
+      // Force a hard redirect to the landing page to bypass middleware complexities
+      window.location.href = '/';
+      
+      // The router navigation below might not execute due to the hard redirect above
+      // router.push('/');
+      // router.refresh();
     } catch (error) {
       console.error('Logout error:', error);
+      toast.error("Gagal logout, silakan coba lagi");
     }
   };
   

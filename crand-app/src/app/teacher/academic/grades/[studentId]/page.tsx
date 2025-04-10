@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Pencil, Plus, Trash2, History } from "lucide-react";
+import { ArrowLeft, Pencil, Plus, Trash2, History, BookOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
   Dialog,
@@ -228,15 +228,18 @@ const StudentGradesPage = ({ params }: PageProps) => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        Loading...
+      <div className="min-h-screen bg-[#e2f6f4] flex items-center justify-center px-4 lg:pl-64 pt-16">
+        <div className="flex flex-col items-center">
+          <div className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-800 rounded-full animate-spin mb-4"></div>
+          <div className="text-emerald-800 text-base font-medium">Loading data...</div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex justify-center items-center h-screen text-red-500">
+      <div className="min-h-screen bg-[#e2f6f4] flex items-center justify-center px-4 lg:pl-64 pt-16 text-red-500 font-medium">
         {error}
       </div>
     );
@@ -245,90 +248,106 @@ const StudentGradesPage = ({ params }: PageProps) => {
   console.log("Data yang akan ditampilkan:", grades);
 
   return (
-    <div className="space-y-6 m-5">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button variant="outline" size="icon" onClick={() => router.back()}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold">Detail Nilai Santri</h1>
-            <p className="text-gray-600">
-              Daftar nilai akademik santri per semester
-            </p>
+    <main className="min-h-screen bg-[#e2f6f4] pt-16">
+      <div className="lg:pl-1">
+        <div className="pl-4 pr-4 sm:pl-6 lg:pl-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 bg-white rounded-xl shadow-sm p-4">
+            <div className="flex items-center">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="mr-2 text-emerald-800 hover:bg-emerald-50" 
+                onClick={() => router.back()}
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div className="p-2 bg-emerald-700 text-white rounded-lg mr-3">
+                <BookOpen className="h-6 w-6" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-emerald-800">Detail Nilai Santri</h1>
+                <p className="text-emerald-600 text-sm">
+                  Daftar nilai akademik santri per semester
+                </p>
+              </div>
+            </div>
+            <Button
+              onClick={() => setIsAddDialogOpen(true)}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white mt-4 sm:mt-0"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Tambah Nilai
+            </Button>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm mb-4 overflow-hidden">
+            <div className="p-4 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-emerald-800 flex items-center">
+                <div className="w-1 h-5 bg-emerald-600 rounded-full mr-2"></div>
+                Daftar Nilai
+              </h3>
+            </div>
+            <div className="p-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Mata Pelajaran</TableHead>
+                    <TableHead>Nilai</TableHead>
+                    <TableHead>Semester</TableHead>
+                    <TableHead>Tahun Akademik</TableHead>
+                    <TableHead>Aksi</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {grades.map((grade, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{grade.subject_name}</TableCell>
+                      <TableCell>{grade.score}</TableCell>
+                      <TableCell>{grade.semester}</TableCell>
+                      <TableCell>{grade.academic_year}</TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => handleEditClick(grade)}
+                            className="text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => handleHistoryClick(grade)}
+                            className="text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+                          >
+                            <History className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => handleDeleteClick(grade)}
+                            className="text-red-500 border-red-200 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {grades.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                        Belum ada data nilai
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         </div>
-        <Button
-          onClick={() => setIsAddDialogOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Tambah Nilai
-        </Button>
       </div>
-
-      <Card className="bg-white shadow-lg">
-        <CardHeader>
-          <CardTitle>Daftar Nilai</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Mata Pelajaran</TableHead>
-                <TableHead>Nilai</TableHead>
-                <TableHead>Semester</TableHead>
-                <TableHead>Tahun Akademik</TableHead>
-                <TableHead>Aksi</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {grades.map((grade, index) => (
-                <TableRow key={index}>
-                  <TableCell>{grade.subject_name}</TableCell>
-                  <TableCell>{grade.score}</TableCell>
-                  <TableCell>{grade.semester}</TableCell>
-                  <TableCell>{grade.academic_year}</TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handleEditClick(grade)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handleHistoryClick(grade)}
-                        className="text-blue-500 hover:text-blue-700"
-                      >
-                        <History className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handleDeleteClick(grade)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {grades.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center">
-                    Belum ada data nilai
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
 
       <Dialog open={showEditForm} onOpenChange={setShowEditForm}>
         <DialogContent>
@@ -386,7 +405,7 @@ const StudentGradesPage = ({ params }: PageProps) => {
               <Button variant="outline" onClick={() => setShowEditForm(false)}>
                 Batal
               </Button>
-              <Button onClick={handleEditGrade}>Simpan</Button>
+              <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={handleEditGrade}>Simpan</Button>
             </div>
           </div>
         </DialogContent>
@@ -467,7 +486,7 @@ const StudentGradesPage = ({ params }: PageProps) => {
               >
                 Batal
               </Button>
-              <Button onClick={handleAddGrade}>Tambah</Button>
+              <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={handleAddGrade}>Tambah</Button>
             </div>
           </div>
         </DialogContent>
@@ -536,7 +555,7 @@ const StudentGradesPage = ({ params }: PageProps) => {
                 ))}
                 {gradeHistory.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center">
+                    <TableCell colSpan={4} className="text-center py-6 text-gray-500">
                       Tidak ada riwayat nilai
                     </TableCell>
                   </TableRow>
@@ -545,13 +564,13 @@ const StudentGradesPage = ({ params }: PageProps) => {
             </Table>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowHistoryDialog(false)}>
+            <Button className="bg-emerald-600 hover:bg-emerald-700" variant="default" onClick={() => setShowHistoryDialog(false)}>
               Tutup
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </main>
   );
 };
 
