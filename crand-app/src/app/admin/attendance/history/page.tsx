@@ -14,12 +14,23 @@ export default function AttendanceHistoryPage() {
   const [teacherRecords, setTeacherRecords] = useState<AttendanceRecord[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [activeTab, setActiveTab] = useState<"admin" | "teacher">("admin");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const recordsPerPage = 5;
 
   useEffect(() => {
     const loadRecords = async () => {
-      console.log("Fetching records for tab:", activeTab);
-      await fetchAttendanceRecords();
+      try {
+        setIsLoading(true);
+        setError(null);
+        console.log("Fetching records for tab:", activeTab);
+        await fetchAttendanceRecords();
+      } catch (err) {
+        setError("Terjadi kesalahan saat memuat data. Silakan coba lagi.");
+        console.error("Error loading records:", err);
+      } finally {
+        setIsLoading(false);
+      }
     };
     loadRecords();
   }, [activeTab]);
@@ -28,15 +39,16 @@ export default function AttendanceHistoryPage() {
     try {
       if (activeTab === "admin") {
         const records = await getAdminAttendanceRecords();
-        console.log("Admin records:", records);
+        console.log("Admin records count:", records.length);
         setAdminRecords(records);
       } else {
         const records = await getTeacherAttendanceRecords();
-        console.log("Teacher records:", records);
+        console.log("Teacher records count:", records.length);
         setTeacherRecords(records);
       }
     } catch (error) {
       console.error("Error fetching records:", error);
+      throw error;
     }
   };
 
@@ -141,88 +153,106 @@ export default function AttendanceHistoryPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse rounded-lg overflow-hidden">
-            <thead>
-              <tr className="bg-emerald-800 text-white">
-                <th className="px-2 sm:px-4 py-2 sm:py-3 text-left font-semibold rounded-tl-lg text-sm sm:text-base">
-                  No
-                </th>
-                <th className="px-2 sm:px-4 py-2 sm:py-3 text-left font-semibold text-sm sm:text-base">
-                  Nama
-                </th>
-                <th className="px-2 sm:px-4 py-2 sm:py-3 text-left font-semibold text-sm sm:text-base">
-                  Waktu Absen
-                </th>
-                <th className="px-2 sm:px-4 py-2 sm:py-3 text-left font-semibold rounded-tr-lg text-sm sm:text-base">
-                  Foto
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedRecords.map((record, index) => (
-                <tr
-                  key={record._id}
-                  className="border-b border-emerald-100 hover:bg-emerald-50/50 transition-colors duration-150"
-                >
-                  <td className="px-2 sm:px-4 py-2 sm:py-3 text-sm sm:text-base">
-                    {indexOfFirstRecord + index + 1}
-                  </td>
-                  <td className="px-2 sm:px-4 py-2 sm:py-3 font-semibold text-emerald-800 text-sm sm:text-base">
-                    {record.name}
-                  </td>
-                  <td className="px-2 sm:px-4 py-2 sm:py-3 text-sm sm:text-base">
-                    {new Date(record.timestamp).toLocaleString("id-ID", {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      second: "2-digit",
-                    })}
-                  </td>
-                  <td className="px-2 sm:px-4 py-2 sm:py-3">
-                    <div className="relative w-12 h-12 sm:w-16 sm:h-16 group">
-                      <Image
-                        src={`data:image/jpeg;base64,${record.photo}`}
-                        alt={`${record.name}'s attendance`}
-                        fill
-                        className="object-cover rounded-lg border-2 border-emerald-200 transition-transform duration-300 group-hover:scale-105 shadow-sm"
-                      />
-                    </div>
-                  </td>
+          {error && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
+              {error}
+            </div>
+          )}
+          {isLoading ? (
+            <div className="flex justify-center items-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-800"></div>
+            </div>
+          ) : (
+            <table className="w-full border-collapse rounded-lg overflow-hidden">
+              <thead>
+                <tr className="bg-emerald-800 text-white">
+                  <th className="px-2 sm:px-4 py-2 sm:py-3 text-left font-semibold rounded-tl-lg text-sm sm:text-base">
+                    No
+                  </th>
+                  <th className="px-2 sm:px-4 py-2 sm:py-3 text-left font-semibold text-sm sm:text-base">
+                    Nama
+                  </th>
+                  <th className="px-2 sm:px-4 py-2 sm:py-3 text-left font-semibold text-sm sm:text-base">
+                    Waktu Absen
+                  </th>
+                  <th className="px-2 sm:px-4 py-2 sm:py-3 text-left font-semibold rounded-tr-lg text-sm sm:text-base">
+                    Foto
+                  </th>
                 </tr>
-              ))}
-              {currentRecords.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={4}
-                    className="text-center py-6 sm:py-8 text-emerald-800 bg-emerald-50/70 italic rounded-lg"
+              </thead>
+              <tbody>
+                {paginatedRecords.map((record, index) => (
+                  <tr
+                    key={record._id}
+                    className="border-b border-emerald-100 hover:bg-emerald-50/50 transition-colors duration-150"
                   >
-                    <div className="flex flex-col items-center justify-center gap-2">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-8 w-8 sm:h-12 sm:w-12 text-emerald-400"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-sm sm:text-base">
+                      {indexOfFirstRecord + index + 1}
+                    </td>
+                    <td className="px-2 sm:px-4 py-2 sm:py-3 font-semibold text-emerald-800 text-sm sm:text-base">
+                      {record.name}
+                    </td>
+                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-sm sm:text-base">
+                      {new Date(record.timestamp).toLocaleString("id-ID", {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                      })}
+                    </td>
+                    <td className="px-2 sm:px-4 py-2 sm:py-3">
+                      <div className="relative w-12 h-12 sm:w-16 sm:h-16 group">
+                        <Image
+                          src={
+                            record.photo
+                              ? `data:image/jpeg;base64,${Buffer.from(
+                                  record.photo
+                                ).toString("base64")}`
+                              : "/default-avatar.png"
+                          }
+                          alt={`Foto ${record.name}`}
+                          width={40}
+                          height={40}
+                          className="rounded-full"
                         />
-                      </svg>
-                      <span className="text-sm sm:text-base">
-                        Belum ada riwayat absensi
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {currentRecords.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className="text-center py-6 sm:py-8 text-emerald-800 bg-emerald-50/70 italic rounded-lg"
+                    >
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-8 w-8 sm:h-12 sm:w-12 text-emerald-400"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={1.5}
+                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        <span className="text-sm sm:text-base">
+                          Belum ada riwayat absensi
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
 
         {/* Pagination */}

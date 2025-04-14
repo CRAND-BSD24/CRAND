@@ -59,7 +59,7 @@ export const authOptions: AuthOptions = {
   ],
   pages: {
     signIn: "/login",
-    signOut: "/"
+    signOut: "/",
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -89,7 +89,7 @@ export const authOptions: AuthOptions = {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: process.env.NODE_ENV === "production",
+        secure: true,
       },
     },
   },

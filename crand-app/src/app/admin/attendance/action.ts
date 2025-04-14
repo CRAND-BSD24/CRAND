@@ -188,7 +188,10 @@ export async function getAdminAttendanceRecords(): Promise<AttendanceRecord[]> {
         },
       },
       {
-        $unwind: "$user_info",
+        $unwind: {
+          path: "$user_info",
+          preserveNullAndEmptyArrays: true,
+        },
       },
     ];
 
@@ -197,23 +200,32 @@ export async function getAdminAttendanceRecords(): Promise<AttendanceRecord[]> {
       .sort({ date: -1 })
       .toArray();
 
-    console.log("Raw admin records:", JSON.stringify(records, null, 2));
+    console.log("Raw admin records count:", records.length);
 
-    const mappedRecords = records.map((record) => ({
-      _id: record._id.toString(),
-      name: record.user_info.name,
-      timestamp: record.date,
-      photo: record.photo,
-    }));
+    const mappedRecords = records.map((record) => {
+      try {
+        return {
+          _id: record._id ? record._id.toString() : "",
+          name: record.user_info?.name || "Unknown",
+          timestamp: record.date || new Date(),
+          photo: record.photo || Buffer.from(""),
+        };
+      } catch (err) {
+        console.error("Error mapping record:", err);
+        return {
+          _id: "",
+          name: "Error processing record",
+          timestamp: new Date(),
+          photo: Buffer.from(""),
+        };
+      }
+    });
 
-    console.log(
-      "Mapped admin records:",
-      JSON.stringify(mappedRecords, null, 2)
-    );
+    console.log("Successfully mapped admin records");
     return mappedRecords as AttendanceRecord[];
   } catch (error) {
     console.error("Error fetching admin attendance records:", error);
-    return [];
+    throw new Error("Failed to fetch admin attendance records");
   }
 }
 
@@ -237,7 +249,10 @@ export async function getTeacherAttendanceRecords(): Promise<
         },
       },
       {
-        $unwind: "$teacher_info",
+        $unwind: {
+          path: "$teacher_info",
+          preserveNullAndEmptyArrays: true,
+        },
       },
       {
         $lookup: {
@@ -248,7 +263,10 @@ export async function getTeacherAttendanceRecords(): Promise<
         },
       },
       {
-        $unwind: "$user_info",
+        $unwind: {
+          path: "$user_info",
+          preserveNullAndEmptyArrays: true,
+        },
       },
     ];
 
@@ -257,22 +275,31 @@ export async function getTeacherAttendanceRecords(): Promise<
       .sort({ date: -1 })
       .toArray();
 
-    console.log("Raw teacher records:", JSON.stringify(records, null, 2));
+    console.log("Raw teacher records count:", records.length);
 
-    const mappedRecords = records.map((record) => ({
-      _id: record._id.toString(),
-      name: record.user_info.name,
-      timestamp: record.date,
-      photo: record.photo,
-    }));
+    const mappedRecords = records.map((record) => {
+      try {
+        return {
+          _id: record._id ? record._id.toString() : "",
+          name: record.user_info?.name || "Unknown",
+          timestamp: record.date || new Date(),
+          photo: record.photo || Buffer.from(""),
+        };
+      } catch (err) {
+        console.error("Error mapping record:", err);
+        return {
+          _id: "",
+          name: "Error processing record",
+          timestamp: new Date(),
+          photo: Buffer.from(""),
+        };
+      }
+    });
 
-    console.log(
-      "Mapped teacher records:",
-      JSON.stringify(mappedRecords, null, 2)
-    );
+    console.log("Successfully mapped teacher records");
     return mappedRecords as AttendanceRecord[];
   } catch (error) {
     console.error("Error fetching teacher attendance records:", error);
-    return [];
+    throw new Error("Failed to fetch teacher attendance records");
   }
 }
