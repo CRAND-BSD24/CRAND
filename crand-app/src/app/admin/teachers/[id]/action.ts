@@ -1,57 +1,70 @@
-'use server';
+"use server";
 
 import { ObjectId } from "mongodb";
-import { connectToDatabase } from "@/lib/mongodb";
+import { getMongoClientInstance } from "@/db/config/connection";
 
 export async function getTeacherById(id: string) {
   try {
-    const { db } = await connectToDatabase();
-    
-    const teacher = await db.collection('teachers').aggregate([
-      {
-        $match: {
-          _id: new ObjectId(id)
-        }
-      },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'user_id',
-          foreignField: '_id',
-          as: 'user'
-        }
-      },
-      {
-        $unwind: '$user'
-      },
-      {
-        $project: {
-          _id: 1,
-          nip: 1,
-          address: 1,
-          created_at: 1,
-          updated_at: 1,
-          user_id: {
-            _id: '$user._id',
-            name: '$user.name',
-            email: '$user.email',
-            role: '$user.role',
-            phone_number: '$user.phone_number',
-            profile_picture: '$user.profile_picture',
-            created_at: '$user.created_at',
-            updated_at: '$user.updated_at'
-          }
-        }
-      }
-    ]).toArray();
+    const client = await getMongoClientInstance();
+    const db = client.db("pesantren_db");
 
-    if (!teacher || teacher.length === 0) {
-      return null;
+    const teacher = await db.collection("teachers").findOne({
+      _id: new ObjectId(id),
+    });
+
+    if (!teacher) {
+      throw new Error("Teacher not found");
     }
 
-    return teacher[0];
+    return JSON.stringify(teacher);
   } catch (error) {
-    console.error('Error fetching teacher:', error);
-    throw new Error('Failed to fetch teacher data');
+    console.error("Error fetching teacher:", error);
+    throw error;
   }
-} 
+}
+
+export async function updateTeacher(id: string, formData: any) {
+  try {
+    const client = await getMongoClientInstance();
+    const db = client.db("pesantren_db");
+
+    const result = await db.collection("teachers").updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          ...formData,
+          updated_at: new Date(),
+        },
+      }
+    );
+
+    if (result.matchedCount === 0) {
+      throw new Error("Teacher not found");
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error updating teacher:", error);
+    return false;
+  }
+}
+
+export async function deleteTeacher(id: string) {
+  try {
+    const client = await getMongoClientInstance();
+    const db = client.db("pesantren_db");
+
+    const result = await db.collection("teachers").deleteOne({
+      _id: new ObjectId(id),
+    });
+
+    if (result.deletedCount === 0) {
+      throw new Error("Teacher not found");
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error deleting teacher:", error);
+    return false;
+  }
+}

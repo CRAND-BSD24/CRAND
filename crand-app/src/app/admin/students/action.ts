@@ -56,48 +56,52 @@ export const getAllStudents = async (
     // Define a more specific type for the match stage, allowing ObjectId or string
     const matchStage: { class_id?: ObjectId; academic_level?: string } = {};
     if (filters?.class_id) matchStage.class_id = new ObjectId(filters.class_id);
-    if (filters?.academic_level) matchStage.academic_level = filters.academic_level;
+    if (filters?.academic_level)
+      matchStage.academic_level = filters.academic_level;
 
     const sort: { [key: string]: 1 | -1 } = {};
     sort[sortField] = sortOrder === "asc" ? 1 : -1;
 
-    const students = await db.collection("students").aggregate([
-      { $match: matchStage },
-      {
-        $lookup: {
-          from: "classes",
-          localField: "class_id",
-          foreignField: "_id",
-          as: "class_info"
-        }
-      },
-      {
-        $addFields: {
-          class_name: { $arrayElemAt: ["$class_info.class_name", 0] }
-        }
-      },
-      {
-        $project: {
-          _id: 1,
-          name: 1,
-          nisn: 1,
-          class_id: 1,
-          class_name: 1,
-          academic_level: 1,
-          gender: 1,
-          parent_name: 1,
-          birth_date: 1,
-          birth_place: 1,
-          address: 1,
-          phone_number: 1,
-          graduation_status: 1,
-          payment_status: 1,
-          created_at: 1,
-          updated_at: 1
-        }
-      },
-      { $sort: sort }
-    ]).toArray();
+    const students = await db
+      .collection("students")
+      .aggregate([
+        { $match: matchStage },
+        {
+          $lookup: {
+            from: "classes",
+            localField: "class_id",
+            foreignField: "_id",
+            as: "class_info",
+          },
+        },
+        {
+          $addFields: {
+            class_name: { $arrayElemAt: ["$class_info.class_name", 0] },
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            name: 1,
+            nisn: 1,
+            class_id: 1,
+            class_name: 1,
+            academic_level: 1,
+            gender: 1,
+            parent_name: 1,
+            birth_date: 1,
+            birth_place: 1,
+            address: 1,
+            phone_number: 1,
+            graduation_status: 1,
+            payment_status: 1,
+            created_at: 1,
+            updated_at: 1,
+          },
+        },
+        { $sort: sort },
+      ])
+      .toArray();
 
     return JSON.stringify(students);
   } catch (error) {
@@ -198,7 +202,9 @@ export const promoteStudentsByClassId = async (className: string) => {
   const db = client.db("pesantren_db");
 
   try {
-    const oldClass = await db.collection("classes").findOne({ class_name: className });
+    const oldClass = await db
+      .collection("classes")
+      .findOne({ class_name: className });
 
     if (!oldClass) {
       console.error("Class not found");
@@ -213,7 +219,7 @@ export const promoteStudentsByClassId = async (className: string) => {
     }
 
     const currentLevel = parseInt(numericMatch[0]);
-    const suffix = className.replace(numericMatch[0], ''); // Get the non-numeric part
+    const suffix = className.replace(numericMatch[0], ""); // Get the non-numeric part
 
     if (currentLevel >= 12) {
       console.log(`Class ${className} is already the highest level`);
@@ -221,7 +227,9 @@ export const promoteStudentsByClassId = async (className: string) => {
     }
 
     const nextClassName = `${currentLevel + 1}${suffix}`;
-    const nextClass = await db.collection("classes").findOne({ class_name: nextClassName });
+    const nextClass = await db
+      .collection("classes")
+      .findOne({ class_name: nextClassName });
 
     if (!nextClass) {
       console.error(`Next class not found: ${nextClassName}`);
@@ -233,12 +241,14 @@ export const promoteStudentsByClassId = async (className: string) => {
       {
         $set: {
           class_id: nextClass._id,
-          updated_at: new Date()
-        }
+          updated_at: new Date(),
+        },
       }
     );
 
-    console.log(`Promoted ${result.modifiedCount} students from ${className} to ${nextClassName}`);
+    console.log(
+      `Promoted ${result.modifiedCount} students from ${className} to ${nextClassName}`
+    );
     return result.modifiedCount > 0;
   } catch (error) {
     console.error("Error promoting students by class:", error);
@@ -252,12 +262,26 @@ export const createNewStudent = async (data: NewStudentData) => {
 
   try {
     // Validate required fields
-    if (!data.nisn || !data.email || !data.gender || !data.class_id || !data.academic_level || !data.name) {
+    if (
+      !data.nisn ||
+      !data.email ||
+      !data.gender ||
+      !data.class_id ||
+      !data.academic_level ||
+      !data.name
+    ) {
       throw new Error("Mohon lengkapi semua field yang wajib diisi");
     }
 
     // Validate academic level
-    const validAcademicLevels = ["Ula", "Wustho", "Ulya", "SMP Formal", "Aliyah Agama", "Aliyah IPA"];
+    const validAcademicLevels = [
+      "Ula",
+      "Wustho",
+      "Ulya",
+      "SMP Formal",
+      "Aliyah Agama",
+      "Aliyah IPA",
+    ];
     if (!validAcademicLevels.includes(data.academic_level)) {
       throw new Error("Tingkat akademik tidak valid");
     }
@@ -285,7 +309,7 @@ export const createNewStudent = async (data: NewStudentData) => {
       role: "student",
       password: hashedPassword,
       created_at: new Date(),
-      updated_at: new Date()
+      updated_at: new Date(),
     });
 
     // Create student document
@@ -308,7 +332,7 @@ export const createNewStudent = async (data: NewStudentData) => {
       halaqah_id: new ObjectId(data.halaqah_id),
       graduation_status: data.graduation_status,
       created_at: new Date(),
-      updated_at: new Date()
+      updated_at: new Date(),
     };
 
     const result = await db.collection("students").insertOne(studentDoc);
@@ -321,5 +345,27 @@ export const createNewStudent = async (data: NewStudentData) => {
   } catch (error) {
     console.error("Error creating student:", error);
     throw error;
+  }
+};
+
+export const deleteStudent = async (id: string) => {
+  const client = await getMongoClientInstance();
+  const db = client.db("pesantren_db");
+
+  try {
+    const result = await db.collection("students").deleteOne({
+      _id: new ObjectId(id),
+    });
+
+    if (result.deletedCount === 0) {
+      console.error("No student found with the given ID");
+      return false;
+    }
+
+    console.log(`Deleted student with ID: ${id}`);
+    return true;
+  } catch (error) {
+    console.error("Error deleting student:", error);
+    return false;
   }
 };
