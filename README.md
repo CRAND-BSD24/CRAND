@@ -6,8 +6,11 @@ Demo Link: https://crand-app.vercel.app/
 
 Login credentials
 
-role Admin email : admin@pesantren.ac.id pass : 112233
+role Admin email : admin@pesantren.ac.id 
+pass : 112233
 
-role Teacher email : mahmud.ali@pesantren.ac.id pass : teacher123
+role Teacher email : mahmud.ali@pesantren.ac.id 
+pass : teacher123
 
-role Student: email : ahmadfarhan@pesantren.id pass : teacher123
+role Student: email : ahmadfarhan@pesantren.id 
+pass : teacher123
