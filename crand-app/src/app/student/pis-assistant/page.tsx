@@ -1,18 +1,19 @@
 'use client';
 
 import PISAssistantComponent from '@/components/pis-assistant/PISAssistantComponent';
-// Import the specific student action
-import { processStudentQuestion } from '@/app/student/pis-assistant/action';
+// IMPORTANT: Ideally, create a separate action for students with potentially different logic/permissions
+// For now, we reuse the admin action for demonstration purposes.
+import { processQuestion } from '../../admin/pis-assistant/action';
 
 export default function PISAssistantStudentPage() {
-  const initialMessage = 'Assalamu\'alaikum! Saya PIS Assistant, siap membantu menjawab pertanyaan seputar informasi pribadi Anda di pesantren (nilai, absensi, prestasi) atau informasi umum. Silakan bertanya!';
+  const initialMessage = 'Assalamu\'alaikum! Saya PIS Assistant, siap membantu menjawab pertanyaan seputar informasi umum pesantren. Silakan bertanya!';
 
   return (
     <PISAssistantComponent 
-      processQuestionAction={processStudentQuestion} // Use the student-specific action
+      processQuestionAction={processQuestion} // Using admin action for now
       initialMessage={initialMessage}
       assistantName="PIS Assistant (Santri)"
-      assistantDescription="Tanya AI tentang data Anda atau info pesantren"
+      assistantDescription="Tanya AI tentang informasi pesantren"
     />
   );
 } 
