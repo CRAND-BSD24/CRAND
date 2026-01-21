@@ -2,17 +2,18 @@
 
 import { getMongoClientInstance } from "@/db/config/connection";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { ObjectId } from "mongodb";
 
 export type MemorizationStudent = {
   id: string;
   name: string;
-  class_name: string;
+  halaqah_name: string;
   semester: string;
   email: string;
   academic_year: string;
   juz_name: string;
+  surah: string;
   pages: string;
   status: string;
   notes: string;
@@ -36,6 +37,7 @@ export type MemorizationHistory = {
   semester: string;
   academic_year: string;
   juz_name: string;
+  surah: string;
   pages: string;
   status: string;
   notes: string;
@@ -64,8 +66,22 @@ export async function getStudentMemorization(): Promise<MemorizationStudent[]> {
 
     console.log("Teacher found:", teacher);
 
-    // Aggregate pipeline to get students with their memorization data
+    // Aggregate pipeline to get students with their memorization data based on halaqah
     const pipeline = [
+      {
+        $lookup: {
+          from: "halaqah",
+          localField: "halaqah_id",
+          foreignField: "_id",
+          as: "halaqah",
+        },
+      },
+      {
+        $unwind: {
+          path: "$halaqah",
+          preserveNullAndEmptyArrays: true
+        }
+      },
       {
         $lookup: {
           from: "classes",
@@ -75,11 +91,14 @@ export async function getStudentMemorization(): Promise<MemorizationStudent[]> {
         },
       },
       {
-        $unwind: "$class",
+        $unwind: {
+          path: "$class",
+          preserveNullAndEmptyArrays: true
+        }
       },
       {
         $match: {
-          "class.teacher_id": teacher._id,
+          "halaqah.teacher_id": teacher._id,
         },
       },
       {
@@ -136,13 +155,15 @@ export async function getStudentMemorization(): Promise<MemorizationStudent[]> {
           id: "$_id",
           name: 1,
           class_name: "$class.class_name",
+          halaqah_name: "$halaqah.name",
           semester: "$grades.semester",
           academic_year: "$grades.academic_year",
           juz_name: "$memorization.name",
+          surah: "$grades.surah",
           pages: "$grades.pages",
           status: "$grades.status",
           notes: "$grades.notes",
-          teacher_id: "$class.teacher_id",
+          teacher_id: "$halaqah.teacher_id",
           quran_memorization_id: "$grades.quran_memorization_id",
           created_at: "$grades.created_at",
           email: "$user.email",
@@ -150,6 +171,35 @@ export async function getStudentMemorization(): Promise<MemorizationStudent[]> {
           user_data: "$user",
         },
       },
+      // Menambahkan field untuk sorting kelas
+      {
+        $addFields: {
+          class_level: {
+            $convert: {
+              input: {
+                $arrayElemAt: [
+                  {
+                    $regexFindAll: {
+                      input: "$class.class_name",
+                      regex: /\d+/
+                    }
+                  },
+                  0
+                ]
+              },
+              to: "int",
+              onError: 999
+            }
+          }
+        }
+      },
+      // Sorting berdasarkan kelas (7-12) kemudian nama (A-Z)
+      {
+        $sort: {
+          "class_level": 1,  // Urutkan berdasarkan angka kelas
+          "name": 1          // Kemudian urutkan berdasarkan nama A-Z
+        }
+      }
     ];
     
     const result = await db.collection("students").aggregate(pipeline).toArray();
@@ -161,10 +211,11 @@ export async function getStudentMemorization(): Promise<MemorizationStudent[]> {
         id: doc._id.toString(),
         name: doc.name || "",
         email: doc.user_data.email || "",
-        class_name: doc.class_name || "",
+        halaqah_name: doc.halaqah_name || "Tidak ada halaqah",
         semester: doc.semester || "",
         academic_year: doc.academic_year || "",
         juz_name: doc.juz_name || "",
+        surah: doc.surah || "",
         pages: doc.pages || "",
         status: doc.status || "Belum Ada",
         notes: doc.notes || "",
@@ -327,7 +378,7 @@ export async function getMemorizationHistory(
         $unwind: "$memorization"
       },
       {
-        $sort: { created_at: -1 }
+        $sort: { created_at: 1 }
       }
     ];
 
@@ -341,6 +392,7 @@ export async function getMemorizationHistory(
       semester: doc.semester || "",
       academic_year: doc.academic_year || "",
       juz_name: doc.memorization.name || "",
+      surah: doc.surah || "",
       pages: doc.pages || "",
       status: doc.status || "",
       notes: doc.notes || "",
@@ -361,6 +413,7 @@ export async function addMemorizationData(
     pages: string;
     status: string;
     notes: string;
+    surah?: string;
   }
 ) {
   const client = await getMongoClientInstance();
@@ -375,6 +428,7 @@ export async function addMemorizationData(
       pages: data.pages,
       status: data.status,
       notes: data.notes,
+      surah: data.surah || "",
       created_at: new Date(),
       updated_at: new Date(),
     });
@@ -384,4 +438,4 @@ export async function addMemorizationData(
     console.error("Error adding memorization data:", error);
     throw error;
   }
-} 
+}

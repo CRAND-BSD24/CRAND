@@ -1,6 +1,11 @@
+'use client';
+
 import Image from 'next/image';
+import { useState } from 'react';
 
 export default function Home() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (
     <main className="min-h-screen">
       {/* Navigation */}
@@ -21,14 +26,35 @@ export default function Home() {
               </div>
             </div>
             <div className="md:hidden">
-              <button className="text-gray-700">
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
+              <button 
+                className="text-gray-700 p-2"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                {isMenuOpen ? (
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                ) : (
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                )}
               </button>
             </div>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <div className="md:hidden bg-white border-t border-gray-100">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+              <a href="#tentang" className="block text-gray-700 hover:text-green-800 hover:bg-green-50 px-3 py-2 rounded-md text-base font-medium" onClick={() => setIsMenuOpen(false)}>Tentang</a>
+              <a href="#program" className="block text-gray-700 hover:text-green-800 hover:bg-green-50 px-3 py-2 rounded-md text-base font-medium" onClick={() => setIsMenuOpen(false)}>Program</a>
+              <a href="#kontak" className="block text-gray-700 hover:text-green-800 hover:bg-green-50 px-3 py-2 rounded-md text-base font-medium" onClick={() => setIsMenuOpen(false)}>Kontak</a>
+              <a href="/login" className="block bg-green-600 text-white hover:bg-green-700 px-3 py-2 rounded-md text-base font-medium mt-4" onClick={() => setIsMenuOpen(false)}>Masuk ke Sistem</a>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Hero Section */}
@@ -76,8 +102,8 @@ export default function Home() {
           <h2 className="text-4xl font-bold text-center mb-12 text-green-800">Program Unggulan</h2>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-white p-6 rounded-lg shadow-lg">
-              <h3 className="text-xl font-semibold mb-4 text-green-800">Tahfidz Al-Qur'an</h3>
-              <p className="text-gray-600">Program menghafal Al-Qur'an dengan metode yang efektif dan terstruktur.</p>
+              <h3 className="text-xl font-semibold mb-4 text-green-800">Tahfidz Al-Qur&apos;an</h3>
+              <p className="text-gray-600">Program menghafal Al-Qur&apos;an dengan metode yang efektif dan terstruktur.</p>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-lg">
               <h3 className="text-xl font-semibold mb-4 text-green-800">Pendidikan Formal</h3>

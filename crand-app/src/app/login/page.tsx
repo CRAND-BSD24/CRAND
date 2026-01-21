@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { signIn, useSession } from 'next-auth/react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { signIn, getSession, useSession } from 'next-auth/react';
 import Image from 'next/image';
 import logo from '@/assets/logo.png';
 
@@ -12,25 +12,10 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams?.get('callbackUrl') || '';
   const { status, data: session } = useSession();
 
-  // If user is already authenticated, redirect to the appropriate page
-  useEffect(() => {
-    if (status === 'authenticated') {
-      const userRole = session?.user?.role;
-      if (userRole === 'admin') {
-        router.push('/admin');
-      } else if (userRole === 'teacher') {
-        router.push('/teacher');
-      } else if (userRole === 'student') {
-        router.push('/student');
-      } else {
-        router.push(callbackUrl || '/');
-      }
-    }
-  }, [status, router, callbackUrl, session]);
+  // Catatan: Tidak redirect otomatis dari /login meskipun sudah authenticated.
+  // Pengguna wajib memasukkan email & password dulu untuk diarahkan sesuai role.
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,28 +41,25 @@ export default function Login() {
         return;
       }
       
-      // Explicitly check session and redirect based on role
-      // The refresh here is important to ensure the session is updated
-      router.refresh();
-      
-      // Poll for session update after successful login
-      const checkSession = setInterval(() => {
-        if (status === 'authenticated' && session?.user?.role) {
-          clearInterval(checkSession);
-          const userRole = session.user.role;
-          
-          if (userRole === 'admin') {
-            router.push('/admin');
-          } else if (userRole === 'teacher') {
-            router.push('/teacher');
-          } else if (userRole === 'student') {
-            router.push('/student');
-          }
-        }
-      }, 300);
-      
-      // Clear interval after 5 seconds if no redirect happened
-      setTimeout(() => clearInterval(checkSession), 5000);
+      // Ambil session terbaru dan redirect sesuai role
+      const updated = await getSession();
+      const userRole = updated?.user?.role;
+      if (userRole === 'admin') {
+        router.push('/admin');
+      } else if (userRole === 'teacher') {
+        router.push('/teacher');
+      } else if (userRole === 'student') {
+        router.push('/student');
+      } else if (userRole === 'hrd') {
+        router.push('/hrd');
+      } else if (userRole === 'educator') {
+        router.push('/educator');
+      } else if (userRole === 'manager') {
+        router.push('/manager');
+      } else {
+        router.push('/');
+      }
+      setLoading(false);
       
     } catch (err) {
       console.error('Login error:', err);

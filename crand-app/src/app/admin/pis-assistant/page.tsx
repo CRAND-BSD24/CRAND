@@ -1,13 +1,13 @@
 'use client';
 
 import PISAssistantComponent from '@/components/pis-assistant/PISAssistantComponent';
-import { processQuestion } from './action'; // Import the server action
+import { processQuestion } from './action';
 
 export default function PISAssistantAdminPage() {
   const initialMessage = 'Selamat datang Admin di PIS Assistant! Saya siap membantu Anda dengan informasi seputar santri dan ustadz menggunakan Gemini AI. Tanyakan apa saja terkait data pesantren.';
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] z-0 overflow-hidden bg-gradient-to-br from-emerald-50 to-teal-50">
+    <div className="flex flex-col min-h-screen pt-20 lg:pt-8 z-0 overflow-hidden bg-gradient-to-br from-emerald-50 to-teal-50">
       <div className="flex-none p-4 sm:p-6 md:p-8">
         {/* Header Section */}
         <div className="max-w-7xl mx-auto">
@@ -17,11 +17,11 @@ export default function PISAssistantAdminPage() {
       </div>
 
       {/* Main Content - Takes remaining height */}
-      <div className="flex-1 min-h-0">
+      <div className="flex-1 min-h-0 pb-4 sm:pb-6 md:pb-8">
         <div className="h-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-          <div className="h-full bg-white rounded-t-xl sm:rounded-xl shadow-lg border border-emerald-100">
+          <div className="h-full bg-white rounded-xl shadow-lg border border-emerald-100">
             <PISAssistantComponent 
-              processQuestionAction={processQuestion} // Pass the server action
+              processQuestionAction={processQuestion}
               initialMessage={initialMessage}
               assistantName="PIS Assistant (Admin)"
               assistantDescription="Tanya AI tentang data santri & ustadz"

@@ -129,8 +129,8 @@ const StudentsPage = () => {
   const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
 
   return (
-    <div className="p-4 sm:p-8 bg-gradient-to-br from-emerald-50 to-teal-50 min-h-screen mt-16">
-      <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl p-4 sm:p-8 mt-4 sm:mt-12 relative z-0">
+    <div className="p-4 sm:p-8 pt-20 lg:pt-8 bg-gradient-to-br from-emerald-50 to-teal-50 min-h-screen">
+      <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl p-4 sm:p-8 mb-8 relative z-0">
         <h1 className="text-2xl sm:text-3xl font-bold text-emerald-800 mb-6 sm:mb-8 text-center">
           Manajemen Data Santri
         </h1>
@@ -183,37 +183,37 @@ const StudentsPage = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-separate border-spacing-y-2 mb-6">
             <thead>
-              <tr className="bg-emerald-800 text-white">
-                <th className="px-4 py-3 cursor-pointer hidden sm:table-cell" onClick={() => handleSort("nisn")}>
+              <tr className="bg-emerald-800 text-white rounded-lg overflow-hidden">
+                <th className="px-4 py-3 cursor-pointer hidden sm:table-cell rounded-l-lg">
                   NISN{getSortIndicator("nisn")}
                 </th>
-                <th className="px-4 py-3 cursor-pointer" onClick={() => handleSort("name")}>
+                <th className="px-4 py-3 cursor-pointer">
                   Nama{getSortIndicator("name")}
                 </th>
-                <th className="px-4 py-3 cursor-pointer hidden sm:table-cell" onClick={() => handleSort("class_name")}>
+                <th className="px-4 py-3 cursor-pointer hidden sm:table-cell">
                   Kelas{getSortIndicator("class_name")}
                 </th>
-                <th className="px-4 py-3 cursor-pointer hidden md:table-cell" onClick={() => handleSort("academic_level")}>
+                <th className="px-4 py-3 cursor-pointer hidden md:table-cell">
                   Jenjang{getSortIndicator("academic_level")}
                 </th>
-                <th className="px-4 py-3 cursor-pointer hidden md:table-cell" onClick={() => handleSort("gender")}>
+                <th className="px-4 py-3 cursor-pointer hidden md:table-cell">
                   JK{getSortIndicator("gender")}
                 </th>
-                <th className="px-4 py-3">Aksi</th>
+                <th className="px-4 py-3 rounded-r-lg">Aksi</th>
               </tr>
             </thead>
             <tbody>
               {currentItems.map((student) => (
                 <tr
                   key={student._id}
-                  className="bg-white hover:bg-emerald-50 transition-colors rounded-md shadow-sm"
+                  className="bg-white hover:bg-emerald-50 transition-colors rounded-lg shadow-sm"
                 >
-                  <td className="px-4 py-3 hidden sm:table-cell">{student.nisn}</td>
+                  <td className="px-4 py-3 hidden sm:table-cell rounded-l-lg">{student.nisn}</td>
                   <td className="px-4 py-3">{student.name}</td>
                   <td className="px-4 py-3 hidden sm:table-cell">{student.class_name || "-"}</td>
                   <td className="px-4 py-3 hidden md:table-cell">{student.academic_level}</td>
                   <td className="px-4 py-3 hidden md:table-cell">{student.gender}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 rounded-r-lg">
                     <Link
                       href={`/admin/students/${student._id}`}
                       className="text-emerald-800 font-semibold hover:underline transition-all"
@@ -227,7 +227,7 @@ const StudentsPage = () => {
                 <tr>
                   <td
                     colSpan={6}
-                    className="text-center py-6 text-emerald-800 italic bg-emerald-50 rounded-md"
+                    className="text-center py-6 text-emerald-800 italic bg-emerald-50 rounded-lg"
                   >
                     Tidak ada data santri yang ditemukan.
                   </td>
@@ -237,7 +237,7 @@ const StudentsPage = () => {
           </table>
 
           {/* Pagination */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6 pb-4">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6">
             <div className="text-sm text-gray-600">
               Menampilkan {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredStudents.length)} dari {filteredStudents.length} data
             </div>
@@ -245,14 +245,14 @@ const StudentsPage = () => {
               <button
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="px-4 py-2 rounded-lg bg-emerald-100 text-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 rounded-lg bg-emerald-100 text-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-200 transition-colors"
               >
                 Sebelumnya
               </button>
               <button
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="px-4 py-2 rounded-lg bg-emerald-100 text-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 rounded-lg bg-emerald-100 text-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-200 transition-colors"
               >
                 Selanjutnya
               </button>
@@ -261,12 +261,14 @@ const StudentsPage = () => {
         </div>
       </div>
 
-      <PromoteClassModal
-        isOpen={isPromoteModalOpen}
-        onClose={() => setIsPromoteModalOpen(false)}
-        onConfirm={handlePromoteConfirm}
-        className={filterClass}
-      />
+      {isPromoteModalOpen && (
+        <PromoteClassModal
+          isOpen={isPromoteModalOpen}
+          onClose={() => setIsPromoteModalOpen(false)}
+          onConfirm={handlePromoteConfirm}
+          className={filterClass}
+        />
+      )}
     </div>
   );
 };

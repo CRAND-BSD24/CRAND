@@ -5,7 +5,7 @@ import logo from "@/assets/logo.png";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
-import { Home, Users, UserPlus, CalendarCheck, GraduationCap, BookOpen, User, Bot, Menu, X, LogOut } from 'lucide-react';
+import { Home, Users, UserPlus, CalendarCheck, GraduationCap, User, Bot, Menu, X, LogOut } from 'lucide-react';
 import { useState, useCallback, useEffect } from 'react';
 import { signOut } from 'next-auth/react';
 import { toast } from 'sonner';
@@ -24,19 +24,9 @@ const AdminSidebar = () => {
 
   const handleLogout = async () => {
     try {
-      // First call the server action to clear cookies
       await logout();
-      
-      // Show a success toast message
       toast.success("Berhasil logout");
-      
-      // Use a combined approach for more reliable redirects
-      await signOut({
-        redirect: false,
-      });
-      
-      // Force a hard redirect to the landing page to bypass middleware complexities
-      window.location.href = '/';
+      await signOut({ redirect: true, callbackUrl: '/logout' });
     } catch (error) {
       console.error('Logout error:', error);
       toast.error("Gagal logout, silakan coba lagi");
@@ -50,32 +40,42 @@ const AdminSidebar = () => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 h-16 bg-emerald-800 border-b border-emerald-700/50 z-50 flex items-center px-4">
-        <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-2 rounded-lg text-white hover:bg-emerald-700 transition-colors lg:hidden"
-        >
-          {isCollapsed ? <Menu size={24} /> : <X size={24} />}
-        </button>
-        <div className="flex items-center gap-3 ml-4">
-          <Image src={logo} alt="logo" className="w-10 h-10 rounded-lg" width={40} height={40} />
-          <div className="flex flex-col">
-            <h1 className="text-lg font-bold text-white">CRAND</h1>
-            <p className="text-xs text-emerald-200/80">Admin Dashboard</p>
+      {/* Mobile Header */}
+      <header className="fixed top-0 left-0 right-0 h-16 bg-emerald-800 border-b border-emerald-700/50 z-50 flex items-center justify-between px-4 lg:hidden">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="p-2 rounded-lg text-white hover:bg-emerald-700/50 active:bg-emerald-700 transition-colors"
+          >
+            {isCollapsed ? <Menu size={20} /> : <X size={20} />}
+          </button>
+          <div className="flex items-center gap-3">
+            <Image src={logo} alt="logo" className="w-8 h-8 rounded-lg" width={32} height={32} priority />
+            <div className="flex flex-col">
+              <h1 className="text-lg font-bold text-white">CRAND</h1>
+              <p className="text-[11px] text-emerald-200/80">Admin Dashboard</p>
+            </div>
           </div>
         </div>
       </header>
 
       <aside className={cn(
-        'fixed top-16 lg:top-0 lg:pt-16 left-0 w-64 h-screen bg-emerald-800 flex flex-col transition-all duration-300 ease-in-out border-r border-emerald-700/50 z-40',
-        isCollapsed ? '-translate-x-full lg:translate-x-0' : 'translate-x-0'
+        'w-64 min-h-screen bg-emerald-800 flex flex-col transition-all duration-300 ease-in-out border-r border-emerald-700/50',
+        'fixed inset-y-0 -left-64 lg:left-0 z-50',
+        !isCollapsed && 'left-0'
       )}>
-        <div className="flex flex-col h-[calc(100vh-7rem)] overflow-y-auto py-6 px-4">
-          <div className="lg:hidden">
-            <hr className="my-4 border-emerald-800/50" />
+        <div className="flex flex-col flex-1 px-4 py-6 overflow-y-auto">
+          <div className="flex items-center gap-3 px-2 mb-2 mt-6">
+            <Image src={logo} alt="logo" className="w-16 h-16 rounded-lg" width={64} height={64} />
+            <div className="flex flex-col">
+              <h1 className="text-lg font-bold text-white">CRAND</h1>
+              <p className="text-xs text-emerald-200/80">Admin Dashboard</p>
+            </div>
           </div>
 
-          <nav className="space-y-2">
+          <hr className="my-4 border-emerald-800/50" />
+
+          <nav className="mt-2 space-y-2">
             {[
               { href: '/admin', icon: Home, label: 'Dashboard' },
               { href: '/admin/students', icon: Users, label: 'Santri' },
@@ -106,36 +106,32 @@ const AdminSidebar = () => {
                   <Icon className="w-[18px] h-[18px]" />
                 </div>
                 <span className="text-sm font-medium">{label}</span>
-                {pathname === href && (
-                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                )}
               </Link>
             ))}
           </nav>
-        </div>
 
-        {/* Fixed logout button at bottom of sidebar */}
-        <div className="sticky bottom-0 p-4 bg-emerald-800 border-t border-emerald-700/50">
-          <button
-            onClick={handleLogout}
-            className={cn(
-              'w-full flex items-center justify-center gap-2 px-3 py-2.5',
-              'bg-red-500 hover:bg-red-600 active:bg-red-700',
-              'text-white font-medium',
-              'rounded-xl transition-all duration-200',
-              'shadow-lg'
-            )}
-          >
-            <LogOut className="w-4 h-4" />
-            Logout
-          </button>
+          <div className="mt-auto">
+            <button
+              onClick={handleLogout}
+              className={cn(
+                'w-full px-4 py-2.5 flex items-center justify-center gap-2',
+                'bg-red-500 hover:bg-red-600 active:bg-red-700',
+                'text-white font-medium',
+                'rounded-xl transition-all duration-200',
+                'shadow-lg'
+              )}
+            >
+              <LogOut className="w-4 h-4" />
+              Logout
+            </button>
+          </div>
         </div>
       </aside>
 
       {/* Overlay untuk menutup sidebar saat klik di luar */}
       {!isCollapsed && (
-        <div 
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden"
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setIsCollapsed(true)}
         />
       )}

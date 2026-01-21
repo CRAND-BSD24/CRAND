@@ -2,7 +2,7 @@
 
 import { getMongoClientInstance } from "@/db/config/connection";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { ObjectId } from "mongodb";
 import { getStudentsByTeacherId } from "../attendance/action";
 import {
@@ -105,7 +105,7 @@ export async function getDashboardData(): Promise<DashboardData> {
         return {
           id: studentId,
           name: student?.name || "",
-          class_name: student?.class_name || "",
+          halaqah_name: student?.halaqah_name || "",
           juz_name: student?.juz_name || "",
           totalPages,
         };
@@ -205,7 +205,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       .slice(0, 3)
       .map((student) => ({
         name: student.name,
-        class_name: `Kelas ${student.class_name}`,
+        class_name: `Halaqah ${student.halaqah_name}`,
         achievement: `${student.juz_name} (${student.totalPages} halaman)`,
       }));
 

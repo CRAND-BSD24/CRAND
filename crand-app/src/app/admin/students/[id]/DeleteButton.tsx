@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteStudent } from "../action";
+import { deleteStudentById } from "./action";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
@@ -9,7 +9,7 @@ export default function DeleteButton({ id }: { id: string }) {
 
   const handleDelete = async () => {
     if (window.confirm("Apakah Anda yakin ingin menghapus santri ini?")) {
-      const success = await deleteStudent(id);
+      const success = await deleteStudentById(id);
       if (success) {
         toast.success("Santri berhasil dihapus.", {
           position: "top-right",

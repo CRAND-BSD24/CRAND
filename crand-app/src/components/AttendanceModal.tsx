@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createAttendance } from "@/app/teacher/attendance/action";
+import { isValidAttendanceTime } from "@/lib/shift-utils";
 import { toast } from "sonner";
 
 interface AttendanceModalProps {
@@ -37,6 +38,11 @@ export default function AttendanceModal({
 
   const handleSubmit = async () => {
     try {
+      const { isValid, message } = isValidAttendanceTime(new Date());
+      if (!isValid) {
+        toast.error(message);
+        return;
+      }
       await createAttendance({
         student_id: studentId,
         date: new Date(),
@@ -85,7 +91,7 @@ export default function AttendanceModal({
             <Button variant="outline" onClick={() => setOpen(false)}>
               Batal
             </Button>
-            <Button onClick={handleSubmit}>Simpan</Button>
+            <Button onClick={handleSubmit} disabled={!isValidAttendanceTime(new Date()).isValid}>Simpan</Button>
           </div>
         </div>
       </DialogContent>

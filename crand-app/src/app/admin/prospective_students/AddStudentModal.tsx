@@ -113,7 +113,7 @@ export default function AddProspectiveStudentModal({
               <Select name="program" value={form.program} onChange={handleChange}>
                 <option value="">Pilih Program</option>
                 <option value="Reguler">Reguler</option>
-                <option value="Shorhul Qurro">Shorhul Qurro'</option>
+                <option value="Shorhul Qurro">Shorhul Qurro&apos;</option>
               </Select>
               <Select name="gender" value={form.gender} onChange={handleChange}>
                 <option key="default" value="">Pilih Jenis Kelamin</option>

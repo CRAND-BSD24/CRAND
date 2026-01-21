@@ -28,7 +28,6 @@ function getGenderDisplay(gender: string | undefined): string {
 }
 
 // Using any for db type until Db is exported from connection
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function getDatabaseContextForAdmin(db: any, normalizedQuestion: string, question: string): Promise<string | null> {
     // This function contains the previous database querying logic
     // It returns a formatted string with the context or null if no specific query matches
@@ -47,11 +46,9 @@ async function getDatabaseContextForAdmin(db: any, normalizedQuestion: string, q
           const student = await db.collection('students').findOne({ name: { $regex: `.*${studentName}.*`, $options: 'i' } });
           if (!student) return `Tidak ada data santri dengan nama "${studentName}".`;
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const achievements: any[] = await db.collection('achievements').find({ studentId: new ObjectId(student._id) }).sort({ date: -1 }).limit(3).toArray();
           const academicRecords: AcademicRecord[] = await db.collection('academic_records').find({ studentId: new ObjectId(student._id) }).sort({ year: -1, semester: -1 }).limit(1).toArray();
           const currentMonth = new Date(); currentMonth.setDate(1);
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const attendance: any[] = await db.collection('attendance').find({ studentId: new ObjectId(student._id), date: { $gte: currentMonth } }).toArray();
           
           let context = `Konteks Data Santri ${student.name}:\n`;
@@ -59,7 +56,6 @@ async function getDatabaseContextForAdmin(db: any, normalizedQuestion: string, q
           if (student.enrollmentDate) context += `Tanggal Masuk: ${new Date(student.enrollmentDate).toLocaleDateString('id-ID')}\n`;
         if (achievements.length > 0) {
             context += 'Prestasi:\n';
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             achievements.forEach((ach: any, i: number) => context += `${i + 1}. ${ach.title} (${ach.category}, ${ach.level}, ${ach.date ? new Date(ach.date).toLocaleDateString('id-ID') : 'N/A'})\n`);
           }
         if (academicRecords.length > 0) {
@@ -67,7 +63,6 @@ async function getDatabaseContextForAdmin(db: any, normalizedQuestion: string, q
             context += `Akademik (${rec.semester} ${rec.year}): Rata-rata ${rec.average?.toFixed(2) || 'N/A'}, Peringkat ${rec.rank || 'N/A'}\n`;
           }
         if (attendance.length > 0) {
-             // eslint-disable-next-line @typescript-eslint/no-explicit-any
              const present = attendance.filter((a: any) => a.status === 'present').length;
           const total = attendance.length;
              const percentage = total > 0 ? (present / total * 100).toFixed(1) : '0';
@@ -108,11 +103,9 @@ async function getDatabaseContextForAdmin(db: any, normalizedQuestion: string, q
     if (normalizedQuestion.includes('jumlah santri') || normalizedQuestion.includes('total santri')) {
       console.log("[Admin Context] Fetching context for total students");
       const totalStudents = await db.collection('students').countDocuments();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const statusCounts: any[] = await db.collection('students').aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]).toArray();
       let context = `Konteks Jumlah Santri: Total ${totalStudents} orang.\n`;
       context += "Detail Status:\n";
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       statusCounts.forEach((s: any) => context += `${s._id}: ${s.count}\n`);
       return context;
     }
@@ -121,11 +114,9 @@ async function getDatabaseContextForAdmin(db: any, normalizedQuestion: string, q
     if (normalizedQuestion.includes('jumlah ustadz') || normalizedQuestion.includes('total ustadz')) {
       console.log("[Admin Context] Fetching context for total teachers");
       const totalTeachers = await db.collection('teachers').countDocuments() + await db.collection('users').countDocuments({ role: { $in: ["teacher", "ustadz", "ustadzah", "guru"] } });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const statusCounts: any[] = await db.collection('teachers').aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]).toArray();
       let context = `Konteks Jumlah Ustadz: Total ${totalTeachers} orang.\n`;
       context += "Detail Status (dari collection 'teachers'):\n";
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       statusCounts.forEach((s: any) => context += `${s._id || 'Aktif'}: ${s.count}\n`);
       return context;
     }
@@ -133,12 +124,10 @@ async function getDatabaseContextForAdmin(db: any, normalizedQuestion: string, q
     // Handle questions about class distribution
     if (normalizedQuestion.includes('kelas') || normalizedQuestion.includes('tingkat')) {
       console.log("[Admin Context] Fetching context for class distribution");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const classDistribution: any[] = await db.collection('students').aggregate([ { $group: { _id: '$class', count: { $sum: 1 } } }, { $sort: { _id: 1 } } ]).toArray();
       if (classDistribution.length === 0) return "Tidak ada data distribusi kelas.";
       let context = "Konteks Distribusi Kelas:\n";
       let totalSantri = 0;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       classDistribution.forEach((cls: any) => { context += `Kelas ${cls._id}: ${cls.count}\n`; totalSantri += cls.count; });
       context += `Total Santri: ${totalSantri}`;
       return context;
@@ -163,7 +152,6 @@ export async function processQuestion(question: string): Promise<string> {
 
   try {
     const client = await getMongoClientInstance();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const db: any = client.db("pesantren_db");
     const normalizedQuestion = question.toLowerCase();
 

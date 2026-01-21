@@ -60,7 +60,7 @@ export default function StudentDetailPage({ params }: Props) {
   };
 
   if (!student) return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 pt-20 lg:pt-8">
       <div className="text-center">
         <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-800 mb-4"></div>
         <p className="text-lg text-emerald-800 font-medium">Memuat data santri...</p>
@@ -69,8 +69,8 @@ export default function StudentDetailPage({ params }: Props) {
   );
 
   return (
-    <div className="bg-gradient-to-br from-emerald-50 to-teal-50 min-h-screen p-6 mt-5">
-      <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl p-4 sm:p-8 mt-4 sm:mt-12 relative z-0 mt-10">
+    <div className="bg-gradient-to-br from-emerald-50 to-teal-50 min-h-screen p-4 sm:p-8 pt-20 lg:pt-8">
+      <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl p-4 sm:p-8 mb-8 relative z-0">
         {/* Header with back button */}
         <div className="flex justify-between items-center mb-8">
           <Link
@@ -85,7 +85,7 @@ export default function StudentDetailPage({ params }: Props) {
           <div className="flex gap-3">
             <button
               onClick={() => setShowEditModal(true)}
-              className="bg-emerald-800 hover:bg-emerald-700 text-white font-medium px-2 py-2 rounded-lg shadow-md transition-all duration-200 flex items-center gap-2"
+              className="bg-emerald-800 hover:bg-emerald-700 text-white font-medium px-4 py-2 rounded-lg shadow-md transition-all duration-200 flex items-center gap-2"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
@@ -94,7 +94,7 @@ export default function StudentDetailPage({ params }: Props) {
             </button>
             <button
               onClick={handleDelete}
-              className="bg-red-500 hover:bg-red-600 text-white font-medium px-2 py-2 rounded-lg shadow-md transition-all duration-200 flex items-center gap-2"
+              className="bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2 rounded-lg shadow-md transition-all duration-200 flex items-center gap-2"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
@@ -105,12 +105,12 @@ export default function StudentDetailPage({ params }: Props) {
         </div>
 
         {/* Heading */}
-        <h1 className="text-3xl font-bold text-center text-emerald-800 mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-center text-emerald-800 mb-8">
           Detail Santri
         </h1>
 
         {/* Profile Card */}
-        <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-6 mb-8 shadow-md">
+        <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-4 sm:p-6 mb-8 shadow-md">
           <div className="flex flex-col md:flex-row items-center gap-6">
             <div className="relative">
               <Image
@@ -125,26 +125,26 @@ export default function StudentDetailPage({ params }: Props) {
               </div>
             </div>
             <div className="text-center md:text-left flex-1">
-              <h2 className="text-2xl font-bold text-emerald-800">{student.name}</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-emerald-800">{student.name}</h2>
               <div className="flex flex-wrap gap-4 mt-2 justify-center md:justify-start">
                 <div className="flex items-center gap-1 text-gray-600">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-700" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                   </svg>
-                  <span>NISN: {student.nisn}</span>
+                  <span className="text-sm sm:text-base">NISN: {student.nisn}</span>
                 </div>
                 <div className="flex items-center gap-1 text-gray-600">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-700" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                     <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                   </svg>
-                  <span>{student.email}</span>
+                  <span className="text-sm sm:text-base">{student.email}</span>
                 </div>
                 <div className="flex items-center gap-1 text-gray-600">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-700" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
                   </svg>
-                  <span>{student.class_name || "Belum ada kelas"}</span>
+                  <span className="text-sm sm:text-base">{student.class_name || "Belum ada kelas"}</span>
                 </div>
               </div>
             </div>
@@ -320,7 +320,7 @@ export default function StudentDetailPage({ params }: Props) {
                 icon={
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-emerald-700" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
-                    <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
+                    <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H7a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
                   </svg>
                 }
                 label="VA SPP"

@@ -84,7 +84,7 @@ const StudentDashboard = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#e0e0e0] to-[#e6e6e6] p-6 space-y-8">
+    <div className="space-y-8">
       <div className="bg-white/50 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg">
         <h1 className="text-3xl font-bold text-black mb-2">Dashboard Santri</h1>
         <p className="text-black">

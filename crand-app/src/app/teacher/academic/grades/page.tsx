@@ -48,7 +48,7 @@ interface AddGradeForm {
 export default function StudentGradesPage({
   params,
 }: {
-  params: { studentId: string };
+  params: Promise<{ studentId: string }>;
 }) {
   const router = useRouter();
   const [grades, setGrades] = useState<StudentGrade[]>([]);
@@ -57,6 +57,7 @@ export default function StudentGradesPage({
   const [editingGrade, setEditingGrade] = useState<EditGradeForm | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [studentId, setStudentId] = useState<string>("");
   const [newGrade, setNewGrade] = useState<AddGradeForm>({
     subject_name: "",
     score: 0,
@@ -65,9 +66,19 @@ export default function StudentGradesPage({
   });
 
   useEffect(() => {
+    const initializeParams = async () => {
+      const resolvedParams = await params;
+      setStudentId(resolvedParams.studentId);
+    };
+    initializeParams();
+  }, [params]);
+
+  useEffect(() => {
+    if (!studentId) return;
+    
     const fetchGrades = async () => {
       try {
-        const data = await getStudentGrades(params.studentId);
+        const data = await getStudentGrades(studentId);
         setGrades(data);
       } catch (error) {
         console.error("Error fetching grades:", error);
@@ -78,7 +89,7 @@ export default function StudentGradesPage({
     };
 
     fetchGrades();
-  }, [params.studentId]);
+  }, [studentId]);
 
   const handleEditClick = (grade: StudentGrade) => {
     setEditingGrade(grade);
@@ -86,11 +97,11 @@ export default function StudentGradesPage({
   };
 
   const handleSaveEdit = async () => {
-    if (!editingGrade) return;
+    if (!editingGrade || !studentId) return;
 
     try {
       await updateStudentGrade(
-        params.studentId,
+        studentId,
         editingGrade.subject_name,
         editingGrade.score,
         editingGrade.semester,
@@ -98,7 +109,7 @@ export default function StudentGradesPage({
       );
 
       // Refresh data setelah update
-      const updatedGrades = await getStudentGrades(params.studentId);
+      const updatedGrades = await getStudentGrades(studentId);
       setGrades(updatedGrades);
       setIsEditDialogOpen(false);
     } catch (error) {
@@ -108,9 +119,11 @@ export default function StudentGradesPage({
   };
 
   const handleAddGrade = async () => {
+    if (!studentId) return;
+    
     try {
       await updateStudentGrade(
-        params.studentId,
+        studentId,
         newGrade.subject_name,
         newGrade.score,
         newGrade.semester,
@@ -118,7 +131,7 @@ export default function StudentGradesPage({
       );
 
       // Refresh data setelah menambah
-      const updatedGrades = await getStudentGrades(params.studentId);
+      const updatedGrades = await getStudentGrades(studentId);
       setGrades(updatedGrades);
       setIsAddDialogOpen(false);
       // Reset form

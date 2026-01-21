@@ -5,15 +5,13 @@ import { NextRequest } from 'next/server';
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
-  // Check if this is a logout request
-  const isLogout = pathname.includes('/api/auth/signout');
-  if (isLogout) {
-    // Allow the logout request to proceed without interference
+  // Check if this is an auth-related request
+  if (pathname.startsWith('/api/auth')) {
     return NextResponse.next();
   }
   
   // Paths that are accessible without authentication
-  const publicPaths = ['/', '/login'];
+  const publicPaths = ['/', '/login', '/logout', '/api/users/create-manager'];
   
   // Check if the path is public
   const isPublicPath = publicPaths.some(path => pathname === path || 
@@ -25,21 +23,8 @@ export async function middleware(request: NextRequest) {
     secret: process.env.NEXTAUTH_SECRET
   });
 
-  // If we're on the login page and user is already authenticated, redirect based on role
-  if (pathname === '/login' && token) {
-    const role = token.role as string;
-    
-    if (role === 'admin') {
-      return NextResponse.redirect(new URL('/admin', request.url));
-    } else if (role === 'teacher') {
-      return NextResponse.redirect(new URL('/teacher', request.url));
-    } else if (role === 'student') {
-      return NextResponse.redirect(new URL('/student', request.url));
-    }
-    
-    // Default fallback
-    return NextResponse.redirect(new URL('/', request.url));
-  }
+  // Note: Jangan redirect otomatis dari /login meskipun sudah authenticated.
+  // Pengguna harus memasukkan email dan password terlebih dahulu.
 
   // If the path is not public and user is not logged in, redirect to login
   if (!isPublicPath && !token) {
@@ -67,6 +52,21 @@ export async function middleware(request: NextRequest) {
     if (pathname.startsWith('/student') && role !== 'student') {
       return NextResponse.redirect(new URL(`/${role}`, request.url));
     }
+
+    // HRD routes
+    if (pathname.startsWith('/hrd') && role !== 'hrd') {
+      return NextResponse.redirect(new URL(`/${role}`, request.url));
+    }
+
+    // Educator routes
+    if (pathname.startsWith('/educator') && role !== 'educator') {
+      return NextResponse.redirect(new URL(`/${role}`, request.url));
+    }
+
+    // Manager routes
+    if (pathname.startsWith('/manager') && role !== 'manager') {
+      return NextResponse.redirect(new URL(`/${role}`, request.url));
+    }
   }
 
   return NextResponse.next();
@@ -76,12 +76,11 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|images|public).*)'
+    '/((?!api/auth|_next/static|_next/image|favicon.ico|images|public|login).*)',
   ],
-}; 
+};

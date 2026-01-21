@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next",
+      "config": {
+        "installCommand": "npm install",
+        "buildCommand": "npm run build"
+      }
+    }
+  ],
+  "env": {
+    "MONGODB_CONNECTION_STRING": "mongodb+srv://mrejaa:NsYPMPenGY7HhJpR@cluster0.16o8y.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+    "NEXTAUTH_URL": "https://crand-ju3xt8vkc-anawawims-projects.vercel.app",
+    "NEXTAUTH_SECRET": "NEXTAUTH_SECRET",
+    "EMAIL_USER": "anawawim@gmail.com",
+    "EMAIL_PASSWORD": "ixvr qqxe rlxm ixvr",
+    "GOOGLE_GEMINI_API_KEY": "AIzaSyDGxUhzMLYYVKDZNZcf-YOgGCAYZZKyPWE"
+  }
+}

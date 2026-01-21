@@ -6,7 +6,7 @@ import { ReactNode } from 'react';
 
 interface ProtectedRouteProps {
   children: ReactNode;
-  requiredRole?: 'admin' | 'teacher' | 'student';
+  requiredRole?: 'admin' | 'teacher' | 'student' | 'hrd' | 'educator' | 'manager';
 }
 
 export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
@@ -32,4 +32,4 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   }
 
   return <>{children}</>;
-} 
+}

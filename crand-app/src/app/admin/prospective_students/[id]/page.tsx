@@ -7,9 +7,9 @@ import Image from "next/image";
 import Link from "next/link";
 
 interface SantriDetailPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function SantriDetailPage({ params }: SantriDetailPageProps) {

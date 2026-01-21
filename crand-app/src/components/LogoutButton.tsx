@@ -22,17 +22,8 @@ export default function LogoutButton({ className = '', iconClassName = '' }: Log
       // Show a success toast message
       toast.success("Berhasil logout");
       
-      // Use a combined approach for more reliable redirects
-      await signOut({
-        redirect: false,
-      });
-      
-      // Force a hard redirect to the landing page to bypass middleware complexities
-      window.location.href = '/';
-      
-      // The router navigation below might not execute due to the hard redirect above
-      // router.push('/');
-      // router.refresh();
+      // Sign out and redirect to the dedicated logout page
+      await signOut({ redirect: true, callbackUrl: '/logout' });
     } catch (error) {
       console.error('Logout error:', error);
       toast.error("Gagal logout, silakan coba lagi");
@@ -48,4 +39,4 @@ export default function LogoutButton({ className = '', iconClassName = '' }: Log
       Logout
     </button>
   );
-} 
+}

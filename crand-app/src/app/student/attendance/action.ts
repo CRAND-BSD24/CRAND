@@ -16,7 +16,10 @@ export interface MonthlyAttendance {
   class: string;
   attendance: {
     date: Date;
-    status: "Present" | "Absent" | "Sick" | "Permission" | "Holiday" | "";
+    status: "" | "Present" | "Absent" | "Sick" | "Permission" | "Holiday";
+    photo?: string;
+    timestamp?: string;
+    shift_time?: string;
   }[];
 }
 
@@ -81,15 +84,11 @@ export async function getMonthlyAttendance(
   studentId: string
 ): Promise<MonthlyAttendance[]> {
   try {
-    // console.log("Getting monthly attendance for:", { year, month, studentId });
-
     const client = await getMongoClientInstance();
     const db = client.db("pesantren_db");
 
     // Ambil data siswa
     const studentsCollection = db.collection("students");
-    // console.log("Finding student with ID:", studentId);
-
     const student = await studentsCollection.findOne({
       user_id: new ObjectId(studentId),
     });
@@ -97,8 +96,6 @@ export async function getMonthlyAttendance(
     const kelas = await db.collection("classes").findOne({
       _id: new ObjectId(student?.class_id.toString()),
     });
-
-    // console.log("Found student:", student);
 
     if (!student) {
       console.error("Student not found");
@@ -112,11 +109,6 @@ export async function getMonthlyAttendance(
     const startDate = new Date(year, month - 1, 1);
     const endDate = new Date(year, month, 0);
 
-    // console.log("Searching attendance records between:", {
-    //   startDate: startDate.toISOString(),
-    //   endDate: endDate.toISOString(),
-    // });
-
     const query = {
       student_id: new ObjectId(student._id.toString()),
       date: {
@@ -125,16 +117,10 @@ export async function getMonthlyAttendance(
       },
     };
 
-    // console.log("Attendance query:", JSON.stringify(query));
-
-    const attendanceRecords = await attendanceCollection.find(query).toArray();
-
-    // console.log("Found attendance records:", attendanceRecords);
-
-    // Pastikan status yang diambil dari database sesuai dengan yang diharapkan
-    attendanceRecords.forEach((record) => {
-      console.log(`Record for date ${record.date}:`, record.status);
-    });
+    const attendanceRecords = await attendanceCollection
+      .find(query)
+      .sort({ date: 1, created_at: 1 })
+      .toArray();
 
     // Generate attendance array untuk setiap hari dalam bulan
     const daysInMonth = endDate.getDate();
@@ -158,54 +144,164 @@ export async function getMonthlyAttendance(
           recordDate.getFullYear() === date.getFullYear()
         );
       });
-      // console.log(record, "record");
 
-      // Jika tidak ada record, anggap Absent
+      // Jika tidak ada record dan tanggal sudah lewat, set Absent
       if (!record) {
-        // Jika tanggal lebih dari hari ini, biarkan status kosong
-        if (date > new Date()) {
-          return {
-            date,
-            status: "" as const,
-          };
-        }
         return {
           date,
-          status: "Absent" as const,
+          status: date > new Date() ? "" : "Absent" as const,
         };
       }
 
-      // Konversi status ke format yang benar (kapitalisasi)
-      const statusMap: {
-        [key: string]: "Present" | "Absent" | "Sick" | "Permission";
-      } = {
-        present: "Present",
-        absent: "Absent",
-        sick: "Sick",
-        permission: "Permission",
-      };
-
+      // Gunakan status langsung dari database
       return {
         date,
-        status: statusMap[record.status.toLowerCase()] || "Absent",
+        status: record.status === "Present" ? "Present" :
+               record.status === "Sick" ? "Sick" :
+               record.status === "Permission" ? "Permission" :
+               record.status === "Absent" ? "Absent" :
+               record.status === "Holiday" ? "Holiday" : "",
+        photo: record.photo?.buffer.toString('base64'),
+        timestamp: record.created_at?.toISOString(),
+        shift_time: record.shift_time
       };
     });
 
-    const result = [
-      {
-        _id: student._id.toString(),
-        name: student.name,
-        class: kelas?.class_name,
-        attendance,
-      },
-    ];
+    return [{
+      _id: student._id.toString(),
+      name: student.name,
+      class: kelas?.class_name,
+      attendance: attendance as MonthlyAttendance['attendance'],
+    }];
 
-    // console.log("Returning result:", result);
-    // console.log(kelas, "kelas");
-
-    return result;
   } catch (error) {
     console.error("Error fetching monthly attendance:", error);
     return [];
+  }
+}
+
+export interface AttendanceHistory {
+  date: Date;
+  status: string;
+  shift_time?: string;
+  created_at?: Date;
+  photo?: string;
+}
+
+export async function getAttendanceHistory(
+  studentId: string,
+  startDate?: Date,
+  endDate?: Date
+): Promise<AttendanceHistory[]> {
+  const client = await getMongoClientInstance();
+  const db = client.db("pesantren_db");
+
+  try {
+    const student = await db.collection("students").findOne({
+      user_id: new ObjectId(studentId)
+    });
+
+    if (!student) {
+      throw new Error("Student not found");
+    }
+
+    const matchStage: any = {
+      student_id: new ObjectId(student._id.toString())
+    };
+
+    if (startDate && endDate) {
+      matchStage.date = {
+        $gte: startDate,
+        $lte: endDate
+      };
+    }
+
+    const result = await db
+      .collection("class_attendance")
+      .aggregate([
+        {
+          $match: matchStage
+        },
+        {
+          $addFields: {
+            shift_time: {
+              $let: {
+                vars: {
+                  hour: { $hour: "$created_at" },
+                  minute: { $minute: "$created_at" }
+                },
+                in: {
+                  $switch: {
+                    branches: [
+                      {
+                        case: {
+                          $and: [
+                            { $gte: [{ $add: [{ $multiply: ["$$hour", 60] }, "$$minute"] }, 240] },
+                            { $lte: [{ $add: [{ $multiply: ["$$hour", 60] }, "$$minute"] }, 285] }
+                          ]
+                        },
+                        then: "04:00 - 04:45"
+                      },
+                      {
+                        case: {
+                          $and: [
+                            { $gte: [{ $add: [{ $multiply: ["$$hour", 60] }, "$$minute"] }, 330] },
+                            { $lte: [{ $add: [{ $multiply: ["$$hour", 60] }, "$$minute"] }, 420] }
+                          ]
+                        },
+                        then: "05:30 - 07:00"
+                      },
+                      {
+                        case: {
+                          $and: [
+                            { $gte: [{ $add: [{ $multiply: ["$$hour", 60] }, "$$minute"] }, 480] },
+                            { $lte: [{ $add: [{ $multiply: ["$$hour", 60] }, "$$minute"] }, 540] }
+                          ]
+                        },
+                        then: "08:00 - 09:00"
+                      },
+                      {
+                        case: {
+                          $and: [
+                            { $gte: [{ $add: [{ $multiply: ["$$hour", 60] }, "$$minute"] }, 960] },
+                            { $lte: [{ $add: [{ $multiply: ["$$hour", 60] }, "$$minute"] }, 1035] }
+                          ]
+                        },
+                        then: "16:00 - 17:15"
+                      },
+                      {
+                        case: {
+                          $and: [
+                            { $gte: [{ $add: [{ $multiply: ["$$hour", 60] }, "$$minute"] }, 1110] },
+                            { $lte: [{ $add: [{ $multiply: ["$$hour", 60] }, "$$minute"] }, 1200] }
+                          ]
+                        },
+                        then: "18:30 - 20:00"
+                      }
+                    ],
+                    default: "Unknown"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          $sort: { date: 1, created_at: 1 }
+        }
+      ])
+      .toArray();
+
+    return result.map(record => ({
+      date: record.date,
+      status: record.status,
+      shift_time: record.shift_time,
+      created_at: record.created_at,
+      photo: record.photo?.buffer.toString('base64')
+    }));
+
+  } catch (error) {
+    console.error("Error fetching attendance history:", error);
+    throw error;
   }
 }

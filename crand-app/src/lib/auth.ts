@@ -5,6 +5,10 @@ import { compare } from "bcrypt";
 import NextAuth from "next-auth/next";
 import { getMongoClientInstance } from "@/db/config/connection";
 
+function escapeRegExp(s: string) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -19,7 +23,9 @@ export const authOptions: NextAuthOptions = {
         const client = await getMongoClientInstance();
         const db = client.db("pesantren_db");
 
-        const user = await db.collection("users").findOne({ email: credentials.email });
+        const emailInput = String(credentials.email || '').trim();
+        const emailRegex = new RegExp(`^${escapeRegExp(emailInput)}$`, 'i');
+        const user = await db.collection("users").findOne({ email: { $regex: emailRegex } });
 
         if (!user) return null;
 
@@ -30,7 +36,7 @@ export const authOptions: NextAuthOptions = {
           id: user._id.toString(),
           name: user.name,
           email: user.email,
-          role: user.role as "admin" | "teacher" | "student",
+          role: user.role as "admin" | "teacher" | "student" | "hrd" | "educator" | "manager",
         };
       },
     }),
@@ -45,7 +51,7 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       session.user.id = token.id as string;
-      session.user.role = token.role as "admin" | "teacher" | "student";
+      session.user.role = token.role as "admin" | "teacher" | "student" | "hrd" | "educator" | "manager";
       return session;
     },
   },

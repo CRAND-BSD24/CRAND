@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { getMongoClientInstance } from "@/db/config/connection";
 import { ObjectId } from "mongodb";
+import { isValidAttendanceTime } from "@/lib/shift-utils";
 
 export async function POST(request: Request) {
   try {
@@ -19,6 +20,8 @@ export async function POST(request: Request) {
     const photo = formData.get("photo") as string;
     const faceDescriptor = JSON.parse(formData.get("faceDescriptor") as string);
     const type = (formData.get("type") as string) || "teacher";
+    const latStr = formData.get("latitude") as string | null;
+    const lngStr = formData.get("longitude") as string | null;
 
     if (!photo || !faceDescriptor) {
       return NextResponse.json(
@@ -31,6 +34,59 @@ export async function POST(request: Request) {
     const db = client.db("pesantren_db");
     const faceDataCollection = db.collection("face_data");
     const threshold = 0.6;
+
+    // Validasi lokasi (2 lokasi, radius 500m)
+    const isWithinRadius = (
+      userLat: number,
+      userLng: number,
+      locations: Array<{ lat: number; lng: number }>,
+      radius: number
+    ): boolean => {
+      const R = 6371e3; // meters
+      for (const location of locations) {
+        const φ1 = (userLat * Math.PI) / 180;
+        const φ2 = (location.lat * Math.PI) / 180;
+        const Δφ = ((location.lat - userLat) * Math.PI) / 180;
+        const Δλ = ((location.lng - userLng) * Math.PI) / 180;
+        const a =
+          Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+          Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const distance = R * c;
+        if (distance <= radius) return true;
+      }
+      return false;
+    };
+
+    // Enforce lokasi wajib tersedia dan valid
+    if (!latStr || !lngStr) {
+      return NextResponse.json(
+        { success: false, message: "Data lokasi diperlukan untuk absensi" },
+        { status: 400 }
+      );
+    }
+    const userLat = parseFloat(latStr);
+    const userLng = parseFloat(lngStr);
+    if (Number.isNaN(userLat) || Number.isNaN(userLng)) {
+      return NextResponse.json(
+        { success: false, message: "Data lokasi tidak valid" },
+        { status: 400 }
+      );
+    }
+    const allowedLocations = [
+      { lat: -5.9943049319879425, lng: 106.04812321979192 },
+      { lat: -5.979029363145886, lng: 106.0590577982583 },
+    ];
+    const within = isWithinRadius(userLat, userLng, allowedLocations, 500);
+    if (!within) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Absensi hanya dapat dilakukan di lokasi yang ditentukan",
+        },
+        { status: 400 }
+      );
+    }
 
     // Fungsi untuk menghitung jarak euclidean antara dua face descriptor
     const calculateDistance = (
@@ -45,7 +101,16 @@ export async function POST(request: Request) {
       );
     };
 
+    const BUFFER_MINUTES = 10;
     if (type === "teacher") {
+      // Validasi waktu absensi guru dan deteksi terlambat
+      const timeCheck = isValidAttendanceTime(new Date(), "teacher", BUFFER_MINUTES);
+      if (!timeCheck.isValid) {
+        return NextResponse.json(
+          { success: false, message: timeCheck.message },
+          { status: 400 }
+        );
+      }
       // Cek apakah guru ada di database
       const existingTeacher = await db.collection("teachers").findOne({
         user_id: new ObjectId(session.user.id),
@@ -106,14 +171,18 @@ export async function POST(request: Request) {
       // Simpan data absensi guru
       const attendance = {
         teacher_id: existingTeacher._id,
+        name: userData.name,
         date: new Date(),
-        photo,
+        photo: photo,
+        type: "teacher",
         face_descriptor: faceDescriptor,
         created_at: new Date(),
         updated_at: new Date(),
+        is_late: Boolean(timeCheck.isLate),
+        late_minutes: timeCheck.lateMinutes || 0,
       };
 
-      await db.collection("teacher_attendance").insertOne(attendance);
+      await db.collection("attendance").insertOne(attendance);
 
       const timestamp = new Date().toLocaleString("id-ID", {
         weekday: "long",
@@ -185,6 +254,15 @@ export async function POST(request: Request) {
         }
       }
 
+      // Validasi waktu absensi untuk admin/HRD
+      const timeCheck = isValidAttendanceTime(new Date(), "admin", BUFFER_MINUTES);
+      if (!timeCheck.isValid) {
+        return NextResponse.json(
+          { success: false, message: timeCheck.message },
+          { status: 400 }
+        );
+      }
+
       // Simpan data absensi admin
       const attendance = {
         admin_id: existingAdmin._id,
@@ -193,6 +271,8 @@ export async function POST(request: Request) {
         face_descriptor: faceDescriptor,
         created_at: new Date(),
         updated_at: new Date(),
+        is_late: Boolean(timeCheck.isLate),
+        late_minutes: timeCheck.lateMinutes || 0,
       };
 
       await db.collection("admin_attendance").insertOne(attendance);

@@ -2,7 +2,7 @@
 
 import { getMongoClientInstance } from "@/db/config/connection";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { ObjectId } from "mongodb";
 import { getStudentsByTeacherId } from "../attendance/action";
 
@@ -50,6 +50,35 @@ export async function getAcademicData(): Promise<AcademicData[]> {
           "class.teacher_id": teacher._id,
         },
       },
+      // Menambahkan field untuk sorting kelas
+      {
+        $addFields: {
+          class_level: {
+            $convert: {
+              input: {
+                $arrayElemAt: [
+                  {
+                    $regexFindAll: {
+                      input: "$class.class_name",
+                      regex: /\d+/
+                    }
+                  },
+                  0
+                ]
+              },
+              to: "int",
+              onError: 999
+            }
+          }
+        }
+      },
+      // Sorting berdasarkan kelas (7-12) kemudian nama (A-Z)
+      {
+        $sort: {
+          "class_level": 1,  // Urutkan berdasarkan angka kelas
+          "name": 1          // Kemudian urutkan berdasarkan nama A-Z
+        }
+      }
     ];
 
     const result = await db

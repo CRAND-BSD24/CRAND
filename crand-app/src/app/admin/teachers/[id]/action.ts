@@ -1,11 +1,12 @@
 'use server';
 
 import { ObjectId } from "mongodb";
-import { connectToDatabase } from "@/lib/mongodb";
+import { getMongoClientInstance } from "@/db/config/connection";
 
 export async function getTeacherById(id: string) {
   try {
-    const { db } = await connectToDatabase();
+    const client = await getMongoClientInstance();
+    const db = client.db("pesantren_db");
     
     const teacher = await db.collection('teachers').aggregate([
       {
@@ -54,4 +55,4 @@ export async function getTeacherById(id: string) {
     console.error('Error fetching teacher:', error);
     throw new Error('Failed to fetch teacher data');
   }
-} 
+}

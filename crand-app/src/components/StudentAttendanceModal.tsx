@@ -19,29 +19,43 @@ import {
 } from "@/components/ui/select";
 import { createAttendance } from "@/app/teacher/attendance/actions";
 import { toast } from "sonner";
+import { getRoleCurrentShift, isValidAttendanceTime } from "@/lib/shift-utils";
 
 interface StudentAttendanceModalProps {
   studentId: string;
   studentName: string;
   onSuccess?: () => void;
+  role?: "teacher" | "educator";
 }
 
 export default function StudentAttendanceModal({
   studentId,
   studentName,
   onSuccess,
+  role = "teacher",
 }: StudentAttendanceModalProps) {
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<
     "Present" | "Sick" | "Permission" | "Absent"
   >("Present");
 
+  const BUFFER_MINUTES = 10;
+
   const handleSubmit = async () => {
     try {
+      const { isValid, message, isLate, lateMinutes } = isValidAttendanceTime(new Date(), role, BUFFER_MINUTES);
+      if (!isValid) {
+        toast.error(message);
+        return;
+      }
+
       await createAttendance({
         student_id: studentId,
         date: new Date(),
         status: status,
+        role,
+        is_late: Boolean(isLate),
+        late_minutes: lateMinutes || 0,
       });
 
       toast.success(`Kehadiran ${studentName} berhasil dicatat`);
@@ -56,14 +70,27 @@ export default function StudentAttendanceModal({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="hover:bg-blue-50">
+        <Button
+          variant="outline"
+          size="sm"
+          className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+          disabled={!isValidAttendanceTime(new Date(), role, BUFFER_MINUTES).isValid}
+        >
           <Pencil className="mr-2 h-4 w-4" />
-          Edit
+          Absen
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Catat Kehadiran {studentName}</DialogTitle>
+          <div className="text-sm text-emerald-600 mt-2">
+            Shift: {getRoleCurrentShift(role, new Date())}
+          </div>
+          {isValidAttendanceTime(new Date(), role, BUFFER_MINUTES).isLate && (
+            <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md inline-block px-2 py-1 mt-2">
+              Terlambat {isValidAttendanceTime(new Date(), role, BUFFER_MINUTES).lateMinutes} menit
+            </div>
+          )}
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
@@ -88,16 +115,26 @@ export default function StudentAttendanceModal({
                   Izin
                 </SelectItem>
                 <SelectItem value="Absent" className="hover:bg-gray-100">
-                  Tidak Hadir
+                  Alfa
                 </SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setOpen(false)}
+              className="bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+            >
               Batal
             </Button>
-            <Button onClick={handleSubmit}>Simpan</Button>
+            <Button
+              onClick={handleSubmit}
+              className="bg-emerald-600 text-white hover:bg-emerald-700"
+              disabled={!isValidAttendanceTime(new Date(), role, BUFFER_MINUTES).isValid}
+            >
+              Simpan
+            </Button>
           </div>
         </div>
       </DialogContent>

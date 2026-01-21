@@ -193,11 +193,11 @@ export default function AddStudentModal({
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="bg-emerald-800 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-semibold shadow-md hover:bg-emerald-700 transition-all duration-300 flex items-center gap-2 w-full sm:w-auto justify-center"
+        className="bg-emerald-800 text-white px-3 sm:px-4 py-2 rounded-lg text-sm sm:text-base font-semibold shadow-md hover:bg-emerald-700 transition-all duration-300 flex items-center gap-2 w-full sm:w-auto justify-center"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5"
+          className="h-4 w-4 sm:h-5 sm:w-5"
           viewBox="0 0 20 20"
           fill="currentColor"
         >
@@ -211,10 +211,10 @@ export default function AddStudentModal({
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl shadow-2xl p-4 sm:p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto mx-4 mt-20">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl p-4 sm:p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-emerald-800">
+              <h2 className="text-lg sm:text-2xl font-bold text-emerald-800">
                 Tambah Data Santri
               </h2>
               <button
@@ -223,7 +223,7 @@ export default function AddStudentModal({
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
+                  className="h-5 w-5 sm:h-6 sm:w-6"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -238,7 +238,7 @@ export default function AddStudentModal({
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
                   Nama Lengkap
@@ -248,8 +248,8 @@ export default function AddStudentModal({
                   name="name"
                   value={form.name}
                   onChange={handleChange}
+                  className="w-full p-2 sm:p-2.5 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                   required
-                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
                 />
               </div>
 

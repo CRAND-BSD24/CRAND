@@ -3,26 +3,31 @@ import { config } from "dotenv";
 config();
 
 const connectionString = process.env.MONGODB_CONNECTION_STRING;
-// test INI
 const dbName = "pesantren_db";
 
-// Memastikan bahwa connectionString sudah ada value-nya
 if (!connectionString) {
   throw new Error("MONGODB_CONNECTION_STRING is not defined");
 }
 
-// Tipe data dari client adalah MongoClient
 let client: MongoClient;
+let clientPromise: Promise<MongoClient>;
 
-// Fungsi ini akan mengembalikan client yang sudah terkoneksi dengan MongoDB
-// Hanya boleh ada 1 instance client (Singleton)
-export const getMongoClientInstance = async () => {
-  if (!client) {
-    client = await MongoClient.connect(connectionString);
-    await client.connect();
+if (process.env.NODE_ENV === "development") {
+  let globalWithMongo = global as typeof globalThis & {
+    _mongoClientPromise?: Promise<MongoClient>;
+  };
+
+  if (!globalWithMongo._mongoClientPromise) {
+    client = new MongoClient(connectionString);
+    globalWithMongo._mongoClientPromise = client.connect();
   }
+  clientPromise = globalWithMongo._mongoClientPromise;
+} else {
+  client = new MongoClient(connectionString);
+  clientPromise = client.connect();
+}
 
-  //test INI
-
+export async function getMongoClientInstance() {
+  const client = await clientPromise;
   return client;
-};
+}

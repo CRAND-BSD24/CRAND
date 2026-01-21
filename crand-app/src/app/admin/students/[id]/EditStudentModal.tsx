@@ -167,10 +167,10 @@ export default function EditStudentModal({ student, onClose, onUpdated }: EditSt
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto mx-3">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl p-4 sm:p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-[#006A71]">Edit Data Santri</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-[#006A71]">Edit Data Santri</h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 transition-colors"
@@ -181,7 +181,7 @@ export default function EditStudentModal({ student, onClose, onUpdated }: EditSt
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-6">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">Nama Lengkap</label>
             <input
@@ -189,7 +189,7 @@ export default function EditStudentModal({ student, onClose, onUpdated }: EditSt
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
+              className="w-full p-2 sm:p-2.5 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
               required
             />
           </div>
@@ -201,7 +201,7 @@ export default function EditStudentModal({ student, onClose, onUpdated }: EditSt
               name="nisn"
               value={formData.nisn}
               onChange={handleChange}
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
+              className="w-full p-2 sm:p-2.5 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
               required
             />
           </div>
@@ -212,7 +212,7 @@ export default function EditStudentModal({ student, onClose, onUpdated }: EditSt
               name="gender"
               value={formData.gender}
               onChange={handleChange}
-              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
+              className="w-full p-2 sm:p-2.5 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#006A71] focus:border-transparent transition-all"
               required
             >
               <option value="" disabled>Pilih Jenis Kelamin</option>

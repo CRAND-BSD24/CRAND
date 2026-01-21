@@ -1,278 +1,239 @@
 "use server";
 
-import { getMongoClientInstance } from "@/db/config/connection";
-import { Binary } from "bson";
-
-interface AttendanceResponse {
-  success: boolean;
-  message: string;
-  isNewFace?: boolean;
-  name?: string;
-  timestamp?: Date;
-}
+import { getMongoClientInstance } from "@/lib/mongodb";
+import { Binary, ObjectId } from "mongodb";
+import { isValidAttendanceTime } from "@/lib/shift-utils";
 
 export interface AttendanceRecord {
-  _id: string;
+  _id?: ObjectId | string;
   name: string;
-  timestamp: Date;
-  photo: Buffer;
+  photo: string;
+  timestamp: string;
+  type: "admin" | "teacher";
+  faceDescriptor: number[];
 }
 
-export async function handleAbsensi(
-  formData: FormData
-): Promise<AttendanceResponse> {
-  try {
-    const base64Image = formData.get("photo") as string;
-    const name = formData.get("name") as string;
-    const faceDescriptor = formData.get("faceDescriptor") as string;
+interface AttendanceRecordInsert {
+  name: string;
+  photo: Binary;
+  timestamp: string;
+  type: string;
+  faceDescriptor: number[];
+}
 
-    if (!base64Image) {
-      return { success: false, message: "Tidak ada foto yang diupload" };
+const checkAttendanceTime = (): { isValid: boolean; message: string } => {
+  return isValidAttendanceTime(new Date(), "admin");
+};
+
+const isWithinRadius = (
+  userLat: number,
+  userLng: number,
+  locations: Array<{ lat: number; lng: number }>,
+  radius: number
+): boolean => {
+  const R = 6371e3; // Earth's radius in meters
+
+  for (const location of locations) {
+    const φ1 = (userLat * Math.PI) / 180;
+    const φ2 = (location.lat * Math.PI) / 180;
+    const Δφ = ((location.lat - userLat) * Math.PI) / 180;
+    const Δλ = ((location.lng - userLng) * Math.PI) / 180;
+
+    const a =
+      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+
+    if (distance <= radius) {
+      return true;
     }
+  }
+  return false;
+};
 
-    if (!faceDescriptor) {
+export async function handleAbsensi(
+  photo: string,
+  faceDescriptor: number[],
+  type: string,
+  name?: string,
+  latitude?: number,
+  longitude?: number
+) {
+  try {
+    // Cek waktu absensi
+    const timeCheck = checkAttendanceTime();
+    if (!timeCheck.isValid) {
       return {
         success: false,
-        message: "Tidak ada deskriptor wajah yang ditemukan",
+        message: timeCheck.message,
       };
     }
+    const ENABLE_LOCATION_CHECK = false;
+    if (ENABLE_LOCATION_CHECK && latitude !== undefined && longitude !== undefined) {
+      const allowedLocations = [
+        { lat: -5.9943049319879425, lng: 106.04812321979192 },
+        { lat: -5.979029363145886, lng: 106.0590577982583 },
+        { lat: -5.979356246025161, lng: 106.05914613343309 },
+        { lat: -5.994659669233751, lng: 106.04809359755676 }
+      ];
+      const radius = 1000; // dalam meter
 
-    // Convert base64 to buffer for MongoDB storage
-    const buffer = Buffer.from(base64Image, "base64");
+      const isWithin = isWithinRadius(
+        latitude,
+        longitude,
+        allowedLocations,
+        radius
+      );
 
-    const client = await getMongoClientInstance();
-    const db = client.db("pesantren_db");
-    const faceDataCollection = db.collection("face_data");
-    const attendanceCollection = db.collection("attendance");
-
-    // Parse the face descriptor
-    let descriptor: number[];
-    try {
-      descriptor = JSON.parse(faceDescriptor);
-      if (!Array.isArray(descriptor) || descriptor.length === 0) {
+      if (!isWithin) {
         return {
           success: false,
-          message: "Format deskriptor wajah tidak valid",
-        };
-      }
-    } catch (error) {
-      console.error("Error parsing face descriptor:", error);
-      return { success: false, message: "Format deskriptor wajah tidak valid" };
-    }
-
-    // Check if face is already registered
-    const existingFaces = await faceDataCollection.find({}).toArray();
-    const threshold = 0.6; // Adjust this threshold based on testing
-
-    if (existingFaces.length > 0) {
-      // Find the closest matching face
-      let minDistance = Infinity;
-      let matchedFace = null;
-
-      for (const face of existingFaces) {
-        if (!Array.isArray(face.descriptor) || face.descriptor.length === 0) {
-          continue;
-        }
-
-        const distance = Math.sqrt(
-          descriptor.reduce(
-            (sum: number, val: number, i: number) =>
-              sum + Math.pow(val - face.descriptor[i], 2),
-            0
-          )
-        );
-
-        if (distance < minDistance) {
-          minDistance = distance;
-          matchedFace = face;
-        }
-      }
-
-      if (matchedFace && minDistance < threshold) {
-        // Face recognized, record attendance
-        const timestamp = new Date();
-        await attendanceCollection.insertOne({
-          name: matchedFace.name,
-          timestamp,
-          photo: new Binary(buffer),
-        });
-
-        return {
-          success: true,
-          message: `Absensi berhasil! Selamat datang ${matchedFace.name}`,
-          isNewFace: false,
-          name: matchedFace.name,
-          timestamp,
+          message: "Absensi hanya dapat dilakukan di lokasi yang ditentukan.",
         };
       }
     }
 
-    // If face is not recognized and name is provided, register new face
-    if (name) {
-      const timestamp = new Date();
-      await faceDataCollection.insertOne({
-        descriptor,
-        name,
-        createdAt: timestamp,
-      });
+    const client = await getMongoClientInstance();
+    const db = client.db("crand");
+    const collection = db.collection("attendance");
 
-      await attendanceCollection.insertOne({
-        name,
-        timestamp,
-        photo: new Binary(buffer),
-      });
+    // Konversi base64 ke Buffer
+    const buffer = Buffer.from(photo, "base64");
+    const binaryPhoto = new Binary(buffer);
 
-      return {
-        success: true,
-        message: `Wajah berhasil didaftarkan! Selamat datang ${name}`,
-        isNewFace: true,
-        name,
-        timestamp,
-      };
-    }
+    const timestamp = new Date().toLocaleString("id-ID", {
+      timeZone: "Asia/Jakarta",
+    });
+
+    const record: AttendanceRecordInsert = {
+      name: name || "",
+      photo: binaryPhoto,
+      timestamp,
+      type,
+      faceDescriptor,
+    };
+
+    await collection.insertOne(record);
 
     return {
-      success: false,
-      message:
-        "Wajah tidak dikenali. Silakan daftarkan wajah Anda terlebih dahulu.",
-      isNewFace: true,
+      success: true,
+      message: "Absensi berhasil disimpan",
+      timestamp,
     };
   } catch (error) {
-    console.error("Attendance error:", error);
+    console.error("Error in handleAbsensi:", error);
     return {
       success: false,
-      message: "Terjadi kesalahan saat memproses absensi",
+      message: "Terjadi kesalahan saat menyimpan absensi",
     };
   }
 }
 
-export async function getAttendanceRecords(): Promise<AttendanceRecord[]> {
+export async function getAttendanceRecords() {
   try {
     const client = await getMongoClientInstance();
-    const db = client.db("pesantren_db");
-    const attendanceCollection = db.collection("attendance");
+    const db = client.db("crand");
+    const collection = db.collection("attendance");
 
-    const records = await attendanceCollection
+    const records = await collection
       .find({})
       .sort({ timestamp: -1 })
       .toArray();
 
-    // Convert ObjectId to string and Binary photo to base64
-    return records.map((record) => ({
-      _id: record._id.toString(),
-      name: record.name,
-      timestamp: record.timestamp,
-      photo: record.photo.buffer.toString("base64"),
-    })) as AttendanceRecord[];
+    return records;
   } catch (error) {
-    console.error("Error fetching attendance records:", error);
-    return [];
+    console.error("Error in getAttendanceRecords:", error);
+    throw error;
   }
 }
 
 export async function getAdminAttendanceRecords(): Promise<AttendanceRecord[]> {
   try {
-    console.log("Starting to fetch admin attendance records...");
     const client = await getMongoClientInstance();
     const db = client.db("pesantren_db");
-    const attendanceCollection = db.collection("admin_attendance");
+    const collection = db.collection("admin_attendance");
 
-    console.log("Executing admin attendance aggregation...");
-    const pipeline = [
-      {
-        $lookup: {
-          from: "users",
-          localField: "admin_id",
-          foreignField: "_id",
-          as: "user_info",
+    const records = await collection
+      .aggregate([
+        { $sort: { created_at: -1 } },
+        {
+          $lookup: {
+            from: "users",
+            localField: "admin_id",
+            foreignField: "_id",
+            as: "admin",
+          },
         },
-      },
-      {
-        $unwind: "$user_info",
-      },
-    ];
-
-    const records = await attendanceCollection
-      .aggregate(pipeline)
-      .sort({ date: -1 })
+        { $unwind: { path: "$admin", preserveNullAndEmptyArrays: true } },
+        {
+          $project: {
+            _id: 1,
+            name: { $ifNull: ["$admin.name", "Admin"] },
+            photo: 1,
+            created_at: 1,
+            face_descriptor: 1,
+          },
+        },
+      ])
       .toArray();
 
-    console.log("Raw admin records:", JSON.stringify(records, null, 2));
-
-    const mappedRecords = records.map((record) => ({
+    return records.map((record: any) => ({
       _id: record._id.toString(),
-      name: record.user_info.name,
-      timestamp: record.date,
-      photo: record.photo,
+      name: record.name,
+      photo:
+        typeof record.photo === "string"
+          ? record.photo
+          : record.photo?.buffer
+          ? Buffer.from(record.photo.buffer).toString("base64")
+          : "",
+      timestamp: new Date(record.created_at).toLocaleString("id-ID", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      }),
+      type: "admin",
+      faceDescriptor: record.face_descriptor,
     }));
-
-    console.log(
-      "Mapped admin records:",
-      JSON.stringify(mappedRecords, null, 2)
-    );
-    return mappedRecords as AttendanceRecord[];
   } catch (error) {
-    console.error("Error fetching admin attendance records:", error);
-    return [];
+    console.error("Error in getAdminAttendanceRecords:", error);
+    throw error;
   }
 }
 
-export async function getTeacherAttendanceRecords(): Promise<
-  AttendanceRecord[]
-> {
+export async function getTeacherAttendanceRecords(): Promise<AttendanceRecord[]> {
   try {
-    console.log("Starting to fetch teacher attendance records...");
     const client = await getMongoClientInstance();
     const db = client.db("pesantren_db");
-    const attendanceCollection = db.collection("teacher_attendance");
+    const collection = db.collection("attendance");
 
-    console.log("Executing teacher attendance aggregation...");
-    const pipeline = [
-      {
-        $lookup: {
-          from: "teachers",
-          localField: "teacher_id",
-          foreignField: "_id",
-          as: "teacher_info",
-        },
-      },
-      {
-        $unwind: "$teacher_info",
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "teacher_info.user_id",
-          foreignField: "_id",
-          as: "user_info",
-        },
-      },
-      {
-        $unwind: "$user_info",
-      },
-    ];
-
-    const records = await attendanceCollection
-      .aggregate(pipeline)
-      .sort({ date: -1 })
+    const records = await collection
+      .find({ type: "teacher" })
+      .sort({ created_at: -1 })
       .toArray();
 
-    console.log("Raw teacher records:", JSON.stringify(records, null, 2));
-
-    const mappedRecords = records.map((record) => ({
+    return records.map(record => ({
       _id: record._id.toString(),
-      name: record.user_info.name,
-      timestamp: record.date,
+      name: record.name,
       photo: record.photo,
+      timestamp: record.created_at.toLocaleString("id-ID", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+      }),
+      type: record.type,
+      faceDescriptor: record.face_descriptor
     }));
-
-    console.log(
-      "Mapped teacher records:",
-      JSON.stringify(mappedRecords, null, 2)
-    );
-    return mappedRecords as AttendanceRecord[];
   } catch (error) {
-    console.error("Error fetching teacher attendance records:", error);
-    return [];
+    console.error("Error in getTeacherAttendanceRecords:", error);
+    throw error;
   }
 }

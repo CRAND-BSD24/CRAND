@@ -1,0 +1,12 @@
+"use client";
+
+export default function AdditionalSalariesPage() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 p-6">
+      <div className="max-w-6xl mx-auto mt-10 bg-white rounded-2xl shadow-xl p-6 border-t-4 border-emerald-800">
+        <h1 className="text-2xl sm:text-3xl font-bold text-emerald-800">THR / Gaji 14 / Gaji 15</h1>
+        <p className="text-emerald-700 mt-2">Halaman ini akan menampilkan perhitungan dan pengaturan tambahan penggajian.</p>
+      </div>
+    </div>
+  );
+}

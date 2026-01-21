@@ -1,11 +1,11 @@
 'use server';
 import { getMongoClientInstance } from "@/db/config/connection";
 import { AcademicRecord } from '@/types/database'; // Only importing what's used
-import { ObjectId } from 'mongodb';
+import { ObjectId, Db } from 'mongodb';
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 // --- IMPORTANT: Import necessary items for session handling ---
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"; // Adjust path if needed
+import { authOptions } from "@/lib/auth"; // Adjust path if needed
 // --------------------------------------------------------------
 
 const MODEL_NAME = "gemini-1.5-flash"; 
@@ -52,7 +52,11 @@ async function getDatabaseContextForStudent(db: Db, userId: string | ObjectId, n
         // --- Query 3: Get Student's Recent Academic Records --- 
         if (normalizedQuestion.includes('akademik') || normalizedQuestion.includes('nilai') || normalizedQuestion.includes('rapor')) {
             console.log(`[Student Context] Fetching academic records for student: ${studentId}`);
-            const academicRecords: AcademicRecord[] = await db.collection('academic_records').find({ studentId: studentId }).sort({ year: -1, semester: -1 }).limit(2).toArray();
+            const academicRecords = await db.collection('academic_records')
+                .find({ studentId: studentId })
+                .sort({ year: -1, semester: -1 })
+                .limit(2)
+                .toArray() as unknown as AcademicRecord[];
              if (academicRecords.length > 0) {
                 context += '\nAkademik Terbaru Anda:\n';
                 academicRecords.forEach((rec: AcademicRecord) => {
@@ -110,7 +114,7 @@ export async function processStudentQuestion(question: string): Promise<string> 
     const normalizedQuestion = question.toLowerCase();
 
     // 1. Get context (specific to the logged-in student)
-    const dbContext = await getDatabaseContextForStudent(db, userId, normalizedQuestion, question);
+    const dbContext = await getDatabaseContextForStudent(db, userId, normalizedQuestion);
 
     // 2. Initialize Gemini AI
     const genAI = new GoogleGenerativeAI(API_KEY);
@@ -166,4 +170,4 @@ Selalu jawab dalam Bahasa Indonesia yang ramah dan sopan. Sapa santri dengan bai
     // Basic error, avoid leaking details
     return `❌ Maaf, terjadi kesalahan internal saat memproses pertanyaan Anda.`; 
   }
-} 
+}

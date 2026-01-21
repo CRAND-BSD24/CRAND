@@ -60,6 +60,7 @@ const MemorizationPage = () => {
     pages: "",
     status: "",
     notes: "",
+    surah: "",
   });
   const [currentWeek, setCurrentWeek] = useState(new Date());
 
@@ -188,6 +189,7 @@ const MemorizationPage = () => {
       pages: "",
       status: "",
       notes: "",
+      surah: "",
     });
     setSelectedJuzId("");
     setShowAddForm(true);
@@ -324,6 +326,7 @@ const MemorizationPage = () => {
         pages: newMemorization.pages,
         status: newMemorization.status,
         notes: newMemorization.notes,
+        surah: newMemorization.surah,
       });
 
       if (result.success) {
@@ -359,6 +362,7 @@ const MemorizationPage = () => {
           pages: "",
           status: "",
           notes: "",
+          surah: "",
         });
         toast.success("Data hafalan berhasil ditambahkan");
       } else {
@@ -439,7 +443,8 @@ const MemorizationPage = () => {
       "Semester",
       "Tahun",
       "Juz",
-      "Halaman",
+      "Surat",
+      "Jumlah Hal",
       "Status",
       "Catatan",
     ];
@@ -470,6 +475,7 @@ const MemorizationPage = () => {
         record.semester,
         record.academic_year,
         record.juz_name,
+        record.surah || "-",
         record.pages.toString(),
         record.status,
         record.notes ?? "-",
@@ -534,7 +540,7 @@ const MemorizationPage = () => {
               <div>
                 <h1 className="text-2xl font-bold text-emerald-800">Manajemen Hafalan</h1>
                 <p className="text-emerald-600 text-sm">
-                  Kelola progress hafalan santri di kelas Anda
+                  Kelola progress hafalan santri di halaqah Anda
                 </p>
               </div>
             </div>
@@ -555,7 +561,8 @@ const MemorizationPage = () => {
                     <TableHead>Semester</TableHead>
                     <TableHead>Tahun Angkatan</TableHead>
                     <TableHead>Juz</TableHead>
-                    <TableHead>Halaman</TableHead>
+                    <TableHead>Surat</TableHead>
+                    <TableHead>Jumlah Hal</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Catatan</TableHead>
                     <TableHead>Tanggal</TableHead>
@@ -569,6 +576,7 @@ const MemorizationPage = () => {
                       <TableCell>{student.semester}</TableCell>
                       <TableCell>{student.academic_year}</TableCell>
                       <TableCell>{student.juz_name}</TableCell>
+                      <TableCell>{student.surah}</TableCell>
                       <TableCell>{student.pages}</TableCell>
                       <TableCell>{student.status}</TableCell>
                       <TableCell>{student.notes}</TableCell>
@@ -666,7 +674,7 @@ const MemorizationPage = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-emerald-800 mb-1">Halaman</label>
+              <label className="block text-sm font-medium text-emerald-800 mb-1">Jumlah Hal</label>
               <input
                 type="text"
                 name="pages"
@@ -717,7 +725,7 @@ const MemorizationPage = () => {
 
       {/* Add Dialog */}
       <Dialog open={showAddForm} onOpenChange={setShowAddForm}>
-        <DialogContent>
+        <DialogContent className="max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Tambah Hafalan Baru</DialogTitle>
           </DialogHeader>
@@ -730,6 +738,7 @@ const MemorizationPage = () => {
                 value={newMemorization.semester}
                 onChange={handleAddInputChange}
                 className="w-full p-2 border border-emerald-200 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
+                placeholder="Ganjil / Genap"
                 required
                 disabled={isSubmitting}
               />
@@ -744,6 +753,7 @@ const MemorizationPage = () => {
                 value={newMemorization.academic_year}
                 onChange={handleAddInputChange}
                 className="w-full p-2 border border-emerald-200 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
+                placeholder="2021/2022"
                 required
                 disabled={isSubmitting}
               />
@@ -767,13 +777,27 @@ const MemorizationPage = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-emerald-800 mb-1">Halaman</label>
+              <label className="block text-sm font-medium text-emerald-800 mb-1">Surat (Cth: Al-Baqarah 6 - 16)</label>
+              <input
+                type="text"
+                name="surah"
+                value={newMemorization.surah}
+                onChange={handleAddInputChange}
+                className="w-full p-2 border border-emerald-200 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
+                placeholder="Contoh: Al-Baqarah 6 - 16"
+                required
+                disabled={isSubmitting}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-emerald-800 mb-1">Jumlah Hal</label>
               <input
                 type="text"
                 name="pages"
                 value={newMemorization.pages}
                 onChange={handleAddInputChange}
                 className="w-full p-2 border border-emerald-200 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
+                placeholder="1 Halaman"
                 required
                 disabled={isSubmitting}
               />
@@ -818,7 +842,7 @@ const MemorizationPage = () => {
 
       {/* History Dialog */}
       <Dialog open={showHistory} onOpenChange={setShowHistory}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-5xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Riwayat Hafalan {selectedStudent?.name}</DialogTitle>
           </DialogHeader>
@@ -880,36 +904,53 @@ const MemorizationPage = () => {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-800"></div>
               </div>
             ) : historyData.length > 0 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Tanggal</TableHead>
-                    <TableHead>Semester</TableHead>
-                    <TableHead>Tahun Angkatan</TableHead>
-                    <TableHead>Juz</TableHead>
-                    <TableHead>Halaman</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Catatan</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {historyData.map((record) => (
-                    <TableRow key={record.id}>
-                      <TableCell>
-                        {format(new Date(record.created_at), "dd MMMM yyyy", {
-                          locale: id,
-                        })}
-                      </TableCell>
-                      <TableCell>{record.semester}</TableCell>
-                      <TableCell>{record.academic_year}</TableCell>
-                      <TableCell>{record.juz_name}</TableCell>
-                      <TableCell>{record.pages}</TableCell>
-                      <TableCell>{record.status}</TableCell>
-                      <TableCell>{record.notes}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <div>
+                <div className="max-h-96 overflow-y-auto border border-emerald-200 rounded-lg">
+                  <Table>
+                    <TableHeader className="sticky top-0 bg-white z-10">
+                      <TableRow>
+                        <TableHead>Tanggal</TableHead>
+                        <TableHead>Semester</TableHead>
+                        <TableHead>Tahun Angkatan</TableHead>
+                        <TableHead>Juz</TableHead>
+                        <TableHead>Surat</TableHead>
+                        <TableHead>Jumlah Hal</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Catatan</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {historyData.map((record) => (
+                        <TableRow key={record.id}>
+                          <TableCell>
+                            {format(new Date(record.created_at), "dd MMMM yyyy", {
+                              locale: id,
+                            })}
+                          </TableCell>
+                          <TableCell>{record.semester}</TableCell>
+                          <TableCell>{record.academic_year}</TableCell>
+                          <TableCell>{record.juz_name}</TableCell>
+                          <TableCell>{record.surah || '-'}</TableCell>
+                          <TableCell>{record.pages}</TableCell>
+                          <TableCell>{record.status}</TableCell>
+                          <TableCell>{record.notes}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-emerald-800">Total Halaman:</span>
+                    <span className="font-bold text-emerald-800 text-lg">
+                      {historyData.reduce((total, record) => {
+                        const pages = parseInt(record.pages) || 0;
+                        return total + pages;
+                      }, 0)} Halaman
+                    </span>
+                  </div>
+                </div>
+              </div>
             ) : (
               <div className="flex justify-center items-center h-32 text-emerald-600">
                 Tidak ada setoran hafalan di minggu ini

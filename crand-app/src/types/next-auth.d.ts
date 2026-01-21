@@ -5,7 +5,7 @@ declare module 'next-auth' {
     id: string;
     name: string;
     email: string;
-    role: 'admin' | 'teacher' | 'student';
+    role: 'admin' | 'teacher' | 'student' | 'hrd' | 'educator' | 'manager';
   }
 
   interface Session {
@@ -16,6 +16,6 @@ declare module 'next-auth' {
 declare module 'next-auth/jwt' {
   interface JWT {
     id: string;
-    role: 'admin' | 'teacher' | 'student';
+    role: 'admin' | 'teacher' | 'student' | 'hrd' | 'educator' | 'manager';
   }
-} 
+}

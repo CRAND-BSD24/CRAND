@@ -104,87 +104,86 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="p-8 min-h-screen bg-gradient-to-br mt-16 from-emerald-50 to-teal-50">
-      <div className="max-w-7xl mx-auto space-y-8">
-        <div className="flex flex-col space-y-2">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-emerald-600 font-medium">
+    <div className="space-y-4 sm:space-y-8">
+      <div className="flex flex-col space-y-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-sm sm:text-base text-emerald-600 font-medium">
             Selamat datang di Sistem Manajemen Pesantren
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           <Card className="group hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
-                <div className="space-y-3">
-                  <p className="text-sm font-medium text-gray-500">
+                <div className="space-y-2 sm:space-y-3">
+                  <p className="text-xs sm:text-sm font-medium text-gray-500">
                     Total Santri
                   </p>
-                  <p className="text-3xl font-bold text-gray-900">
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-900">
                     {students.length}
                   </p>
                 </div>
-                <div className="p-3 bg-blue-100 rounded-xl group-hover:scale-110 transition-transform duration-200">
-                  <Users className="w-8 h-8 text-blue-600" />
+                <div className="p-2 sm:p-3 bg-blue-100 rounded-xl group-hover:scale-110 transition-transform duration-200">
+                  <Users className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="group hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
-                <div className="space-y-3">
-                  <p className="text-sm font-medium text-gray-500">
+                <div className="space-y-2 sm:space-y-3">
+                  <p className="text-xs sm:text-sm font-medium text-gray-500">
                     Total Ustadz
                   </p>
-                  <p className="text-3xl font-bold text-gray-900">
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-900">
                     {teachers.length}
                   </p>
                 </div>
-                <div className="p-3 bg-emerald-100 rounded-xl group-hover:scale-110 transition-transform duration-200">
-                  <User className="w-8 h-8 text-emerald-600" />
+                <div className="p-2 sm:p-3 bg-emerald-100 rounded-xl group-hover:scale-110 transition-transform duration-200">
+                  <User className="w-6 h-6 sm:w-8 sm:h-8 text-emerald-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="group hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
-                <div className="space-y-3">
-                  <p className="text-sm font-medium text-gray-500">
+                <div className="space-y-2 sm:space-y-3">
+                  <p className="text-xs sm:text-sm font-medium text-gray-500">
                     Rata-rata Kehadiran Guru
                   </p>
                   <div className="space-y-1">
-                    <p className="text-3xl font-bold text-gray-900">
+                    <p className="text-2xl sm:text-3xl font-bold text-gray-900">
                       {attendanceStats.averageAttendance}%
                     </p>
-                    <p className="text-sm text-gray-500">per hari</p>
+                    <p className="text-xs sm:text-sm text-gray-500">per hari</p>
                   </div>
                 </div>
-                <div className="p-3 bg-orange-100 rounded-xl group-hover:scale-110 transition-transform duration-200">
-                  <Calendar className="w-8 h-8 text-orange-600" />
+                <div className="p-2 sm:p-3 bg-orange-100 rounded-xl group-hover:scale-110 transition-transform duration-200">
+                  <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-orange-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <Card className="hover:shadow-lg transition-all duration-200">
-            <CardHeader className="p-6 pb-0">
+            <CardHeader className="p-4 sm:p-6 pb-0">
               <div className="space-y-1">
-                <CardTitle className="text-xl font-bold text-gray-900">
+                <CardTitle className="text-lg sm:text-xl font-bold text-gray-900">
                   Statistik Kehadiran Guru
                 </CardTitle>
-                <p className="text-sm text-gray-500">
+                <p className="text-xs sm:text-sm text-gray-500">
                   Persentase kehadiran guru dalam 7 hari terakhir
                 </p>
               </div>
             </CardHeader>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <Bar
                 data={weeklyData}
                 options={{
@@ -193,6 +192,11 @@ const AdminDashboard = () => {
                   plugins: {
                     legend: {
                       position: "bottom" as const,
+                      labels: {
+                        font: {
+                          size: window.innerWidth < 640 ? 10 : 12
+                        }
+                      }
                     },
                   },
                   scales: {
@@ -208,7 +212,7 @@ const AdminDashboard = () => {
                           return value + "%";
                         },
                         font: {
-                          size: 12,
+                          size: window.innerWidth < 640 ? 10 : 12,
                         },
                       },
                     },
@@ -218,29 +222,29 @@ const AdminDashboard = () => {
                       },
                       ticks: {
                         font: {
-                          size: 12,
+                          size: window.innerWidth < 640 ? 10 : 12,
                         },
                       },
                     },
                   },
                 }}
-                className="h-[300px]"
+                className="h-[250px] sm:h-[300px]"
               />
             </CardContent>
           </Card>
 
           <Card className="hover:shadow-lg transition-all duration-200">
-            <CardHeader className="p-6 pb-0">
+            <CardHeader className="p-4 sm:p-6 pb-0">
               <div className="space-y-1">
-                <CardTitle className="text-xl font-bold text-gray-900">
+                <CardTitle className="text-lg sm:text-xl font-bold text-gray-900">
                   Statistik Total Guru dan Santri
                 </CardTitle>
-                <p className="text-sm text-gray-500">
+                <p className="text-xs sm:text-sm text-gray-500">
                   Perkembangan jumlah guru dan santri dalam 12 bulan terakhir
                 </p>
               </div>
             </CardHeader>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <Line
                 data={monthlyData}
                 options={{
@@ -251,10 +255,9 @@ const AdminDashboard = () => {
                       position: "bottom" as const,
                       labels: {
                         font: {
-                          size: 12,
-                        },
-                        padding: 20,
-                      },
+                          size: window.innerWidth < 640 ? 10 : 12
+                        }
+                      }
                     },
                   },
                   scales: {
@@ -266,7 +269,7 @@ const AdminDashboard = () => {
                       },
                       ticks: {
                         font: {
-                          size: 12,
+                          size: window.innerWidth < 640 ? 10 : 12,
                         },
                       },
                     },
@@ -276,20 +279,17 @@ const AdminDashboard = () => {
                       },
                       ticks: {
                         font: {
-                          size: 12,
+                          size: window.innerWidth < 640 ? 10 : 12,
                         },
-                        maxRotation: 45,
-                        minRotation: 45,
                       },
                     },
                   },
                 }}
-                className="h-[300px]"
+                className="h-[250px] sm:h-[300px]"
               />
             </CardContent>
           </Card>
         </div>
-      </div>
     </div>
   );
 };

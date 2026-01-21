@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { FaceRecognitionService } from "@/services/faceRecognition";
 import Image from "next/image";
+import { isValidAttendanceTime, getRoleCurrentShift } from "@/lib/shift-utils";
 
 interface AttendanceButtonProps {
   onSuccess?: (name: string, timestamp: string) => void;
@@ -53,9 +54,29 @@ export default function AttendanceButton({
 
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: "user",
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+        },
+        audio: false,
+      });
       if (videoRef.current) {
-        videoRef.current.srcObject = stream;
+        const video = videoRef.current;
+        video.srcObject = stream;
+        // Pastikan metadata dimuat sehingga videoWidth/videoHeight valid
+        if (video.readyState < 2) {
+          await new Promise<void>((resolve) => {
+            const handler = () => {
+              video.removeEventListener("loadedmetadata", handler);
+              resolve();
+            };
+            video.addEventListener("loadedmetadata", handler, { once: true });
+          });
+        }
+        // Mulai playback untuk memastikan frame tersedia
+        video.play();
       }
     } catch (err) {
       console.error("Error accessing camera:", err);
@@ -82,8 +103,16 @@ export default function AttendanceButton({
   const capturePhoto = () => {
     if (videoRef.current) {
       const canvas = document.createElement("canvas");
-      canvas.width = videoRef.current.videoWidth;
-      canvas.height = videoRef.current.videoHeight;
+      const vw = videoRef.current.videoWidth;
+      const vh = videoRef.current.videoHeight;
+      if (!vw || !vh) {
+        setIsSuccess(false);
+        setMessage("Kamera belum siap. Tunggu 1–2 detik lalu coba lagi.");
+        if (onError) onError("Kamera belum siap. Tunggu 1–2 detik lalu coba lagi.");
+        return;
+      }
+      canvas.width = vw;
+      canvas.height = vh;
       const ctx = canvas.getContext("2d");
       if (ctx) {
         ctx.drawImage(videoRef.current, 0, 0);
@@ -100,11 +129,42 @@ export default function AttendanceButton({
   const getUserLocation = (): Promise<GeolocationPosition> => {
     return new Promise((resolve, reject) => {
       if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0,
-        });
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            console.log('Akurasi lokasi:', {
+              accuracy: Math.round(position.coords.accuracy),
+              altitude: position.coords.altitude,
+              altitudeAccuracy: position.coords.altitudeAccuracy,
+              heading: position.coords.heading,
+              speed: position.coords.speed
+            });
+            resolve(position);
+          },
+          (error) => {
+            console.error('Error geolokasi:', {
+              code: error.code,
+              message: error.message
+            });
+            let errorMessage = "Tidak dapat mengambil lokasi.";
+            switch(error.code) {
+              case error.PERMISSION_DENIED:
+                errorMessage = "Izin akses lokasi ditolak. Mohon aktifkan izin lokasi di pengaturan browser.";
+                break;
+              case error.POSITION_UNAVAILABLE:
+                errorMessage = "Informasi lokasi tidak tersedia. Pastikan GPS aktif dan ada sinyal yang cukup.";
+                break;
+              case error.TIMEOUT:
+                errorMessage = "Waktu mendapatkan lokasi habis. Silakan coba lagi.";
+                break;
+            }
+            reject(new Error(errorMessage));
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 20000,
+            maximumAge: 0,
+          }
+        );
       } else {
         reject(new Error("Geolocation tidak didukung oleh browser ini."));
       }
@@ -114,51 +174,48 @@ export default function AttendanceButton({
   const isWithinRadius = (
     userLat: number,
     userLng: number,
-    pesantrenLat: number,
-    pesantrenLng: number,
+    locations: Array<{ lat: number; lng: number }>,
     radius: number
   ): boolean => {
-    const toRad = (value: number) => (value * Math.PI) / 180;
-    const R = 6371e3;
-    const φ1 = toRad(userLat);
-    const φ2 = toRad(pesantrenLat);
-    const Δφ = toRad(pesantrenLat - userLat);
-    const Δλ = toRad(pesantrenLng - userLng);
+    const R = 6371e3; // Earth's radius in meters
 
-    const a =
-      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    for (const location of locations) {
+      const φ1 = (userLat * Math.PI) / 180;
+      const φ2 = (location.lat * Math.PI) / 180;
+      const Δφ = ((location.lat - userLat) * Math.PI) / 180;
+      const Δλ = ((location.lng - userLng) * Math.PI) / 180;
 
-    const distance = R * c;
-    return distance <= radius;
+      const a =
+        Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+        Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const distance = R * c;
+
+      console.log('Jarak ke lokasi:', {
+        lokasi: location,
+        jarak: Math.round(distance),
+        dalamRadius: distance <= radius
+      });
+
+      if (distance <= radius) {
+        return true;
+      }
+    }
+    return false;
   };
 
-  const checkAttendanceTime = (): { isValid: boolean; message: string } => {
-    const now = new Date();
-    const currentHour = now.getHours();
-    const currentMinute = now.getMinutes();
-    const currentTime = currentHour * 60 + currentMinute;
-
-    const startTime = 13 * 60 + 30; // 13:30
-    const endTime = 15 * 60; // 15:00
-
-    if (currentTime < startTime) {
+  const BUFFER_MINUTES = 10;
+  const checkAttendanceTime = (): { isValid: boolean; message: string; isLate?: boolean; lateMinutes?: number } => {
+    const role = type === "admin" ? "admin" : "teacher";
+    const result = isValidAttendanceTime(new Date(), role, BUFFER_MINUTES);
+    if (!result.isValid) {
+      const label = getRoleCurrentShift(role);
       return {
         isValid: false,
-        message: "Absensi baru dimulai pukul 13.30",
-      };
-    } else if (currentTime > endTime) {
-      return {
-        isValid: false,
-        message: "Anda gagal absensi karena terlambat",
-      };
-    } else {
-      return {
-        isValid: true,
-        message: "Waktu absensi valid",
+        message: `${result.message}${label !== "Di luar jadwal" ? ` (Saat ini: ${label})` : ""}`,
       };
     }
+    return result;
   };
 
   const formatTime = (date: Date): string => {
@@ -171,6 +228,8 @@ export default function AttendanceButton({
     e.preventDefault();
     const currentTime = new Date();
     setSubmitTime(formatTime(currentTime));
+    let lat: number | null = null;
+    let lng: number | null = null;
 
     if (!selectedFile) {
       setIsSuccess(false);
@@ -188,88 +247,110 @@ export default function AttendanceButton({
       return;
     }
 
-    try {
-      const position = await getUserLocation();
-      const { latitude, longitude } = position.coords;
-      const pesantrenLat = -6.302114872671908;
-      const pesantrenLng = 106.64997821247849;
-      const radius = 100;
+    const ENABLE_LOCATION_CHECK = true;
+    if (ENABLE_LOCATION_CHECK) {
+      try {
+        const position = await getUserLocation();
+        const { latitude, longitude } = position.coords;
+        lat = latitude;
+        lng = longitude;
+        
+        console.log('Lokasi pengguna:', { latitude, longitude });
+        
+        // Lokasi yang diizinkan
+        const allowedLocations = [
+          { lat: -5.9943049319879425, lng: 106.04812321979192 },
+          { lat: -5.979029363145886, lng: 106.0590577982583 }
+        ];
+        const radius = 500; // dalam meter
 
-      const isWithin = isWithinRadius(
-        latitude,
-        longitude,
-        pesantrenLat,
-        pesantrenLng,
-        radius
-      );
-      setIsWithinLocation(isWithin);
-
-      if (!isWithin) {
-        setIsSuccess(false);
-        setMessage(
-          "Absensi hanya dapat dilakukan di dalam lingkungan pesantren."
+        console.log('Menghitung jarak ke lokasi yang diizinkan...');
+        
+        const isWithin = isWithinRadius(
+          latitude,
+          longitude,
+          allowedLocations,
+          radius
         );
-        setLocationMessage("Anda berada di luar area pesantren");
-        if (onError)
-          onError(
-            "Absensi hanya dapat dilakukan di dalam lingkungan pesantren."
-          );
-        return;
-      }
+        console.log('Hasil pengecekan lokasi:', { isWithin });
+        
+        setIsWithinLocation(isWithin);
 
-      setLocationMessage("Anda berada di dalam area pesantren");
-
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const base64String = reader.result as string;
-        const base64Data = base64String.split(",")[1];
-
-        const detectionResult = await faceService.detectFaceFromBase64(
-          base64Data
-        );
-        if (!detectionResult.success) {
+        if (!isWithin) {
           setIsSuccess(false);
-          setMessage(detectionResult.error || "Wajah tidak terdeteksi");
+          setMessage(
+            "Absensi hanya dapat dilakukan di lokasi yang ditentukan."
+          );
+          setLocationMessage("Anda berada di luar area yang ditentukan");
           if (onError)
-            onError(detectionResult.error || "Wajah tidak terdeteksi");
+            onError(
+              "Absensi hanya dapat dilakukan di lokasi yang ditentukan."
+            );
           return;
         }
 
-        const formData = new FormData();
-        formData.append("photo", base64Data);
-        formData.append(
-          "faceDescriptor",
-          JSON.stringify(detectionResult.descriptor)
-        );
-        formData.append("type", type);
-        if (isNewFace && name) {
-          formData.append("name", name);
-        }
-
-        const res = await fetch("/api/attendance", {
-          method: "POST",
-          body: formData,
-        });
-
-        const data = await res.json();
-        setIsSuccess(data.success);
-        setMessage(data.message);
-        setIsNewFace(data.isNewFace ?? null);
-
-        if (data.name) {
-          setRecognizedName(data.name);
-          setAttendanceTime(data.timestamp);
-          if (onSuccess) onSuccess(data.name, data.timestamp);
-        }
-      };
-      reader.readAsDataURL(selectedFile);
-    } catch (error) {
-      console.log(error);
-      setIsSuccess(false);
-      setMessage("Tidak dapat mengambil lokasi. Pastikan GPS diaktifkan.");
-      if (onError)
-        onError("Tidak dapat mengambil lokasi. Pastikan GPS diaktifkan.");
+        setLocationMessage("Anda berada di area yang diizinkan");
+      } catch (error) {
+        console.log(error);
+        setIsSuccess(false);
+        const errorMessage = error instanceof Error ? error.message : "Tidak dapat mengambil lokasi. Pastikan GPS diaktifkan dan ada sinyal yang cukup.";
+        setMessage(errorMessage);
+        if (onError) onError(errorMessage);
+        return;
+      }
+    } else {
+      setIsWithinLocation(null);
+      setLocationMessage("");
     }
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64String = reader.result as string;
+      const base64Data = base64String.split(",")[1];
+
+      const detectionResult = await faceService.detectFaceFromBase64(
+        base64Data
+      );
+      if (!detectionResult.success) {
+        setIsSuccess(false);
+        setMessage(detectionResult.error || "Wajah tidak terdeteksi");
+        if (onError)
+          onError(detectionResult.error || "Wajah tidak terdeteksi");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("photo", base64Data);
+      formData.append(
+        "faceDescriptor",
+        JSON.stringify(detectionResult.descriptor)
+      );
+      formData.append("type", type);
+      if (ENABLE_LOCATION_CHECK && lat !== null && lng !== null) {
+        formData.append("latitude", String(lat));
+        formData.append("longitude", String(lng));
+      }
+      if (isNewFace && name) {
+        formData.append("name", name);
+      }
+
+      const res = await fetch("/api/attendance", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      setIsSuccess(data.success);
+      setMessage(data.message);
+      setIsNewFace(data.isNewFace ?? null);
+
+      if (data.name) {
+        setRecognizedName(data.name);
+        setAttendanceTime(data.timestamp);
+        if (onSuccess) onSuccess(data.name, data.timestamp);
+      }
+    };
+    reader.readAsDataURL(selectedFile);
   };
 
   return (
@@ -350,15 +431,42 @@ export default function AttendanceButton({
           </div>
         )}
 
-        <button
+        {(() => {
+          const role = type === "admin" ? "admin" : "teacher";
+          const timeCheck = isValidAttendanceTime(new Date(), role, BUFFER_MINUTES);
+          const currentLabel = getRoleCurrentShift(role);
+          return (
+            <>
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-600 font-medium">
+                  Jadwal saat ini: {currentLabel}
+                </div>
+                {!timeCheck.isValid && (
+                  <div className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-md px-2 py-1">
+                    Di luar jadwal
+                  </div>
+                )}
+                {timeCheck.isValid && timeCheck.isLate && (
+                  <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2 py-1">
+                    Terlambat {timeCheck.lateMinutes} menit
+                  </div>
+                )}
+              </div>
+              <button
           type="submit"
-          className="w-full mt-5 bg-emerald-800 text-white py-3 px-4 rounded-xl font-semibold hover:bg-emerald-700 transition-all duration-300 flex items-center justify-center gap-2 shadow-md transform hover:scale-[1.02] active:scale-[0.98]"
+          className={`w-full mt-3 bg-emerald-800 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 shadow-md transform hover:scale-[1.02] active:scale-[0.98] ${
+            timeCheck.isValid ? "hover:bg-emerald-700" : "opacity-60 cursor-not-allowed"
+          }`}
+          disabled={!timeCheck.isValid}
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
           </svg>
           Submit Absensi
         </button>
+            </>
+          );
+        })()}
       </form>
 
       {message && (

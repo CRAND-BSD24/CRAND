@@ -7,7 +7,7 @@ import { ObjectId } from 'mongodb';
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 // --- IMPORTANT: Import necessary items for session handling ---
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"; // Adjust path if needed
+import { authOptions } from "@/lib/auth"; // Adjust path if needed
 // --------------------------------------------------------------
 
 const MODEL_NAME = "gemini-1.5-flash"; 
@@ -15,14 +15,12 @@ const API_KEY = process.env.GOOGLE_GEMINI_API_KEY;
 
 // Fetches context specifically for the logged-in teacher and related students
 // Keep db: any for now
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function getDatabaseContextForTeacher(db: any, userId: string | ObjectId, normalizedQuestion: string, question: string): Promise<string | null> {
     try {
         const teacherId = new ObjectId(userId); 
 
         // --- Query 1: Get Logged-in Teacher's Basic Info --- 
         // Using any for teacher type as Teacher/User not found
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const teacher: any = await db.collection('teachers').findOne({ _id: teacherId }) || await db.collection('users').findOne({ _id: teacherId, role: 'teacher' }); 
         
         if (!teacher) {
@@ -92,11 +90,9 @@ export async function processTeacherQuestion(question: string): Promise<string> 
   // --- Get Session & Verify Role --- 
   const session = await getServerSession(authOptions);
   // Using any temporarily for session user structure
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (!session || !session.user || (session.user as any).role !== 'teacher') { 
      return "❌ Error: Akses ditolak. Anda harus login sebagai pengajar.";
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const userId = (session.user as any).id; // Using any temporarily
   console.log(`[Teacher Action] Processing question for teacher ID: ${userId}`);
   // -----------------------------------
@@ -108,7 +104,6 @@ export async function processTeacherQuestion(question: string): Promise<string> 
   try {
     const client = await getMongoClientInstance();
     // Keep db: any
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const db: any = client.db("pesantren_db");
     const normalizedQuestion = question.toLowerCase();
 
@@ -168,4 +163,4 @@ Selalu jawab dalam Bahasa Indonesia yang formal dan sopan.`;
     // Use the errorMessage in the return string
     return `❌ Maaf, terjadi kesalahan internal saat memproses pertanyaan Anda: ${errorMessage}`;
   }
-} 
+}
