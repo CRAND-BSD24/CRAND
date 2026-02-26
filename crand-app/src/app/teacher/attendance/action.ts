@@ -304,11 +304,11 @@ export async function getAttendanceHistory(
                       {
                         case: {
                           $and: [
-                            { $gte: [{ $add: [{ $multiply: ["$$hour", 60] }, "$$minute"] }, 330] },
+                            { $gte: [{ $add: [{ $multiply: ["$$hour", 60] }, "$$minute"] }, 360] },
                             { $lte: [{ $add: [{ $multiply: ["$$hour", 60] }, "$$minute"] }, 420] }
                           ]
                         },
-                        then: "05:30 - 07:00"
+                        then: "06:00 - 07:00"
                       },
                       {
                         case: {

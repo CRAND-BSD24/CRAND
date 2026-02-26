@@ -4,35 +4,46 @@
 import { getMongoClientInstance } from "@/db/config/connection";
 import { ObjectId } from "mongodb";
 import bcrypt from "bcryptjs";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
-// Ambil semua data teacher
+// Ambil semua data teacher dengan role teacher dan educator
 export const getAllTeachers = async () => {
   const client = await getMongoClientInstance();
   const db = client.db("pesantren_db");
 
   try {
-    const teachers = await db.collection("teachers").aggregate([
-      {
-        $lookup: {
-          from: "users",
-          localField: "user_id",
-          foreignField: "_id",
-          as: "user_data",
+    const teachers = await db
+      .collection("teachers")
+      .aggregate([
+        {
+          $lookup: {
+            from: "users",
+            localField: "user_id",
+            foreignField: "_id",
+            as: "user_data",
+          },
         },
-      },
-      { $unwind: "$user_data" },
-      {
-        $project: {
-          _id: 1,
-          user_id: 1,
-          name: "$user_data.name",
-          phone_number: "$user_data.phone_number",
-          address: 1,
-          nip: 1,
-          email: "$user_data.email",
+        { $unwind: "$user_data" },
+        {
+          $match: {
+            "user_data.role": { $in: ["teacher", "educator"] },
+          },
         },
-      },
-    ]).toArray();
+        {
+          $project: {
+            _id: 1,
+            user_id: 1,
+            name: "$user_data.name",
+            phone_number: "$user_data.phone_number",
+            address: 1,
+            nip: 1,
+            email: "$user_data.email",
+            role: "$user_data.role",
+          },
+        },
+      ])
+      .toArray();
 
     return JSON.stringify(teachers);
   } catch (error) {
@@ -150,14 +161,30 @@ export const updateTeacher = async (updatedTeacher: {
   email?: string;
   address?: string;
   nip?: string;
+  role?: string;
 }) => {
   const client = await getMongoClientInstance();
   const db = client.db("pesantren_db");
+  const session = await getServerSession(authOptions);
 
   try {
     const teacher = await db.collection("teachers").findOne({ _id: new ObjectId(updatedTeacher._id) });
 
     if (!teacher) throw new Error("Teacher not found");
+
+    // HRD Role Constraints
+    if (updatedTeacher.role === 'hrd') {
+      // 1. AdminHRD Restriction
+      if (session?.user?.role === 'adminhrd') {
+        throw new Error("Permission denied: AdminHRD cannot assign HRD role");
+      }
+
+      // 2. Single HRD User Constraint
+      const existingHrd = await db.collection("users").findOne({ role: "hrd" });
+      if (existingHrd && existingHrd._id.toString() !== teacher.user_id.toString()) {
+        throw new Error("HRD role already assigned to another user");
+      }
+    }
 
     await db.collection("users").updateOne(
       { _id: teacher.user_id },
@@ -166,6 +193,7 @@ export const updateTeacher = async (updatedTeacher: {
           name: updatedTeacher.name,
           phone_number: updatedTeacher.phone_number,
           email: updatedTeacher.email,
+          ...(updatedTeacher.role ? { role: updatedTeacher.role } : {}),
         },
       }
     );

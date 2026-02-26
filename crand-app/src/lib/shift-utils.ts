@@ -11,58 +11,56 @@ export const SHIFT_SCHEDULES: DaySchedule = {
   0: [], // Minggu - Libur
   1: [ // Senin
     { start: 240, end: 285 },  // 04:00 - 04:45
-    { start: 330, end: 420 },  // 05:30 - 07:00
+    { start: 360, end: 420 },  // 06:00 - 07:00
     { start: 480, end: 540 },  // 08:00 - 09:00
     { start: 960, end: 1035 }, // 16:00 - 17:15
   ],
   2: [ // Selasa
     { start: 240, end: 285 },  // 04:00 - 04:45
-    { start: 330, end: 420 },  // 05:30 - 07:00
+    { start: 360, end: 420 },  // 06:00 - 07:00
     { start: 480, end: 540 },  // 08:00 - 09:00
     { start: 1110, end: 1200 }, // 18:30 - 20:00
   ],
   3: [ // Rabu
     { start: 240, end: 285 },  // 04:00 - 04:45
-    { start: 330, end: 420 },  // 05:30 - 07:00
+    { start: 360, end: 420 },  // 06:00 - 07:00
     { start: 480, end: 540 },  // 08:00 - 09:00
     { start: 1110, end: 1200 }, // 18:30 - 20:00
   ],
   4: [ // Kamis
     { start: 240, end: 285 },  // 04:00 - 04:45
-    { start: 330, end: 420 },  // 05:30 - 07:00
+    { start: 360, end: 420 },  // 06:00 - 07:00
     { start: 480, end: 540 },  // 08:00 - 09:00
     { start: 960, end: 1035 }, // 16:00 - 17:15
   ],
   5: [ // Jumat
     { start: 240, end: 285 },  // 04:00 - 04:45
-    { start: 330, end: 420 },  // 05:30 - 07:00
+    { start: 360, end: 420 },  // 06:00 - 07:00
     { start: 480, end: 540 },  // 08:00 - 09:00
     { start: 1110, end: 1200 }, // 18:30 - 20:00
   ],
   6: [ // Sabtu
     { start: 240, end: 285 },  // 04:00 - 04:45
-    { start: 330, end: 420 },  // 05:30 - 07:00
-    { start: 480, end: 540 },  // 08:00 - 09:00
+    { start: 360, end: 420 },  // 06:00 - 07:00
   ],
 };
 
-type ShiftTimeKey = '240-285' | '330-420' | '480-540' | '960-1035' | '1110-1200';
+type ShiftTimeKey = '240-285' | '360-420' | '480-540' | '960-1035' | '1110-1200';
 
 export const SHIFT_TIMES: Record<ShiftTimeKey, string> = {
   '240-285': '04:00 - 04:45',
-  '330-420': '05:30 - 07:00',
+  '360-420': '06:00 - 07:00',
   '480-540': '08:00 - 09:00',
   '960-1035': '16:00 - 17:15',
   '1110-1200': '18:30 - 20:00',
 };
 
 // ===== Jadwal berbasis peran =====
-export type Role = 'teacher' | 'admin' | 'hrd' | 'educator';
+export type Role = 'teacher' | 'admin' | 'hrd' | 'educator' | 'manager' | 'adminhrd' | 'kepengasuhan' | 'staff';
 
-type AdminShiftKey = '480-960' | '960-1020';
+type AdminShiftKey = '480-990';
 const ADMIN_TIMES: Record<AdminShiftKey, string> = {
-  '480-960': 'Berangkat 08:00 - 16:00',
-  '960-1020': 'Pulang 16:00 - 17:00',
+  '480-990': '08:00 - 16:30',
 };
 
 type EducatorShiftKey = '555-600' | '600-645' | '660-705' | '705-750';
@@ -75,12 +73,12 @@ const EDUCATOR_TIMES: Record<EducatorShiftKey, string> = {
 
 const ADMIN_SCHEDULES: DaySchedule = {
   0: [],
-  1: [ { start: 480, end: 960 }, { start: 960, end: 1020 } ],
-  2: [ { start: 480, end: 960 }, { start: 960, end: 1020 } ],
-  3: [ { start: 480, end: 960 }, { start: 960, end: 1020 } ],
-  4: [ { start: 480, end: 960 }, { start: 960, end: 1020 } ],
-  5: [ { start: 480, end: 960 }, { start: 960, end: 1020 } ],
-  6: [ { start: 480, end: 960 }, { start: 960, end: 1020 } ],
+  1: [ { start: 480, end: 990 } ],
+  2: [ { start: 480, end: 990 } ],
+  3: [ { start: 480, end: 990 } ],
+  4: [ { start: 480, end: 990 } ],
+  5: [ { start: 480, end: 990 } ],
+  6: [ { start: 480, end: 990 } ],
 };
 
 const EDUCATOR_SCHEDULES: DaySchedule = {
@@ -93,23 +91,30 @@ const EDUCATOR_SCHEDULES: DaySchedule = {
   6: [ { start: 555, end: 600 }, { start: 600, end: 645 }, { start: 660, end: 705 }, { start: 705, end: 750 } ],
 };
 
-function getSchedulesByRole(role: Role): DaySchedule {
-  if (role === 'admin' || role === 'hrd') return ADMIN_SCHEDULES;
+export function getSchedulesByRole(role: Role): DaySchedule {
+  if (['admin', 'hrd', 'manager', 'adminhrd', 'staff'].includes(role)) return ADMIN_SCHEDULES;
   if (role === 'educator') return EDUCATOR_SCHEDULES;
   return SHIFT_SCHEDULES; // default teacher
 }
 
-function getTimeLabelsByRole(role: Role): Record<string, string> {
-  if (role === 'admin' || role === 'hrd') return ADMIN_TIMES as unknown as Record<string, string>;
+export function getTimeLabelsByRole(role: Role): Record<string, string> {
+  if (['admin', 'hrd', 'manager', 'adminhrd', 'staff'].includes(role)) return ADMIN_TIMES as unknown as Record<string, string>;
   if (role === 'educator') return EDUCATOR_TIMES as unknown as Record<string, string>;
   return SHIFT_TIMES as unknown as Record<string, string>;
 }
 
+function toJakartaDate(date: Date): Date {
+  return new Date(
+    date.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+  );
+}
+
 export function getCurrentShift(date: Date = new Date()): string {
-  const hour = date.getHours();
-  const minute = date.getMinutes();
+  const local = toJakartaDate(date);
+  const hour = local.getHours();
+  const minute = local.getMinutes();
   const currentTime = hour * 60 + minute;
-  const dayOfWeek = date.getDay();
+  const dayOfWeek = local.getDay();
 
   // Jika hari Minggu
   if (dayOfWeek === 0) {
@@ -128,10 +133,11 @@ export function getCurrentShift(date: Date = new Date()): string {
 }
 
 export function getRoleCurrentShift(role: Role, date: Date = new Date()): string {
-  const hour = date.getHours();
-  const minute = date.getMinutes();
+  const local = toJakartaDate(date);
+  const hour = local.getHours();
+  const minute = local.getMinutes();
   const currentTime = hour * 60 + minute;
-  const dayOfWeek = date.getDay();
+  const dayOfWeek = local.getDay();
 
   if (dayOfWeek === 0) return 'Libur';
 
@@ -147,15 +153,28 @@ export function getRoleCurrentShift(role: Role, date: Date = new Date()): string
   return 'Di luar jadwal';
 }
 
+export function getAttendanceBuffer(role: Role): number {
+  // Teacher, Educator, Kepengasuhan: 15 menit
+  if (role === 'teacher' || role === 'educator' || role === 'kepengasuhan') {
+    return 15;
+  }
+  // Staff (admin, hrd, manager, adminhrd, staff): 1 jam (60 menit)
+  return 60;
+}
+
 export function isValidAttendanceTime(
   date: Date = new Date(),
   role: Role = 'teacher',
-  bufferMinutes: number = 0
-): { isValid: boolean; message: string; isLate?: boolean; lateMinutes?: number } {
-  const hour = date.getHours();
-  const minute = date.getMinutes();
+  bufferMinutes?: number
+): { isValid: boolean; message: string; isLate?: boolean; lateMinutes?: number; schedule?: ShiftSchedule } {
+  const local = toJakartaDate(date);
+  const hour = local.getHours();
+  const minute = local.getMinutes();
   const currentTime = hour * 60 + minute;
-  const dayOfWeek = date.getDay();
+  const dayOfWeek = local.getDay();
+
+  // Determine buffer to use
+  const effectiveBuffer = bufferMinutes !== undefined ? bufferMinutes : getAttendanceBuffer(role);
 
   // Minggu (0) libur
   if (dayOfWeek === 0) {
@@ -165,28 +184,41 @@ export function isValidAttendanceTime(
   const schedules = getSchedulesByRole(role);
   const labels = getTimeLabelsByRole(role);
   const todaySchedules = schedules[dayOfWeek] || [];
+  
+  // Find active schedule considering EARLY buffer
+  // User can clock in from (start - buffer) until end
   const active = todaySchedules.find(
-    (s) => currentTime >= s.start && currentTime <= s.end
+    (s) => currentTime >= (s.start - effectiveBuffer) && currentTime <= s.end
   );
 
   if (active) {
-    // Deteksi keterlambatan: berlaku untuk semua peran kecuali window "pulang" admin/hrd
+    // Check if late (after start + tolerance usually, but here we just check validity first)
+    // Assuming strict start time for "Late" calculation, but "Valid" includes buffer.
+    // Let's assume late tolerance is standard (e.g. 15 mins after start) or just strict start.
+    // For now, if they are in the window [start - buffer, end], it is VALID.
+    
+    // However, we should probably flag if they are late.
+    // Common rule: Late if currentTime > start.
+    // Let's keep it simple: Valid if within window.
+    
+    // Optional: Calculate lateness if needed by UI
     let isLate = false;
     let lateMinutes = 0;
-    const isAdminDepartureWindow = (role === 'admin' || role === 'hrd') && active.start === 960 && active.end === 1020;
-    if (!isAdminDepartureWindow && bufferMinutes > 0) {
-      const threshold = active.start + bufferMinutes; // menit dari 00:00
-      if (currentTime > threshold) {
-        isLate = true;
-        lateMinutes = currentTime - threshold;
-      }
+    
+    // If current time is past the start time + some tolerance (e.g. 0 or 15?)
+    // User didn't specify late tolerance, only early buffer.
+    // Standard practice: Late if > start.
+    if (currentTime > active.start) {
+       isLate = true;
+       lateMinutes = currentTime - active.start;
     }
 
-    return {
-      isValid: true,
-      message: isLate ? `Waktu absensi valid (Terlambat ${lateMinutes} menit).` : 'Waktu absensi valid.',
+    return { 
+      isValid: true, 
+      message: 'Waktu absensi valid.',
       isLate,
       lateMinutes,
+      schedule: active
     };
   }
 

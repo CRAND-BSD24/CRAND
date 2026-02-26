@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['lh3.googleusercontent.com'],
+    domains: ['lh3.googleusercontent.com', 'static.vecteezy.com'],
   },
   webpack: (config, { isServer }) => {
     if (!isServer) {
@@ -23,6 +23,10 @@ const nextConfig = {
         '@tensorflow/tfjs-node': '@tensorflow/tfjs-node'
       });
     }
+
+    config.ignoreWarnings = [
+      { module: /node_modules\/@vladmandic\/face-api\/dist\/face-api.esm.js/ }
+    ];
     
     return config;
   },

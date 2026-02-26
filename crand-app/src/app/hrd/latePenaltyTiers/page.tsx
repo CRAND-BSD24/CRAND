@@ -43,47 +43,47 @@ export default function LatePenaltyTiersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 p-6">
-      <div className="max-w-4xl mx-auto mt-10 bg-white rounded-2xl shadow-xl p-6 border-t-4 border-emerald-800">
-        <h1 className="text-2xl font-bold text-emerald-800">Denda Keterlambatan Bertingkat</h1>
-        <p className="text-emerald-700 mt-1 text-sm">Kelola denda berdasarkan tingkat menit keterlambatan</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-teal-50 p-6">
+      <div className="max-w-4xl mx-auto mt-10 bg-white rounded-2xl shadow-xl p-6 border-t-4 border-blue-800">
+        <h1 className="text-2xl font-bold text-blue-800">Denda Keterlambatan Bertingkat</h1>
+        <p className="text-blue-700 mt-1 text-sm">Kelola denda berdasarkan tingkat menit keterlambatan</p>
 
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-2">
           <input
             value={minutes}
             onChange={(e) => setMinutes(e.target.value)}
-            className="border-2 border-emerald-300 rounded-xl px-3 py-2"
+            className="border-2 border-blue-300 rounded-xl px-3 py-2"
             placeholder="Menit keterlambatan"
           />
           <input
             value={penalty}
             onChange={(e) => setPenalty(e.target.value)}
-            className="border-2 border-emerald-300 rounded-xl px-3 py-2"
+            className="border-2 border-blue-300 rounded-xl px-3 py-2"
             placeholder="Nominal denda"
           />
-          <button onClick={add} disabled={loading} className="px-4 py-2 rounded-xl bg-emerald-800 text-white">
+          <button onClick={add} disabled={loading} className="px-4 py-2 rounded-xl bg-blue-800 text-white">
             {loading ? "Menyimpan..." : "Tambah"}
           </button>
         </div>
 
-        <div className="mt-6 rounded-xl border border-emerald-100 overflow-hidden">
+        <div className="mt-6 rounded-xl border border-blue-100 overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-emerald-800 text-white">
+              <tr className="bg-blue-800 text-white">
                 <th className="px-3 py-2 text-left">Menit</th>
                 <th className="px-3 py-2 text-right">Denda</th>
               </tr>
             </thead>
             <tbody>
               {items.map((it) => (
-                <tr key={it.id || it.minutes} className="odd:bg-white even:bg-emerald-50/50">
+                <tr key={it.id || it.minutes} className="odd:bg-white even:bg-blue-50/50">
                   <td className="px-3 py-2">{it.minutes}</td>
                   <td className="px-3 py-2 text-right">{it.penalty}</td>
                 </tr>
               ))}
               {items.length === 0 && (
                 <tr>
-                  <td colSpan={2} className="px-4 py-6 text-center text-emerald-800 bg-emerald-50/70 italic">Tidak ada data</td>
+                  <td colSpan={2} className="px-4 py-6 text-center text-blue-800 bg-blue-50/70 italic">Tidak ada data</td>
                 </tr>
               )}
             </tbody>

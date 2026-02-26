@@ -3,10 +3,11 @@
 import { useAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from './LoadingSpinner';
 import { ReactNode } from 'react';
+import { Role } from "@/types/role";
 
 interface ProtectedRouteProps {
   children: ReactNode;
-  requiredRole?: 'admin' | 'teacher' | 'student' | 'hrd' | 'educator' | 'manager';
+  requiredRole?: Role;
 }
 
 export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
@@ -28,6 +29,10 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   // If a role is required but the user doesn't have it, don't render
   // The useAuth hook redirects, but this prevents flashes of unauthorized content
   if (requiredRole && role !== requiredRole) {
+    // Exception for adminhrd accessing hrd routes
+    if (requiredRole === 'hrd' && role === 'adminhrd') {
+      return <>{children}</>;
+    }
     return null;
   }
 

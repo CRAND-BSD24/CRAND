@@ -129,14 +129,14 @@ const StudentsPage = () => {
   const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
 
   return (
-    <div className="p-4 sm:p-8 pt-20 lg:pt-8 bg-gradient-to-br from-emerald-50 to-teal-50 min-h-screen">
+    <div className="p-4 sm:p-8 pt-20 lg:pt-8 bg-gradient-to-br from-blue-50 to-teal-50 min-h-screen">
       <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl p-4 sm:p-8 mb-8 relative z-0">
-        <h1 className="text-2xl sm:text-3xl font-bold text-emerald-800 mb-6 sm:mb-8 text-center">
+        <h1 className="text-2xl sm:text-3xl font-bold text-blue-800 mb-6 sm:mb-8 text-center">
           Manajemen Data Santri
         </h1>
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-          <h2 className="text-xl font-semibold text-emerald-800">
+          <h2 className="text-xl font-semibold text-blue-800">
             Daftar Santri
           </h2>
           <AddStudentModal onStudentAdded={fetchStudents} />
@@ -145,21 +145,21 @@ const StudentsPage = () => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6 relative z-0">
           <div className="flex flex-col sm:flex-row gap-4 w-full">
             <div className="relative flex-grow">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-emerald-400" size={20} />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-400" size={20} />
               <input
                 type="text"
                 placeholder="Cari nama santri..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
+                className="w-full pl-10 border-2 border-blue-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent transition-all"
               />
             </div>
             <div className="relative flex-grow">
-              <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-emerald-400" size={20} />
+              <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-400" size={20} />
               <select
                 value={filterClass}
                 onChange={(e) => setFilterClass(e.target.value)}
-                className="w-full pl-10 border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all appearance-none"
+                className="w-full pl-10 border-2 border-blue-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent transition-all appearance-none"
               >
                 <option value="">Pilih Kelas</option>
                 {uniqueClasses.map((kelas, index) => (
@@ -168,95 +168,146 @@ const StudentsPage = () => {
                   </option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-emerald-400 pointer-events-none" size={20} />
+              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-400 pointer-events-none" size={20} />
             </div>
           </div>
           <button
             onClick={handlePromoteByClass}
             disabled={!filterClass}
-            className="w-full sm:w-auto bg-emerald-800 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-md hover:shadow-lg"
+            className="w-full sm:w-auto bg-blue-800 hover:bg-blue-700 text-white px-6 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-md hover:shadow-lg"
           >
             Naikkan Semua di Kelas Ini
           </button>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-separate border-spacing-y-2 mb-6">
-            <thead>
-              <tr className="bg-emerald-800 text-white rounded-lg overflow-hidden">
-                <th className="px-4 py-3 cursor-pointer hidden sm:table-cell rounded-l-lg">
-                  NISN{getSortIndicator("nisn")}
-                </th>
-                <th className="px-4 py-3 cursor-pointer">
-                  Nama{getSortIndicator("name")}
-                </th>
-                <th className="px-4 py-3 cursor-pointer hidden sm:table-cell">
-                  Kelas{getSortIndicator("class_name")}
-                </th>
-                <th className="px-4 py-3 cursor-pointer hidden md:table-cell">
-                  Jenjang{getSortIndicator("academic_level")}
-                </th>
-                <th className="px-4 py-3 cursor-pointer hidden md:table-cell">
-                  JK{getSortIndicator("gender")}
-                </th>
-                <th className="px-4 py-3 rounded-r-lg">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentItems.map((student) => (
-                <tr
-                  key={student._id}
-                  className="bg-white hover:bg-emerald-50 transition-colors rounded-lg shadow-sm"
-                >
-                  <td className="px-4 py-3 hidden sm:table-cell rounded-l-lg">{student.nisn}</td>
-                  <td className="px-4 py-3">{student.name}</td>
-                  <td className="px-4 py-3 hidden sm:table-cell">{student.class_name || "-"}</td>
-                  <td className="px-4 py-3 hidden md:table-cell">{student.academic_level}</td>
-                  <td className="px-4 py-3 hidden md:table-cell">{student.gender}</td>
-                  <td className="px-4 py-3 rounded-r-lg">
-                    <Link
-                      href={`/admin/students/${student._id}`}
-                      className="text-emerald-800 font-semibold hover:underline transition-all"
-                    >
-                      Detail
-                    </Link>
-                  </td>
+        {/* Desktop / tablet: tabel */}
+        <div className="hidden md:block">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-separate border-spacing-y-2 mb-6">
+              <thead>
+                <tr className="bg-blue-800 text-white rounded-lg overflow-hidden">
+                  <th className="px-4 py-3 cursor-pointer hidden sm:table-cell rounded-l-lg">
+                    NISN{getSortIndicator("nisn")}
+                  </th>
+                  <th className="px-4 py-3 cursor-pointer">
+                    Nama{getSortIndicator("name")}
+                  </th>
+                  <th className="px-4 py-3 cursor-pointer hidden sm:table-cell">
+                    Kelas{getSortIndicator("class_name")}
+                  </th>
+                  <th className="px-4 py-3 cursor-pointer hidden md:table-cell">
+                    Jenjang{getSortIndicator("academic_level")}
+                  </th>
+                  <th className="px-4 py-3 cursor-pointer hidden md:table-cell">
+                    JK{getSortIndicator("gender")}
+                  </th>
+                  <th className="px-4 py-3 rounded-r-lg">Aksi</th>
                 </tr>
-              ))}
-              {filteredStudents.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={6}
-                    className="text-center py-6 text-emerald-800 italic bg-emerald-50 rounded-lg"
+              </thead>
+              <tbody>
+                {currentItems.map((student) => (
+                  <tr
+                    key={student._id}
+                    className="bg-white hover:bg-blue-50 transition-colors rounded-lg shadow-sm"
                   >
-                    Tidak ada data santri yang ditemukan.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                    <td className="px-4 py-3 hidden sm:table-cell rounded-l-lg">
+                      {student.nisn}
+                    </td>
+                    <td className="px-4 py-3">{student.name}</td>
+                    <td className="px-4 py-3 hidden sm:table-cell">
+                      {student.class_name || "-"}
+                    </td>
+                    <td className="px-4 py-3 hidden md:table-cell">
+                      {student.academic_level}
+                    </td>
+                    <td className="px-4 py-3 hidden md:table-cell">
+                      {student.gender}
+                    </td>
+                    <td className="px-4 py-3 rounded-r-lg">
+                      <Link
+                        href={`/admin/students/${student._id}`}
+                        className="text-blue-800 font-semibold hover:underline transition-all"
+                      >
+                        Detail
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+                {filteredStudents.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className="text-center py-6 text-blue-800 italic bg-blue-50 rounded-lg"
+                    >
+                      Tidak ada data santri yang ditemukan.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-          {/* Pagination */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6">
-            <div className="text-sm text-gray-600">
-              Menampilkan {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredStudents.length)} dari {filteredStudents.length} data
+        {/* Mobile: kartu */}
+        <div className="md:hidden space-y-3 mb-6">
+          {currentItems.map((student) => (
+            <div
+              key={student._id}
+              className="rounded-xl border border-blue-100 bg-blue-50/40 p-3 shadow-sm flex flex-col gap-2"
+            >
+              <div className="flex justify-between items-start gap-2">
+                <div>
+                  <div className="text-sm font-semibold text-blue-900">
+                    {student.name}
+                  </div>
+                  <div className="text-xs text-blue-700">
+                    NISN: {student.nisn || "-"}
+                  </div>
+                  <div className="mt-1 text-xs text-blue-700">
+                    Kelas {student.class_name || "-"} •{" "}
+                    {student.academic_level || "-"}
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-between items-center text-[11px] text-slate-700">
+                <span>JK: {student.gender || "-"}</span>
+                <Link
+                  href={`/admin/students/${student._id}`}
+                  className="text-blue-700 font-semibold text-[11px] hover:underline"
+                >
+                  Lihat detail
+                </Link>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className="px-4 py-2 rounded-lg bg-emerald-100 text-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-200 transition-colors"
-              >
-                Sebelumnya
-              </button>
-              <button
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                className="px-4 py-2 rounded-lg bg-emerald-100 text-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-200 transition-colors"
-              >
-                Selanjutnya
-              </button>
+          ))}
+          {filteredStudents.length === 0 && (
+            <div className="text-center py-4 text-blue-800 italic bg-blue-50 rounded-lg text-sm">
+              Tidak ada data santri yang ditemukan.
             </div>
+          )}
+        </div>
+
+        {/* Pagination */}
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6">
+          <div className="text-sm text-gray-600">
+            Menampilkan {indexOfFirstItem + 1}-
+            {Math.min(indexOfLastItem, filteredStudents.length)} dari {filteredStudents.length} data
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 rounded-lg bg-blue-100 text-blue-800 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-200 transition-colors"
+            >
+              Sebelumnya
+            </button>
+            <button
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 rounded-lg bg-blue-100 text-blue-800 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-200 transition-colors"
+            >
+              Selanjutnya
+            </button>
           </div>
         </div>
       </div>

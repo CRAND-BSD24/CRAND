@@ -59,43 +59,43 @@ export default function CreateFixedAllowancePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 p-6">
-      <div className="max-w-3xl mx-auto mt-10 bg-white rounded-2xl shadow-xl p-6 border-t-4 border-emerald-800">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-teal-50 p-6">
+      <div className="max-w-3xl mx-auto mt-10 bg-white rounded-2xl shadow-xl p-6 border-t-4 border-blue-800">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl sm:text-3xl font-bold text-emerald-800">{editId ? "Ubah Tunjangan Tetap" : "Tambah Tunjangan Tetap"}</h1>
-          <button onClick={() => router.push('/hrd/fixedAllowances')} className="px-4 py-2 rounded-xl bg-emerald-800 text-white">Batal</button>
+          <h1 className="text-2xl sm:text-3xl font-bold text-blue-800">{editId ? "Ubah Tunjangan Tetap" : "Tambah Tunjangan Tetap"}</h1>
+          <button onClick={() => router.push('/hrd/fixedAllowances')} className="px-4 py-2 rounded-xl bg-blue-800 text-white">Batal</button>
         </div>
-        <p className="text-emerald-700 mt-2">Lengkapi data tunjangan tetap</p>
+        <p className="text-blue-700 mt-2">Lengkapi data tunjangan tetap</p>
 
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
-            <label className="text-sm text-emerald-800">Nama Tunjangan</label>
+            <label className="text-sm text-blue-800">Nama Tunjangan</label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full border-2 border-emerald-300 rounded-xl px-3 py-2"
+              className="w-full border-2 border-blue-300 rounded-xl px-3 py-2"
               placeholder="Contoh: Tunjangan Transport"
             />
           </div>
 
           <div>
-            <label className="text-sm text-emerald-800">Prioritas</label>
+            <label className="text-sm text-blue-800">Prioritas</label>
             <input
               type="text"
               inputMode="numeric"
               value={priority}
               onChange={(e) => setPriority(sanitizeNumber(e.target.value))}
-              className="w-full border-2 border-emerald-300 rounded-xl px-3 py-2"
+              className="w-full border-2 border-blue-300 rounded-xl px-3 py-2"
               placeholder="Contoh: 1"
             />
           </div>
 
           <div>
-            <label className="text-sm text-emerald-800">Tipe</label>
+            <label className="text-sm text-blue-800">Tipe</label>
             <select
               value={type}
               onChange={(e) => setType(e.target.value === "Bulanan" ? "Bulanan" : "Harian")}
-              className="w-full border-2 border-emerald-300 rounded-xl px-3 py-2"
+              className="w-full border-2 border-blue-300 rounded-xl px-3 py-2"
             >
               <option value="Harian">Harian</option>
               <option value="Bulanan">Bulanan</option>
@@ -103,11 +103,11 @@ export default function CreateFixedAllowancePage() {
           </div>
 
           <div>
-            <label className="text-sm text-emerald-800">Terapkan</label>
+            <label className="text-sm text-blue-800">Terapkan</label>
             <select
               value={applyAt}
               onChange={(e) => setApplyAt(e.target.value === "Check Out" ? "Check Out" : "Check In")}
-              className="w-full border-2 border-emerald-300 rounded-xl px-3 py-2"
+              className="w-full border-2 border-blue-300 rounded-xl px-3 py-2"
             >
               <option value="Check In">Check In</option>
               <option value="Check Out">Check Out</option>
@@ -116,7 +116,7 @@ export default function CreateFixedAllowancePage() {
         </div>
 
         <div className="mt-6 flex justify-end">
-          <button onClick={handleSave} disabled={saving} className="px-4 py-2 rounded-xl bg-emerald-800 text-white">
+          <button onClick={handleSave} disabled={saving} className="px-4 py-2 rounded-xl bg-blue-800 text-white">
             {saving ? "Menyimpan..." : "Simpan"}
           </button>
         </div>

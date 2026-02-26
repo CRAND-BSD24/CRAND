@@ -210,8 +210,8 @@ const StudentGradesPage = ({ params }: PageProps) => {
     return (
       <div className="min-h-screen bg-[#e2f6f4] flex items-center justify-center px-4 lg:pl-64 pt-16">
         <div className="flex flex-col items-center">
-          <div className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-800 rounded-full animate-spin mb-4"></div>
-          <div className="text-emerald-800 text-base font-medium">Loading data...</div>
+          <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-800 rounded-full animate-spin mb-4"></div>
+          <div className="text-blue-800 text-base font-medium">Loading data...</div>
         </div>
       </div>
     );
@@ -232,7 +232,7 @@ const StudentGradesPage = ({ params }: PageProps) => {
           <div className="flex items-center mb-5 bg-white rounded-xl shadow-sm p-4">
             <Button
               variant="ghost"
-              className="text-emerald-700 hover:bg-emerald-50"
+              className="text-blue-700 hover:bg-blue-50"
               onClick={() => router.push("/educator/academic")}
             >
               <ArrowLeft className="w-4 h-4 mr-2" /> Kembali
@@ -241,13 +241,13 @@ const StudentGradesPage = ({ params }: PageProps) => {
 
           <Card className="bg-white rounded-xl shadow-sm">
             <CardHeader>
-              <CardTitle className="text-emerald-800">Nilai Santri</CardTitle>
+              <CardTitle className="text-blue-800">Nilai Santri</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="mb-4 flex justify-between">
                 <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button className="bg-emerald-600 hover:bg-emerald-700">
+                    <Button className="bg-blue-600 hover:bg-blue-700">
                       <Plus className="w-4 h-4 mr-2" /> Tambah Nilai
                     </Button>
                   </DialogTrigger>
@@ -299,13 +299,13 @@ const StudentGradesPage = ({ params }: PageProps) => {
                     </div>
                     <DialogFooter>
                       <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Batal</Button>
-                      <Button onClick={handleAddGrade} className="bg-emerald-600 hover:bg-emerald-700">Simpan</Button>
+                      <Button onClick={handleAddGrade} className="bg-blue-600 hover:bg-blue-700">Simpan</Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
               </div>
 
-              <div className="rounded-lg border border-emerald-100 overflow-hidden">
+              <div className="rounded-lg border border-blue-100 overflow-hidden">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -383,7 +383,7 @@ const StudentGradesPage = ({ params }: PageProps) => {
                   </div>
                   <div className="mt-4 flex gap-2">
                     <Button variant="outline" onClick={() => setShowEditForm(false)}>Batal</Button>
-                    <Button onClick={handleEditGrade} className="bg-emerald-600 hover:bg-emerald-700">Simpan</Button>
+                    <Button onClick={handleEditGrade} className="bg-blue-600 hover:bg-blue-700">Simpan</Button>
                   </div>
                 </div>
               )}
@@ -408,7 +408,7 @@ const StudentGradesPage = ({ params }: PageProps) => {
                   <DialogHeader>
                     <DialogTitle>Riwayat Nilai</DialogTitle>
                   </DialogHeader>
-                  <div className="rounded-lg border border-emerald-100 overflow-hidden">
+                  <div className="rounded-lg border border-blue-100 overflow-hidden">
                     <Table>
                       <TableHeader>
                         <TableRow>

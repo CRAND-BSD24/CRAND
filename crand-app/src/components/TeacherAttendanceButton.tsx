@@ -73,7 +73,7 @@ export default function TeacherAttendanceButton({
   const getStatusColor = () => {
     switch (status) {
       case "Hadir":
-        return "bg-emerald-600 hover:bg-emerald-700";
+        return "bg-blue-600 hover:bg-blue-700";
       case "Izin":
         return "bg-yellow-600 hover:bg-yellow-700";
       case "Sakit":
@@ -81,7 +81,7 @@ export default function TeacherAttendanceButton({
       case "Alfa":
         return "bg-red-600 hover:bg-red-700";
       default:
-        return "bg-emerald-600 hover:bg-emerald-700";
+        return "bg-blue-600 hover:bg-blue-700";
     }
   };
 

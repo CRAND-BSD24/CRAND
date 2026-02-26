@@ -1,17 +1,18 @@
 'use client';
 
 import { cn } from "@/lib/utils";
-import logo from "@/assets/logo.png";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
 import { Home, Users, UserPlus, CalendarCheck, GraduationCap, User, Bot, Menu, X, LogOut } from 'lucide-react';
 import { useState, useCallback, useEffect } from 'react';
-import { signOut } from 'next-auth/react';
+import logo from "@/assets/logo.png";
+import { signOut, useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 import { logout } from '@/app/actions/auth';
 
 const AdminSidebar = () => {
+  const { data: session } = useSession();
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(true);
 
@@ -41,39 +42,39 @@ const AdminSidebar = () => {
   return (
     <>
       {/* Mobile Header */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-emerald-800 border-b border-emerald-700/50 z-50 flex items-center justify-between px-4 lg:hidden">
+      <header className="fixed top-0 left-0 right-0 h-16 bg-blue-800 border-b border-blue-700/50 z-50 flex items-center justify-between px-4 lg:hidden">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-2 rounded-lg text-white hover:bg-emerald-700/50 active:bg-emerald-700 transition-colors"
+            className="p-2 rounded-lg text-white hover:bg-blue-700/50 active:bg-blue-700 transition-colors"
           >
             {isCollapsed ? <Menu size={20} /> : <X size={20} />}
           </button>
           <div className="flex items-center gap-3">
-            <Image src={logo} alt="logo" className="w-8 h-8 rounded-lg" width={32} height={32} priority />
+            <Image src={session?.user?.image || logo} alt="logo" className="w-8 h-8 rounded-lg object-cover" width={32} height={32} priority />
             <div className="flex flex-col">
-              <h1 className="text-lg font-bold text-white">CRAND</h1>
-              <p className="text-[11px] text-emerald-200/80">Admin Dashboard</p>
+              <h1 className="text-lg font-bold text-white truncate max-w-[150px]">{session?.user?.name || 'Ibnu Syam'}</h1>
+              <p className="text-[11px] text-blue-200/80">Admin Dashboard</p>
             </div>
           </div>
         </div>
       </header>
 
       <aside className={cn(
-        'w-64 min-h-screen bg-emerald-800 flex flex-col transition-all duration-300 ease-in-out border-r border-emerald-700/50',
+        'w-64 min-h-screen bg-blue-800 flex flex-col transition-all duration-300 ease-in-out border-r border-blue-700/50',
         'fixed inset-y-0 -left-64 lg:left-0 z-50',
         !isCollapsed && 'left-0'
       )}>
         <div className="flex flex-col flex-1 px-4 py-6 overflow-y-auto">
           <div className="flex items-center gap-3 px-2 mb-2 mt-6">
-            <Image src={logo} alt="logo" className="w-16 h-16 rounded-lg" width={64} height={64} />
+            <Image src={session?.user?.image || logo} alt="logo" className="w-16 h-16 rounded-lg object-cover" width={64} height={64} />
             <div className="flex flex-col">
-              <h1 className="text-lg font-bold text-white">CRAND</h1>
-              <p className="text-xs text-emerald-200/80">Admin Dashboard</p>
+              <h1 className="text-lg font-bold text-white truncate max-w-[180px]">{session?.user?.name || 'Admin'}</h1>
+              <p className="text-xs text-blue-200/80">Admin Dashboard</p>
             </div>
           </div>
 
-          <hr className="my-4 border-emerald-800/50" />
+          <hr className="my-4 border-blue-800/50" />
 
           <nav className="mt-2 space-y-2">
             {[
@@ -81,7 +82,6 @@ const AdminSidebar = () => {
               { href: '/admin/students', icon: Users, label: 'Santri' },
               { href: '/admin/prospective_students', icon: UserPlus, label: 'Calon Santri' },
               { href: '/admin/attendance', icon: CalendarCheck, label: 'Absensi' },
-              { href: '/admin/teachers', icon: GraduationCap, label: 'Ustad' },
               { href: '/admin/profile', icon: User, label: 'Profil' },
               { href: '/admin/pis-assistant', icon: Bot, label: 'PIS Assistant' },
             ].map(({ href, icon: Icon, label }) => (
@@ -93,8 +93,8 @@ const AdminSidebar = () => {
                   'group flex items-center px-3 py-2.5 rounded-xl transition-all duration-200',
                   'hover:bg-white/10 active:scale-[0.98]',
                   pathname === href 
-                    ? 'bg-white/15 text-white shadow-lg shadow-emerald-900/20' 
-                    : 'text-emerald-100/70 hover:text-white'
+                    ? 'bg-white/15 text-white shadow-lg shadow-blue-900/20' 
+                    : 'text-blue-100/70 hover:text-white'
                 )}
               >
                 <div className={cn(
@@ -110,7 +110,7 @@ const AdminSidebar = () => {
             ))}
           </nav>
 
-          <div className="mt-auto">
+          <div className="mt-4 lg:mt-auto lg:pb-4">
             <button
               onClick={handleLogout}
               className={cn(

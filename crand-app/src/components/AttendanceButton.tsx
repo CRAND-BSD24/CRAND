@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { FaceRecognitionService } from "@/services/faceRecognition";
 import Image from "next/image";
-import { isValidAttendanceTime, getRoleCurrentShift } from "@/lib/shift-utils";
+import { isValidAttendanceTime, getRoleCurrentShift, Role } from "@/lib/shift-utils";
+import { Loader2, MapPin, CheckCircle } from "lucide-react";
 
 interface AttendanceButtonProps {
   onSuccess?: (name: string, timestamp: string) => void;
   onError?: (message: string) => void;
-  type?: "teacher" | "admin";
+  type?: "teacher" | "admin" | "staff" | "educator" | "manager";
   isModalOpen?: boolean;
 }
 
@@ -33,26 +34,31 @@ export default function AttendanceButton({
   );
   const [locationMessage, setLocationMessage] = useState("");
   const [submitTime, setSubmitTime] = useState<string>("");
+  const [hasFaceDetection, setHasFaceDetection] = useState(false);
+  const [isGpsActive, setIsGpsActive] = useState<boolean | null>(null);
+  const [isGpsLoading, setIsGpsLoading] = useState(false);
+  const detectionLoopRef = useRef<number | null>(null);
+  const faceServiceRef = useRef<FaceRecognitionService | null>(null);
+  const lastDescriptorRef = useRef<number[] | null>(null);
 
-  useEffect(() => {
-    if (!isModalOpen) {
-      stopCamera();
-      setIsCameraActive(false);
+  const getFaceService = () => {
+    if (!faceServiceRef.current) {
+      faceServiceRef.current = FaceRecognitionService.getInstance();
     }
-  }, [isModalOpen]);
+    return faceServiceRef.current;
+  };
 
-  useEffect(() => {
-    if (isCameraActive) {
-      startCamera();
-    } else {
-      stopCamera();
+  const stopCamera = useCallback(() => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach((track) => {
+        track.stop();
+      });
+      videoRef.current.srcObject = null;
     }
-    return () => {
-      stopCamera();
-    };
-  }, [isCameraActive]);
+  }, []);
 
-  const startCamera = async () => {
+  const startCamera = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
@@ -84,23 +90,92 @@ export default function AttendanceButton({
       setIsSuccess(false);
       if (onError) onError("Tidak dapat mengakses kamera");
     }
-  };
+  }, [onError]);
 
-  const stopCamera = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach((track) => {
-        track.stop();
+  useEffect(() => {
+    if (isCameraActive) {
+      setIsGpsLoading(true);
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          () => {
+            setIsGpsActive(true);
+            setIsGpsLoading(false);
+          },
+          () => {
+            setIsGpsActive(false);
+            setIsGpsLoading(false);
+          }
+        );
+      } else {
+        setIsGpsActive(false);
+        setIsGpsLoading(false);
+      }
+      
+      const startDetectionLoop = () => {
+        if (!videoRef.current) return;
+        if (detectionLoopRef.current !== null) {
+          window.clearInterval(detectionLoopRef.current);
+        }
+        detectionLoopRef.current = window.setInterval(async () => {
+          if (!videoRef.current || videoRef.current.paused || videoRef.current.ended) return;
+          try {
+            const result = await getFaceService().detectFaceFromVideo(
+              videoRef.current
+            );
+            if (result.success) {
+              setHasFaceDetection(!!result.hasFace);
+              if (result.descriptor) {
+                lastDescriptorRef.current = result.descriptor;
+              }
+            }
+          } catch (error) {
+            console.error("Error in face detection loop:", error);
+          }
+        }, 800);
+      };
+
+      startCamera().then(() => {
+         startDetectionLoop();
       });
-      videoRef.current.srcObject = null;
+    } else {
+      stopCamera();
+      setIsGpsActive(null);
+      setIsGpsLoading(false);
+      setHasFaceDetection(false);
+      if (detectionLoopRef.current !== null) {
+        window.clearInterval(detectionLoopRef.current);
+        detectionLoopRef.current = null;
+      }
     }
-  };
+    return () => {
+      stopCamera();
+      if (detectionLoopRef.current !== null) {
+        window.clearInterval(detectionLoopRef.current);
+        detectionLoopRef.current = null;
+      }
+    };
+  }, [isCameraActive, startCamera, stopCamera]);
 
-  const toggleCamera = () => {
-    setIsCameraActive(!isCameraActive);
-  };
+  useEffect(() => {
+    if (isModalOpen) {
+      setIsCameraActive(true);
+    } else {
+      stopCamera();
+      setIsCameraActive(false);
+    }
+  }, [isModalOpen, stopCamera]);
 
   const capturePhoto = () => {
+    if (!hasFaceDetection) {
+      setMessage("Wajah belum terdeteksi. Pastikan wajah terlihat jelas di kamera.");
+      return;
+    }
+
+    if (isWithinLocation === false) {
+      setMessage("Anda berada di luar lokasi absensi yang diizinkan.");
+      return;
+    }
+
     if (videoRef.current) {
       const canvas = document.createElement("canvas");
       const vw = videoRef.current.videoWidth;
@@ -120,6 +195,8 @@ export default function AttendanceButton({
           if (blob) {
             const file = new File([blob], "photo.jpg", { type: "image/jpeg" });
             setSelectedFile(file);
+            setHasFaceDetection(true);
+            handleSubmitWithFile(file);
           }
         }, "image/jpeg");
       }
@@ -204,10 +281,9 @@ export default function AttendanceButton({
     return false;
   };
 
-  const BUFFER_MINUTES = 10;
   const checkAttendanceTime = (): { isValid: boolean; message: string; isLate?: boolean; lateMinutes?: number } => {
-    const role = type === "admin" ? "admin" : "teacher";
-    const result = isValidAttendanceTime(new Date(), role, BUFFER_MINUTES);
+    const role = type as Role;
+    const result = isValidAttendanceTime(new Date(), role);
     if (!result.isValid) {
       const label = getRoleCurrentShift(role);
       return {
@@ -224,14 +300,13 @@ export default function AttendanceButton({
     return `pukul ${hours}.${minutes} WIB`;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmitWithFile = async (file: File | null) => {
     const currentTime = new Date();
     setSubmitTime(formatTime(currentTime));
     let lat: number | null = null;
     let lng: number | null = null;
 
-    if (!selectedFile) {
+    if (!file) {
       setIsSuccess(false);
       setMessage("Silakan ambil foto terlebih dahulu.");
       if (onError) onError("Silakan ambil foto terlebih dahulu.");
@@ -307,23 +382,30 @@ export default function AttendanceButton({
     reader.onload = async () => {
       const base64String = reader.result as string;
       const base64Data = base64String.split(",")[1];
+      let descriptor = lastDescriptorRef.current;
 
-      const detectionResult = await faceService.detectFaceFromBase64(
-        base64Data
-      );
-      if (!detectionResult.success) {
-        setIsSuccess(false);
-        setMessage(detectionResult.error || "Wajah tidak terdeteksi");
-        if (onError)
-          onError(detectionResult.error || "Wajah tidak terdeteksi");
-        return;
+      if (!descriptor) {
+        const detectionResult = await getFaceService().detectFaceFromBase64(
+          base64Data
+        );
+        if (!detectionResult.success) {
+          setHasFaceDetection(false);
+          setIsSuccess(false);
+          setMessage(detectionResult.error || "Wajah tidak terdeteksi");
+          if (onError)
+            onError(detectionResult.error || "Wajah tidak terdeteksi");
+          return;
+        }
+        descriptor = detectionResult.descriptor || null;
       }
+
+      setHasFaceDetection(true);
 
       const formData = new FormData();
       formData.append("photo", base64Data);
       formData.append(
         "faceDescriptor",
-        JSON.stringify(detectionResult.descriptor)
+        JSON.stringify(descriptor)
       );
       formData.append("type", type);
       if (ENABLE_LOCATION_CHECK && lat !== null && lng !== null) {
@@ -344,135 +426,134 @@ export default function AttendanceButton({
       setMessage(data.message);
       setIsNewFace(data.isNewFace ?? null);
 
+      if (data.success) {
+        setIsCameraActive(false);
+      }
+
       if (data.name) {
         setRecognizedName(data.name);
         setAttendanceTime(data.timestamp);
         if (onSuccess) onSuccess(data.name, data.timestamp);
       }
     };
-    reader.readAsDataURL(selectedFile);
+    reader.readAsDataURL(file);
   };
 
   return (
     <div className="mb-6">
-      <button
-        onClick={toggleCamera}
-        className="w-full bg-emerald-800 text-white py-3 px-4 rounded-xl font-semibold hover:bg-emerald-700 transition-all duration-300 mb-4 flex items-center justify-center gap-2 shadow-md transform hover:scale-[1.02] active:scale-[0.98]"
-      >
-        {isCameraActive ? (
-          <>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
-            </svg>
-            Matikan Kamera
-          </>
-        ) : (
-          <>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
-            </svg>
-            Aktifkan Kamera
-          </>
-        )}
-      </button>
-
       {isCameraActive && (
-        <div className="relative">
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            className="w-full rounded-xl border-2 border-emerald-300 shadow-md bg-emerald-50"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent rounded-xl pointer-events-none"></div>
-          <button
-            onClick={capturePhoto}
-            className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-emerald-800 text-white p-3 rounded-full hover:bg-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center w-14 h-14 hover:scale-105 active:scale-95"
-            aria-label="Ambil Foto"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
-            </svg>
-          </button>
-          <div className="absolute top-3 right-3 bg-emerald-800/80 text-white px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm">
-            Kamera Aktif
-          </div>
-        </div>
-      )}
-
-      {selectedFile && (
-        <div className="mb-6 mt-5 relative w-full h-64 group">
-          <Image
-            src={URL.createObjectURL(selectedFile)}
-            alt="Preview"
-            fill
-            className="rounded-xl border-2 border-emerald-300 object-cover shadow-md transition-all duration-300 group-hover:shadow-lg"
-          />
-          <div className="absolute top-3 right-3 bg-emerald-800/80 text-white px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm">
-            Foto Siap
-          </div>
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {isNewFace && (
-          <div>
-            <label className="block text-gray-700 font-semibold mb-2">
-              Nama Anda
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full border-2 border-emerald-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all duration-200"
-              required
-              placeholder="Masukkan nama lengkap Anda"
+        <>
+          <div className="relative rounded-2xl overflow-hidden bg-black w-full aspect-[4/3] shadow-inner ring-4 ring-blue-200">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+              style={{ transform: "scaleX(-1)" }}
             />
-          </div>
-        )}
 
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent pointer-events-none" />
+
+            <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-10">
+              <div
+                className={`px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider shadow-lg backdrop-blur-md transition-all duration-300 transform ${
+                  hasFaceDetection
+                    ? "bg-blue-500/90 text-white scale-105 ring-2 ring-blue-300/80"
+                    : "bg-black/70 text-white ring-1 ring-white/20"
+                }`}
+              >
+                {hasFaceDetection ? (
+                  <span className="flex items-center gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5" />
+                    Terdeteksi
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1.5">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Mencari Wajah
+                  </span>
+                )}
+              </div>
+
+              <div
+                className={`px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider shadow-lg backdrop-blur-md transition-all duration-300 flex items-center gap-1.5 ${
+                  isGpsLoading
+                    ? "bg-amber-500/90 text-white animate-pulse"
+                  : isGpsActive
+                    ? "bg-blue-500/90 text-white ring-2 ring-blue-300/80"
+                    : "bg-red-500/90 text-white"
+                }`}
+              >
+                <MapPin className="w-3.5 h-3.5" />
+                {isGpsLoading
+                  ? "Cari GPS..."
+                  : isGpsActive
+                  ? "GPS Aktif"
+                  : "GPS Tidak Aktif"}
+              </div>
+            </div>
+
+            <div className="absolute inset-0 pointer-events-none m-3 border-2 border-white/15 rounded-2xl">
+              <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-white/60 rounded-tl-xl" />
+              <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-white/60 rounded-tr-xl" />
+              <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-white/60 rounded-bl-xl" />
+              <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-white/60 rounded-br-xl" />
+            </div>
+
+            <button
+              onClick={capturePhoto}
+              className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white p-3 rounded-full hover:bg-blue-500 transition-all duration-300 shadow-lg hover:shadow-blue-500/40 flex items-center justify-center w-14 h-14 hover:scale-105 active:scale-95"
+              aria-label="Ambil Foto"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fillRule="evenodd"
+                  d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+          </div>
+          <div className="mt-3 text-center text-xs sm:text-sm text-gray-600">
+            Posisikan wajah di dalam bingkai, lalu tekan tombol kamera untuk absensi.
+          </div>
+        </>
+      )}
+
+      <div className="mt-4 space-y-4">
         {(() => {
-          const role = type === "admin" ? "admin" : "teacher";
-          const timeCheck = isValidAttendanceTime(new Date(), role, BUFFER_MINUTES);
+          const role = ((type as string) === "admin" || (type as string) === "manager" || (type as string) === "staff" || (type as string) === "hrd" || (type as string) === "adminhrd") ? "admin" : (type as Role);
+          const timeCheck = isValidAttendanceTime(new Date(), role);
           const currentLabel = getRoleCurrentShift(role);
           return (
-            <>
-              <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-200">
                 <div className="text-sm text-gray-600 font-medium">
-                  Jadwal saat ini: {currentLabel}
+                  Jadwal: {currentLabel}
                 </div>
                 {!timeCheck.isValid && (
-                  <div className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-md px-2 py-1">
+                  <div className="text-xs text-red-700 bg-red-100 border border-red-200 rounded-md px-2 py-1 font-semibold">
                     Di luar jadwal
                   </div>
                 )}
                 {timeCheck.isValid && timeCheck.isLate && (
-                  <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2 py-1">
-                    Terlambat {timeCheck.lateMinutes} menit
+                  <div className="text-xs text-amber-700 bg-amber-100 border border-amber-200 rounded-md px-2 py-1 font-semibold">
+                    Terlambat {timeCheck.lateMinutes}m
                   </div>
                 )}
-              </div>
-              <button
-          type="submit"
-          className={`w-full mt-3 bg-emerald-800 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 shadow-md transform hover:scale-[1.02] active:scale-[0.98] ${
-            timeCheck.isValid ? "hover:bg-emerald-700" : "opacity-60 cursor-not-allowed"
-          }`}
-          disabled={!timeCheck.isValid}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-          </svg>
-          Submit Absensi
-        </button>
-            </>
+                 {timeCheck.isValid && !timeCheck.isLate && (
+                  <div className="text-xs text-green-700 bg-green-100 border border-green-200 rounded-md px-2 py-1 font-semibold">
+                    Tepat Waktu
+                  </div>
+                )}
+            </div>
           );
         })()}
-      </form>
+      </div>
 
       {message && (
         <div
           className={`mt-6 p-3 rounded-lg text-center text-sm font-semibold ${
-            isSuccess ? "bg-green-50 text-green-700 border border-green-200" : "bg-red-50 text-red-700 border border-red-200"
+            isSuccess ? "bg-blue-50 text-blue-700 border border-blue-200" : "bg-red-50 text-red-700 border border-red-200"
           }`}
         >
           <div className="flex items-center justify-center gap-2">
@@ -491,19 +572,24 @@ export default function AttendanceButton({
       )}
 
       {recognizedName && attendanceTime && (
-        <div className="mt-6 p-4 text-center bg-emerald-50 rounded-xl border border-emerald-200 shadow-sm">
-          <div className="text-lg font-semibold text-emerald-800 flex items-center justify-center gap-2">
+        <div className="mt-6 p-4 text-center bg-blue-50 rounded-xl border border-blue-200 shadow-sm">
+          <div className="text-lg font-semibold text-blue-800 flex items-center justify-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
             </svg>
             Selamat datang, {recognizedName}!
           </div>
-          <div className="flex items-center justify-center gap-1 text-sm text-emerald-700 mt-2">
+          <div className="flex items-center justify-center gap-1 text-sm text-blue-700 mt-2">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
             </svg>
             Waktu absen: {attendanceTime}
           </div>
+          {isNewFace && (
+            <div className="mt-3 text-sm font-bold text-green-600 bg-green-100 px-3 py-1 rounded-full inline-block">
+              Wajah berhasil didaftarkan untuk pertama kali
+            </div>
+          )}
         </div>
       )}
 
@@ -511,7 +597,7 @@ export default function AttendanceButton({
         <div
           className={`mb-4 p-4 rounded-xl text-center shadow-sm border ${
             isWithinLocation
-              ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+              ? "bg-blue-50 text-blue-800 border-blue-200"
               : "bg-red-50 text-red-700 border-red-200"
           }`}
         >
@@ -537,7 +623,7 @@ export default function AttendanceButton({
       )}
 
       {submitTime && (
-        <div className="mb-4 p-4 rounded-xl bg-emerald-50 text-emerald-800 text-center border border-emerald-200 shadow-sm">
+        <div className="mb-4 p-4 rounded-xl bg-blue-50 text-blue-800 text-center border border-blue-200 shadow-sm">
           <div className="text-sm font-medium flex items-center justify-center gap-1">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />

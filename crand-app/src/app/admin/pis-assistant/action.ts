@@ -5,7 +5,7 @@ import { AcademicRecord } from '@/types/database';
 import { ObjectId } from 'mongodb';
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 
-const MODEL_NAME = "gemini-1.5-flash"; 
+const MODEL_NAME = "gemini-1.5-flash-001"; 
 const API_KEY = process.env.GOOGLE_GEMINI_API_KEY;
 
 // Helper function to get gender display text

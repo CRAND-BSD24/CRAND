@@ -67,7 +67,7 @@ export default function AddProspectiveStudentModal({
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="bg-emerald-800 text-white px-3 sm:px-5 py-2 rounded-lg font-semibold shadow-md hover:bg-emerald-700 transition-transform duration-200 hover:scale-105 flex items-center gap-2 text-sm sm:text-base"
+        className="bg-blue-800 text-white px-3 sm:px-5 py-2 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition-transform duration-200 hover:scale-105 flex items-center gap-2 text-sm sm:text-base"
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
           <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
@@ -81,7 +81,7 @@ export default function AddProspectiveStudentModal({
             className="bg-white p-4 sm:p-6 rounded-xl w-full max-w-lg space-y-3 sm:space-y-4 shadow-xl max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl sm:text-2xl font-bold text-emerald-800 mb-2 text-center">
+            <h2 className="text-xl sm:text-2xl font-bold text-blue-800 mb-2 text-center">
               Tambah Data Calon Santri
             </h2>
             <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
@@ -176,7 +176,7 @@ export default function AddProspectiveStudentModal({
                 </button>
                 <button
                   type="submit"
-                  className="bg-emerald-800 text-white px-5 py-2 rounded-lg font-medium hover:bg-emerald-700 transition-transform duration-200 hover:scale-105 w-full sm:w-auto"
+                  className="bg-blue-800 text-white px-5 py-2 rounded-lg font-medium hover:bg-blue-700 transition-transform duration-200 hover:scale-105 w-full sm:w-auto"
                 >
                   Simpan
                 </button>
@@ -213,7 +213,7 @@ const Input = ({
     placeholder={placeholder}
     required={required}
     readOnly={readOnly}
-    className="w-full border border-emerald-300 rounded-md px-3 sm:px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-800 transition text-sm sm:text-base"
+    className="w-full border border-blue-300 rounded-md px-3 sm:px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-800 transition text-sm sm:text-base"
   />
 );
 
@@ -229,7 +229,7 @@ const Select = ({ name, value, onChange, children }: SelectProps) => (
     name={name}
     value={value}
     onChange={onChange}
-    className="w-full border border-emerald-300 rounded-md px-3 sm:px-4 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-800 transition text-sm sm:text-base"
+    className="w-full border border-blue-300 rounded-md px-3 sm:px-4 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-800 transition text-sm sm:text-base"
   >
     {children}
   </select>

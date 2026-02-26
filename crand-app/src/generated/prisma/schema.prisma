@@ -6,7 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
+  output   = "../../../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -15,10 +15,83 @@ datasource db {
 }
 
 model User {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  name            String?
+  email           String    @unique
+  password        String
+  role            String?
+  phone_number    String?
+  profile_picture String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  teacher         Teacher?
+  faceData        FaceData?
+  attendances     Attendance[]
+  auditLogs       AuditLog[]
+}
+
+model Teacher {
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  user_id            String   @unique @db.ObjectId
+  user               User     @relation(fields: [user_id], references: [id])
+  nip                String?
+  title_prefix       String?
+  title_suffix       String?
+  nik                String?
+  npwp               String?
+  address            String?
+  city               String?
+  birth_date         String? // Stored as string in action.ts? or Date? Assuming String for now based on usage
+  gender             String?
+  education          String?
+  start_work_date    String?
+  status_teacher     String?
+  active_status      String?
+  position           String?
+  grade              String?
+  department         String?
+  branch_office      String?
+  head_office        String?
+  supervisor_user_id String?  @db.ObjectId
+  
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model FaceData {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  user_id       String   @unique @db.ObjectId
+  user          User     @relation(fields: [user_id], references: [id])
+  face_encoding Float[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("face_data")
+}
+
+model Attendance {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String?
-  email     String   @unique
-  password  String
+  user_id   String   @db.ObjectId
+  user      User     @relation(fields: [user_id], references: [id])
+  type      String   // "Masuk" or "Pulang"
+  timestamp DateTime
+  status    String?
+  location  Json?
+  photo     String?  // Base64 or URL
+  method    String?  // "face_recognition" etc.
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  user_id   String   @db.ObjectId
+  user      User     @relation(fields: [user_id], references: [id])
+  action    String
+  details   Json?
+  timestamp DateTime @default(now())
+  
+  @@map("audit_logs")
 }

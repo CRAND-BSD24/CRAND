@@ -103,14 +103,14 @@ export default function EditTeacherModal({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[525px] p-0 overflow-hidden rounded-xl bg-white">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b border-emerald-100 bg-gradient-to-r from-emerald-50 to-teal-50">
-          <DialogTitle className="text-2xl font-semibold text-emerald-800 flex items-center gap-2">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-teal-50">
+          <DialogTitle className="text-2xl font-semibold text-blue-800 flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
             </svg>
             Edit Data Guru
           </DialogTitle>
-          <DialogDescription className="text-emerald-600">
+          <DialogDescription className="text-blue-600">
             Perbarui informasi guru di bawah ini.
           </DialogDescription>
         </DialogHeader>
@@ -123,12 +123,12 @@ export default function EditTeacherModal({
                 name="name"
                 render={({ field }: { field: any }) => (
                   <FormItem>
-                    <FormLabel className="text-emerald-700 font-medium">Nama</FormLabel>
+                    <FormLabel className="text-blue-700 font-medium">Nama</FormLabel>
                     <FormControl>
                       <Input 
                         placeholder="Masukkan nama guru" 
                         {...field} 
-                        className="border-emerald-300 focus-visible:ring-emerald-800"
+                        className="border-blue-300 focus-visible:ring-blue-800"
                       />
                     </FormControl>
                     <FormMessage className="text-red-500" />
@@ -141,12 +141,12 @@ export default function EditTeacherModal({
                 name="email"
                 render={({ field }: { field: any }) => (
                   <FormItem>
-                    <FormLabel className="text-emerald-700 font-medium">Email</FormLabel>
+                    <FormLabel className="text-blue-700 font-medium">Email</FormLabel>
                     <FormControl>
                       <Input 
                         placeholder="Masukkan email" 
                         {...field} 
-                        className="border-emerald-300 focus-visible:ring-emerald-800"
+                        className="border-blue-300 focus-visible:ring-blue-800"
                       />
                     </FormControl>
                     <FormMessage className="text-red-500" />
@@ -159,12 +159,12 @@ export default function EditTeacherModal({
                 name="nip"
                 render={({ field }: { field: any }) => (
                   <FormItem>
-                    <FormLabel className="text-emerald-700 font-medium">NIP</FormLabel>
+                    <FormLabel className="text-blue-700 font-medium">NIP</FormLabel>
                     <FormControl>
                       <Input 
                         placeholder="Masukkan NIP" 
                         {...field} 
-                        className="border-emerald-300 focus-visible:ring-emerald-800"
+                        className="border-blue-300 focus-visible:ring-blue-800"
                       />
                     </FormControl>
                     <FormMessage className="text-red-500" />
@@ -177,12 +177,12 @@ export default function EditTeacherModal({
                 name="phone"
                 render={({ field }: { field: any }) => (
                   <FormItem>
-                    <FormLabel className="text-emerald-700 font-medium">Nomor Telepon</FormLabel>
+                    <FormLabel className="text-blue-700 font-medium">Nomor Telepon</FormLabel>
                     <FormControl>
                       <Input 
                         placeholder="Masukkan nomor telepon" 
                         {...field} 
-                        className="border-emerald-300 focus-visible:ring-emerald-800"
+                        className="border-blue-300 focus-visible:ring-blue-800"
                       />
                     </FormControl>
                     <FormMessage className="text-red-500" />
@@ -195,12 +195,12 @@ export default function EditTeacherModal({
                 name="subject"
                 render={({ field }: { field: any }) => (
                   <FormItem className="md:col-span-2">
-                    <FormLabel className="text-emerald-700 font-medium">Mata Pelajaran</FormLabel>
+                    <FormLabel className="text-blue-700 font-medium">Mata Pelajaran</FormLabel>
                     <FormControl>
                       <Input 
                         placeholder="Masukkan mata pelajaran" 
                         {...field} 
-                        className="border-emerald-300 focus-visible:ring-emerald-800"
+                        className="border-blue-300 focus-visible:ring-blue-800"
                       />
                     </FormControl>
                     <FormMessage className="text-red-500" />
@@ -214,7 +214,7 @@ export default function EditTeacherModal({
                 type="button"
                 variant="outline"
                 onClick={onClose}
-                className="border-emerald-800 text-emerald-800 hover:bg-emerald-50 hover:text-emerald-700 transition-colors duration-200"
+                className="border-blue-800 text-blue-800 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
               >
                 <X className="mr-2 h-4 w-4" />
                 Batal
@@ -222,7 +222,7 @@ export default function EditTeacherModal({
               <Button 
                 type="submit" 
                 disabled={isSubmitting}
-                className="bg-emerald-800 hover:bg-emerald-700 text-white transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+                className="bg-blue-800 hover:bg-blue-700 text-white transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
               >
                 {isSubmitting ? (
                   <>

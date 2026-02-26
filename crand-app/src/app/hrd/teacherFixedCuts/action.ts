@@ -32,6 +32,7 @@ export async function getFilterOptions() {
 
   const deptCol = db.collection("departments");
   const deptDefaults = [
+    "Direksi",
     "Departemen Kepengasuhan",
     "Departemen Tahfizh",
     "Departemen Keuangan & Bisnis",

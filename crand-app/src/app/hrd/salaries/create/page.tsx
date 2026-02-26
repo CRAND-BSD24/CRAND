@@ -94,19 +94,19 @@ export default function CreateBaseSalaryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 p-6">
-      <div className="max-w-4xl mx-auto mt-10 bg-white rounded-2xl shadow-xl p-6 border-t-4 border-emerald-800">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-teal-50 p-6">
+      <div className="max-w-4xl mx-auto mt-10 bg-white rounded-2xl shadow-xl p-6 border-t-4 border-blue-800">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl sm:text-3xl font-bold text-emerald-800">Tambah Gaji Pokok</h1>
-          <button onClick={() => router.push('/hrd/salaries')} className="px-4 py-2 rounded-xl bg-emerald-800 text-white">Kembali</button>
+          <h1 className="text-2xl sm:text-3xl font-bold text-blue-800">Tambah Gaji Pokok</h1>
+          <button onClick={() => router.push('/hrd/salaries')} className="px-4 py-2 rounded-xl bg-blue-800 text-white">Kembali</button>
         </div>
-        <p className="text-emerald-700 mt-2">Jabatan: <span className="font-semibold">{job}</span></p>
+        <p className="text-blue-700 mt-2">Jabatan: <span className="font-semibold">{job}</span></p>
 
         <div className="mt-6 space-y-3">
           {entries.map((row, idx) => (
             <div key={idx} className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
               <div className="md:col-span-4">
-                <label className="text-sm text-emerald-800">Masa Bakti (Tahun)</label>
+                <label className="text-sm text-blue-800">Masa Bakti (Tahun)</label>
                 <input
                   type="text"
                   inputMode="numeric"
@@ -115,11 +115,11 @@ export default function CreateBaseSalaryPage() {
                     const v = sanitizeYears(e.target.value);
                     setEntries((prev) => prev.map((r, i) => (i === idx ? { ...r, years_of_service: v } : r)));
                   }}
-                  className="w-full border-2 border-emerald-300 rounded-xl px-3 py-2"
+                  className="w-full border-2 border-blue-300 rounded-xl px-3 py-2"
                 />
               </div>
               <div className="md:col-span-6">
-                <label className="text-sm text-emerald-800">Nominal Gaji Pokok</label>
+                <label className="text-sm text-blue-800">Nominal Gaji Pokok</label>
                 <input
                   type="text"
                   inputMode="numeric"
@@ -128,23 +128,23 @@ export default function CreateBaseSalaryPage() {
                     const v = formatThousands(e.target.value);
                     setEntries((prev) => prev.map((r, i) => (i === idx ? { ...r, amount: v } : r)));
                   }}
-                  className="w-full border-2 border-emerald-300 rounded-xl px-3 py-2"
+                  className="w-full border-2 border-blue-300 rounded-xl px-3 py-2"
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="text-sm text-emerald-800">Aksi</label>
+                <label className="text-sm text-blue-800">Aksi</label>
                 <button onClick={() => removeEntry(idx)} className="w-full px-3 py-2 rounded-xl bg-red-600 text-white hover:bg-red-700">Delete</button>
               </div>
             </div>
           ))}
           <div>
-            <button onClick={addEntry} className="px-4 py-2 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-200 hover:bg-emerald-200">Tambah</button>
+            <button onClick={addEntry} className="px-4 py-2 rounded-xl bg-blue-100 text-blue-800 border border-blue-200 hover:bg-blue-200">Tambah</button>
           </div>
         </div>
 
         <div className="mt-6 flex gap-2">
-          <button onClick={handleSave} disabled={saving} className="px-5 py-2 rounded-xl bg-emerald-800 text-white disabled:opacity-60">{saving ? "Menyimpan..." : "Simpan"}</button>
-          <button onClick={() => router.push('/hrd/salaries')} className="px-5 py-2 rounded-xl bg-gray-200 text-emerald-900">Batal</button>
+          <button onClick={handleSave} disabled={saving} className="px-5 py-2 rounded-xl bg-blue-800 text-white disabled:opacity-60">{saving ? "Menyimpan..." : "Simpan"}</button>
+          <button onClick={() => router.push('/hrd/salaries')} className="px-5 py-2 rounded-xl bg-gray-200 text-blue-900">Batal</button>
         </div>
       </div>
     </div>

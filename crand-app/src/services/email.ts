@@ -1,13 +1,5 @@
 import nodemailer from 'nodemailer';
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
-
 export async function sendEmailWithPDF(
   to: string,
   subject: string,
@@ -16,8 +8,21 @@ export async function sendEmailWithPDF(
   studentName: string
 ) {
   try {
+    if (!process.env.EMAIL_USER_NOTIFICATION || !process.env.EMAIL_PASSWORD_NOTIFICATION) {
+      console.error('Email credentials not found in environment variables');
+      return { success: false, error: 'Email credentials not found' };
+    }
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER_NOTIFICATION,
+        pass: process.env.EMAIL_PASSWORD_NOTIFICATION,
+      },
+    });
+
     const mailOptions = {
-      from: process.env.EMAIL_USER,
+      from: process.env.EMAIL_USER_NOTIFICATION,
       to,
       subject,
       text,

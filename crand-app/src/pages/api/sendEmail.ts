@@ -11,15 +11,15 @@ export default async function handler(
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'mrejaa@gmail.com',
-        pass: 'szao idot pzoq vxbi'
+        user: process.env.EMAIL_USER_NOTIFICATION,
+        pass: process.env.EMAIL_PASSWORD_NOTIFICATION,
       }
     });
 
     const pdfBuffer = Buffer.from(pdfBase64, 'base64');
 
     const mailOptions = {
-      from: "mrejaa@gmail.com",
+      from: process.env.EMAIL_USER_NOTIFICATION,
       to: emailAddress,
       subject: "Rapor Hafalan Santri",
       text: "Berikut terlampir rapor hafalan santri dalam bentuk PDF.",

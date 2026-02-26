@@ -206,7 +206,7 @@ export async function GET(request: Request) {
     infoRow("Nama Karyawan", `${teacher.user?.name ?? "-"}`);
     infoRow("Jabatan", `Guru Tahfizh`);
     infoRow("ID Karyawan", `${teacher.nip ?? teacher._id.toString()}`);
-    infoRow("Departemen", `TAHFIZH`);
+    infoRow("Departemen", `Tahfizh`);
     // Beri sedikit jarak sebelum grup Pendapatan
     infoY -= 12;
 

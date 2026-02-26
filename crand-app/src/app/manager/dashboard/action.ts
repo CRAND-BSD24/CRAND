@@ -1,93 +1,225 @@
 "use server";
 
 import { getMongoClientInstance } from "@/db/config/connection";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { ObjectId } from "mongodb";
+import { getStudentsByTeacherId } from "../attendance/action";
+import {
+  getStudentMemorization,
+  getMemorizationHistory,
+  type MemorizationHistory,
+} from "../memorization/action";
+import { startOfWeek, endOfWeek, subWeeks } from "date-fns";
 
-interface ManagerWeeklyDashboardData {
-  weeks: { label: string; start: string; end: string }[];
-  teacherAttendancePct: number[]; // per minggu, persen hadir
-  studentsMin5Count: number[]; // jumlah santri dengan >=5 halaman per minggu
-  thisWeek: {
-    attendancePct: number;
-    studentsMin5Count: number;
-  };
-}
+// Fungsi untuk menghitung jumlah halaman yang disetor
+function countPages(pages: any): number {
+  try {
+    if (!pages || typeof pages !== "string") {
+      return 0;
+    }
 
-function getWeekStartEnd(date: Date) {
-  const d = new Date(date);
-  const day = d.getDay();
-  const diffToMonday = (day + 6) % 7;
-  const start = new Date(d);
-  start.setDate(d.getDate() - diffToMonday);
-  start.setHours(0, 0, 0, 0);
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6);
-  end.setHours(23, 59, 59, 999);
-  return { start, end };
-}
+    // Bersihkan string dari kata "Halaman" dan spasi berlebih
+    const cleanPages = pages.replace(/Halaman/i, "").trim();
 
-function countWorkingDays(start: Date, end: Date) {
-  let count = 0;
-  const cur = new Date(start);
-  while (cur <= end) {
-    const day = cur.getDay();
-    if (day >= 1 && day <= 5) count++;
-    cur.setDate(cur.getDate() + 1);
+    // Jika hanya angka tunggal
+    if (!cleanPages.includes("-")) {
+      const singlePage = parseInt(cleanPages);
+      return !isNaN(singlePage) ? 1 : 0;
+    }
+
+    // Jika ada range (mengandung "-")
+    const parts = cleanPages.split(/\s*-\s*/);
+    if (parts.length === 2) {
+      const start = parseInt(parts[0]);
+      const end = parseInt(parts[1]);
+      if (!isNaN(start) && !isNaN(end) && end >= start) {
+        return end - start + 1; // Menghitung jumlah halaman dalam range
+      }
+    }
+    return 0;
+  } catch (error) {
+    console.error("Error counting pages:", error);
+    return 0;
   }
-  return count;
 }
 
-export async function getManagerWeeklyDashboardData(): Promise<ManagerWeeklyDashboardData> {
+// Fungsi untuk mengelompokkan data per siswa
+
+export interface DashboardData {
+  averageMemorization: number;
+  attendanceRate: number;
+  weeklyProgress: {
+    memorization: number[];
+    academic: number[];
+  };
+  topStudents: {
+    name: string;
+    class_name: string;
+    achievement: string;
+  }[];
+}
+
+export async function getDashboardData(): Promise<DashboardData> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized");
+  }
+
   const client = await getMongoClientInstance();
   const db = client.db("pesantren_db");
 
-  const now = new Date();
-  const weeks: { start: Date; end: Date; label: string }[] = Array.from({ length: 4 }).map((_, i) => {
-    const ref = new Date(now);
-    ref.setDate(ref.getDate() - i * 7);
-    const { start, end } = getWeekStartEnd(ref);
-    const label = `${start.toLocaleDateString("id-ID", { day: "2-digit", month: "short" })} - ${end.toLocaleDateString("id-ID", { day: "2-digit", month: "short" })}`;
-    return { start, end, label };
-  });
+  try {
+    // Get teacher's students
+    const students = await getStudentsByTeacherId();
+    const studentIds = students.map((student) => new ObjectId(student._id));
 
-  // Total ustadz (gunakan koleksi teachers)
-  const totalTeachers = await db.collection("teachers").countDocuments();
+    // Get current week's data for each student
+    const currentDate = new Date();
+    const startOfCurrentWeek = startOfWeek(currentDate, { weekStartsOn: 1 });
+    const endOfCurrentWeek = endOfWeek(currentDate, { weekStartsOn: 1 });
 
-  const teacherAttendancePct: number[] = [];
-  const studentsMin5Count: number[] = [];
+    // Get memorization data for all students
+    const memorizationData = await getStudentMemorization();
 
-  for (const w of weeks) {
-    const workingDays = countWorkingDays(w.start, w.end);
+    // Collect weekly history for each student
+    const studentWeeklyData: { [key: string]: MemorizationHistory[] } = {};
 
-    // Kehadiran ustadz: status Present per minggu
-    const presentCount = await db.collection("teacher_attendance").countDocuments({
-      date: { $gte: w.start, $lte: w.end },
-      status: "Present",
-    });
-    const attendancePct = totalTeachers > 0 && workingDays > 0
-      ? (presentCount / (totalTeachers * workingDays)) * 100
-      : 0;
-    teacherAttendancePct.push(Number(attendancePct.toFixed(1)));
+    for (const student of memorizationData) {
+      const history = await getMemorizationHistory(
+        student.id,
+        startOfCurrentWeek,
+        endOfCurrentWeek
+      );
+      studentWeeklyData[student.id] = history;
+    }
 
-    // Hafalan santri >= 5 halaman per minggu
-    const agg = await db.collection("memorization_grades").aggregate([
-      { $match: { created_at: { $gte: w.start, $lte: w.end } } },
-      { $addFields: { pages_int: { $convert: { input: "$pages", to: "int", onError: 0, onNull: 0 } } } },
-      { $group: { _id: "$student_id", totalPages: { $sum: "$pages_int" } } },
-      { $match: { totalPages: { $gte: 5 } } },
-      { $count: "count" },
-    ]).toArray();
-    const count = agg[0]?.count ?? 0;
-    studentsMin5Count.push(count);
+    // Calculate total pages for each student this week
+    const studentTotalPages = Object.entries(studentWeeklyData).map(
+      ([studentId, history]) => {
+        const student = memorizationData.find((s) => s.id === studentId);
+        const totalPages = history.reduce((sum, record) => {
+          return sum + countPages(record.pages);
+        }, 0);
+
+        return {
+          id: studentId,
+          name: student?.name || "",
+          halaqah_name: student?.halaqah_name || "",
+          juz_name: student?.juz_name || "",
+          totalPages,
+        };
+      }
+    );
+
+    console.log("Student Total Pages:", studentTotalPages);
+
+    // Calculate average memorization
+    const totalPages = studentTotalPages.reduce(
+      (sum, student) => sum + student.totalPages,
+      0
+    );
+    const averageMemorization =
+      studentTotalPages.length > 0 ? totalPages / studentTotalPages.length : 0;
+
+    // Get attendance data
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const attendanceData = await db
+      .collection("class_attendance")
+      .find({
+        student_id: { $in: studentIds },
+        date: { $gte: today },
+      })
+      .toArray();
+
+    const presentCount = attendanceData.filter(
+      (record) => record.status === "Present"
+    ).length;
+    const attendanceRate =
+      attendanceData.length > 0
+        ? (presentCount / attendanceData.length) * 100
+        : 0;
+
+    // Get weekly progress data for the last 4 weeks
+    const weeklyMemorization = await Promise.all(
+      Array.from({ length: 4 }).map(async (_, index) => {
+        const weekStart = startOfWeek(subWeeks(currentDate, index), {
+          weekStartsOn: 1,
+        });
+        const weekEnd = endOfWeek(subWeeks(currentDate, index), {
+          weekStartsOn: 1,
+        });
+
+        let weeklyTotal = 0;
+        let studentCount = 0;
+
+        for (const student of memorizationData) {
+          const weekHistory = await getMemorizationHistory(
+            student.id,
+            weekStart,
+            weekEnd
+          );
+          const studentWeeklyPages = weekHistory.reduce((sum, record) => {
+            return sum + countPages(record.pages);
+          }, 0);
+
+          if (studentWeeklyPages > 0) {
+            weeklyTotal += studentWeeklyPages;
+            studentCount++;
+          }
+        }
+
+        return studentCount > 0 ? weeklyTotal / studentCount : 0;
+      })
+    );
+
+    // Get weekly academic progress
+    const weeklyAcademic = await Promise.all(
+      Array.from({ length: 4 }).map(async (_, index) => {
+        const weekStart = startOfWeek(subWeeks(currentDate, index), {
+          weekStartsOn: 1,
+        });
+        const weekEnd = endOfWeek(subWeeks(currentDate, index), {
+          weekStartsOn: 1,
+        });
+
+        const weekData = await db
+          .collection("grades")
+          .find({
+            student_id: { $in: studentIds },
+            created_at: { $gte: weekStart, $lte: weekEnd },
+          })
+          .toArray();
+
+        return weekData.length > 0
+          ? weekData.reduce((sum, record) => sum + record.score, 0) /
+              weekData.length
+          : 0;
+      })
+    );
+
+    // Get top students based on total pages this week
+    const topStudents = studentTotalPages
+      .sort((a, b) => b.totalPages - a.totalPages)
+      .slice(0, 3)
+      .map((student) => ({
+        name: student.name,
+        class_name: `Halaqah ${student.halaqah_name}`,
+        achievement: `${student.juz_name} (${student.totalPages} halaman)`,
+      }));
+
+    return {
+      averageMemorization,
+      attendanceRate,
+      weeklyProgress: {
+        memorization: weeklyMemorization.reverse(),
+        academic: weeklyAcademic.reverse(),
+      },
+      topStudents,
+    };
+  } catch (error) {
+    console.error("Error fetching dashboard data:", error);
+    throw error;
   }
-
-  return {
-    weeks: weeks.map((w) => ({ label: w.label, start: w.start.toISOString(), end: w.end.toISOString() })),
-    teacherAttendancePct: teacherAttendancePct.reverse(),
-    studentsMin5Count: studentsMin5Count.reverse(),
-    thisWeek: {
-      attendancePct: teacherAttendancePct[0] ?? 0,
-      studentsMin5Count: studentsMin5Count[0] ?? 0,
-    },
-  };
 }

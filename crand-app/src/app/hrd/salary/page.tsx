@@ -117,17 +117,17 @@ export default function HrdSalaryPage() {
         {/* Header */}
         <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center">
-            <div className="p-3 bg-emerald-700 text-white rounded-xl mr-3">
+            <div className="p-3 bg-blue-700 text-white rounded-xl mr-3">
               <Wallet className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-emerald-900">Gaji Ustadz</h1>
-              <p className="text-emerald-700 text-sm">Perhitungan: Gaji Pokok + (Total Kehadiran x 10.000) + Lain-lain</p>
+              <h1 className="text-2xl font-bold text-blue-900">Gaji Ustadz</h1>
+              <p className="text-blue-700 text-sm">Perhitungan: Gaji Pokok + (Total Kehadiran x 10.000) + Lain-lain</p>
             </div>
           </div>
           <div className="mt-4 sm:mt-0 flex items-end gap-3">
             <div className="flex flex-col">
-              <label className="text-xs text-emerald-900/80 mb-1">Bulan</label>
+              <label className="text-xs text-blue-900/80 mb-1">Bulan</label>
               <input
                 type="month"
                 value={`${year}-${String(month).padStart(2, '0')}`}
@@ -135,7 +135,7 @@ export default function HrdSalaryPage() {
                 className="border rounded-md px-3 py-2 text-sm"
               />
             </div>
-            <Button className="bg-emerald-700 hover:bg-emerald-800" onClick={applyFilter} disabled={loading}>
+            <Button className="bg-blue-700 hover:bg-blue-800" onClick={applyFilter} disabled={loading}>
               {loading ? "Memuat..." : "Tampilkan"}
             </Button>
           </div>
@@ -146,17 +146,17 @@ export default function HrdSalaryPage() {
           <div className="group transition-all duration-300 bg-white rounded-2xl shadow-sm p-4">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm text-emerald-900/80">Total Ustadz</div>
-                <div className="text-2xl font-bold text-emerald-900">{items.length}</div>
+                <div className="text-sm text-blue-900/80">Total Ustadz</div>
+                <div className="text-2xl font-bold text-blue-900">{items.length}</div>
               </div>
-              <div className="p-2 bg-emerald-700 text-white rounded-lg"><Wallet className="w-4 h-4" /></div>
+              <div className="p-2 bg-blue-700 text-white rounded-lg"><Wallet className="w-4 h-4" /></div>
             </div>
           </div>
           <div className="group transition-all duration-300 bg-white rounded-2xl shadow-sm p-4">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm text-emerald-900/80">Total Kehadiran</div>
-                <div className="text-2xl font-bold text-emerald-900">{items.reduce((a, b) => a + (b.attendance_count || 0), 0)}</div>
+                <div className="text-sm text-blue-900/80">Total Kehadiran</div>
+                <div className="text-2xl font-bold text-blue-900">{items.reduce((a, b) => a + (b.attendance_count || 0), 0)}</div>
               </div>
               <div className="p-2 bg-blue-600 text-white rounded-lg"><Calculator className="w-4 h-4" /></div>
             </div>
@@ -164,8 +164,8 @@ export default function HrdSalaryPage() {
           <div className="group transition-all duration-300 bg-white rounded-2xl shadow-sm p-4">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm text-emerald-900/80">Total Gaji</div>
-                <div className="text-2xl font-bold text-emerald-900">{formatCurrency.format(items.reduce((a, b) => a + (b.total_salary || 0), 0))}</div>
+                <div className="text-sm text-blue-900/80">Total Gaji</div>
+                <div className="text-2xl font-bold text-blue-900">{formatCurrency.format(items.reduce((a, b) => a + (b.total_salary || 0), 0))}</div>
               </div>
               <div className="p-2 bg-amber-500 text-white rounded-lg"><Wallet className="w-4 h-4" /></div>
             </div>
@@ -174,8 +174,8 @@ export default function HrdSalaryPage() {
 
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
           <div className="p-4 border-b border-gray-100">
-            <h3 className="text-lg font-bold text-emerald-900 flex items-center">
-              <div className="w-1 h-5 bg-emerald-600 rounded-full mr-2"></div>
+            <h3 className="text-lg font-bold text-blue-900 flex items-center">
+              <div className="w-1 h-5 bg-blue-600 rounded-full mr-2"></div>
               Tabel Gaji Ustadz
             </h3>
           </div>
@@ -195,7 +195,7 @@ export default function HrdSalaryPage() {
               <TableBody>
                 {items.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center text-emerald-900/70 py-6">
+                    <TableCell colSpan={6} className="text-center text-blue-900/70 py-6">
                       {loading ? 'Memuat...' : 'Tidak ada data' }
                     </TableCell>
                   </TableRow>

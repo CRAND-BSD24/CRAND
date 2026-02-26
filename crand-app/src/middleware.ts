@@ -37,35 +37,77 @@ export async function middleware(request: NextRequest) {
   // Role-based access control
   if (token) {
     const role = token.role as string;
+    const homeUrl = role === 'adminhrd' ? '/adminhrd' : `/${role}`;
     
     // Admin routes
-    if (pathname.startsWith('/admin') && role !== 'admin') {
-      return NextResponse.redirect(new URL(`/${role}`, request.url));
+    if (pathname.startsWith('/admin') && role !== 'admin' && !pathname.startsWith('/adminhrd')) {
+      return NextResponse.redirect(new URL(homeUrl, request.url));
+    }
+
+    // AdminHRD routes
+    if (pathname.startsWith('/adminhrd') && role !== 'adminhrd') {
+      return NextResponse.redirect(new URL(homeUrl, request.url));
     }
     
     // Teacher routes
     if (pathname.startsWith('/teacher') && role !== 'teacher') {
-      return NextResponse.redirect(new URL(`/${role}`, request.url));
+      return NextResponse.redirect(new URL(homeUrl, request.url));
     }
     
     // Student routes
     if (pathname.startsWith('/student') && role !== 'student') {
-      return NextResponse.redirect(new URL(`/${role}`, request.url));
+      return NextResponse.redirect(new URL(homeUrl, request.url));
     }
 
     // HRD routes
-    if (pathname.startsWith('/hrd') && role !== 'hrd') {
-      return NextResponse.redirect(new URL(`/${role}`, request.url));
+    if (pathname.startsWith('/hrd')) {
+      if (role !== 'hrd' && role !== 'adminhrd') {
+        return NextResponse.redirect(new URL(homeUrl, request.url));
+      }
+
+      // Redirect adminhrd from /hrd to /adminhrd
+      if (role === 'adminhrd' && pathname === '/hrd') {
+        return NextResponse.redirect(new URL('/adminhrd', request.url));
+      }
+
+      // Block adminhrd from payroll routes
+      if (role === 'adminhrd' && (
+        pathname.startsWith('/hrd/salaries') ||
+        pathname.startsWith('/hrd/teacherSalaries') ||
+        pathname.startsWith('/hrd/teacherFixedCuts') ||
+        pathname.startsWith('/hrd/payrolls') ||
+        pathname.startsWith('/hrd/payrollBonuses') ||
+        pathname.startsWith('/hrd/additionalSalaries') ||
+        pathname.startsWith('/hrd/weeklyPayrolls') ||
+        pathname.startsWith('/hrd/hourPayrolls')
+      )) {
+        return NextResponse.redirect(new URL('/adminhrd', request.url));
+      }
     }
 
     // Educator routes
     if (pathname.startsWith('/educator') && role !== 'educator') {
-      return NextResponse.redirect(new URL(`/${role}`, request.url));
+      return NextResponse.redirect(new URL(homeUrl, request.url));
     }
 
     // Manager routes
     if (pathname.startsWith('/manager') && role !== 'manager') {
-      return NextResponse.redirect(new URL(`/${role}`, request.url));
+      return NextResponse.redirect(new URL(homeUrl, request.url));
+    }
+
+    // Staff routes
+    if (pathname.startsWith('/staff') && role !== 'staff') {
+      return NextResponse.redirect(new URL(homeUrl, request.url));
+    }
+
+    // Kepengasuhan routes
+    if (pathname.startsWith('/kepengasuhan') && role !== 'kepengasuhan') {
+      return NextResponse.redirect(new URL(homeUrl, request.url));
+    }
+
+    // Parenting routes
+    if (pathname.startsWith('/parenting') && role !== 'parenting') {
+      return NextResponse.redirect(new URL(homeUrl, request.url));
     }
   }
 

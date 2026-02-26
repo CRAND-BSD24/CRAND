@@ -27,6 +27,29 @@ export class FaceRecognitionService {
     }
   }
 
+  public async detectFaceFromVideo(video: HTMLVideoElement) {
+    try {
+      await this.loadModels();
+      const options = new faceapi.SsdMobilenetv1Options({ minConfidence: 0.3 });
+      const detection = await faceapi.detectSingleFace(video, options)
+        .withFaceLandmarks()
+        .withFaceDescriptor();
+      return {
+        success: true,
+        hasFace: !!detection,
+        descriptor: detection ? Array.from(detection.descriptor) : null,
+      };
+    } catch (error) {
+      console.error("Face detection from video error:", error);
+      return {
+        success: false,
+        hasFace: false,
+        descriptor: null,
+        error: error instanceof Error ? error.message : "Unknown error during face detection from video",
+      };
+    }
+  }
+
   public async detectFaceFromBase64(base64Image: string) {
     try {
       await this.loadModels();
@@ -58,6 +81,7 @@ export class FaceRecognitionService {
       console.error('Face detection error:', error);
       return {
         success: false,
+        descriptor: null,
         error: error instanceof Error ? error.message : 'Unknown error during face detection'
       };
     }

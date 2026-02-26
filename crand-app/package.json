@@ -55,7 +55,6 @@
     "dotenv": "^16.4.1",
     "embla-carousel-react": "^8.6.0",
     "encoding": "^0.1.13",
-    "face-api.js": "^0.22.2",
     "framer-motion": "^11.0.3",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.330.0",

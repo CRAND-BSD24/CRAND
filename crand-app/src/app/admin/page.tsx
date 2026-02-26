@@ -107,7 +107,7 @@ const AdminDashboard = () => {
     <div className="space-y-4 sm:space-y-8">
       <div className="flex flex-col space-y-2">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-sm sm:text-base text-emerald-600 font-medium">
+          <p className="text-sm sm:text-base text-blue-600 font-medium">
             Selamat datang di Sistem Manajemen Pesantren
           </p>
         </div>
@@ -142,8 +142,8 @@ const AdminDashboard = () => {
                     {teachers.length}
                   </p>
                 </div>
-                <div className="p-2 sm:p-3 bg-emerald-100 rounded-xl group-hover:scale-110 transition-transform duration-200">
-                  <User className="w-6 h-6 sm:w-8 sm:h-8 text-emerald-600" />
+                <div className="p-2 sm:p-3 bg-blue-100 rounded-xl group-hover:scale-110 transition-transform duration-200">
+                  <User className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
                 </div>
               </div>
             </CardContent>

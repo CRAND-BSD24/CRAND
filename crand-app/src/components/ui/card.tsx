@@ -43,3 +43,15 @@ export const CardContent = ({
 }) => {
   return <div className={`p-4 ${className}`}>{children}</div>;
 };
+
+export const CardDescription = ({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => {
+  return (
+    <p className={`text-sm text-gray-500 ${className || ""}`}>{children}</p>
+  );
+};

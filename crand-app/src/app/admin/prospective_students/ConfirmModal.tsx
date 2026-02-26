@@ -48,7 +48,7 @@ export default function ConfirmModal({
             className={`w-full sm:w-auto px-4 py-2 rounded-lg font-medium text-white transition-all
               ${type === 'danger' 
                 ? 'bg-red-500 hover:bg-red-600' 
-                : 'bg-emerald-800 hover:bg-emerald-700'
+                : 'bg-blue-800 hover:bg-blue-700'
               }`}
           >
             {confirmText}

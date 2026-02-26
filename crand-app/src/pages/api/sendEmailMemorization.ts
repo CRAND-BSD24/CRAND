@@ -13,13 +13,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
+      user: process.env.EMAIL_USER_NOTIFICATION,
+      pass: process.env.EMAIL_PASSWORD_NOTIFICATION,
     },
   });
 
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: process.env.EMAIL_USER_NOTIFICATION,
     to: emailAddress,
     subject: "Riwayat Hafalan",
     text: "Berikut adalah lampiran riwayat hafalan santri.",

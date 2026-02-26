@@ -193,7 +193,7 @@ export default function AddStudentModal({
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="bg-emerald-800 text-white px-3 sm:px-4 py-2 rounded-lg text-sm sm:text-base font-semibold shadow-md hover:bg-emerald-700 transition-all duration-300 flex items-center gap-2 w-full sm:w-auto justify-center"
+        className="bg-blue-800 text-white px-3 sm:px-4 py-2 rounded-lg text-sm sm:text-base font-semibold shadow-md hover:bg-blue-700 transition-all duration-300 flex items-center gap-2 w-full sm:w-auto justify-center"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -214,7 +214,7 @@ export default function AddStudentModal({
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl p-4 sm:p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-lg sm:text-2xl font-bold text-emerald-800">
+              <h2 className="text-lg sm:text-2xl font-bold text-blue-800">
                 Tambah Data Santri
               </h2>
               <button
@@ -248,7 +248,7 @@ export default function AddStudentModal({
                   name="name"
                   value={form.name}
                   onChange={handleChange}
-                  className="w-full p-2 sm:p-2.5 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
+                  className="w-full p-2 sm:p-2.5 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-800 focus:border-transparent transition-all"
                   required
                 />
               </div>
@@ -263,7 +263,7 @@ export default function AddStudentModal({
                   value={form.nisn}
                   onChange={handleChange}
                   required
-                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
+                  className="w-full border-2 border-blue-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent transition-all"
                 />
               </div>
 
@@ -276,7 +276,7 @@ export default function AddStudentModal({
                   name="email"
                   value={form.email}
                   onChange={handleChange}
-                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
+                  className="w-full border-2 border-blue-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent transition-all"
                 />
               </div>
 
@@ -289,7 +289,7 @@ export default function AddStudentModal({
                   value={form.gender}
                   onChange={handleChange}
                   required
-                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
+                  className="w-full border-2 border-blue-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent transition-all"
                 >
                   <option value="">Pilih Jenis Kelamin</option>
                   <option value="Laki-laki">Laki-laki</option>
@@ -306,7 +306,7 @@ export default function AddStudentModal({
                   name="phone_number"
                   value={form.phone_number}
                   onChange={handleChange}
-                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
+                  className="w-full border-2 border-blue-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent transition-all"
                 />
               </div>
 
@@ -319,7 +319,7 @@ export default function AddStudentModal({
                   name="father_name"
                   value={form.father_name}
                   onChange={handleChange}
-                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
+                  className="w-full border-2 border-blue-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent transition-all"
                 />
               </div>
 
@@ -332,7 +332,7 @@ export default function AddStudentModal({
                   name="academic_year"
                   value={form.academic_year}
                   onChange={handleChange}
-                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
+                  className="w-full border-2 border-blue-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent transition-all"
                 />
               </div>
 
@@ -344,7 +344,7 @@ export default function AddStudentModal({
                   name="program"
                   value={form.program}
                   onChange={handleChange}
-                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
+                  className="w-full border-2 border-blue-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent transition-all"
                 >
                   <option value="">Pilih Program</option>
                   <option value="Reguler">Reguler</option>
@@ -377,7 +377,7 @@ export default function AddStudentModal({
                   name="class_id"
                   value={form.class_id}
                   onChange={handleChange}
-                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
+                  className="w-full border-2 border-blue-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent transition-all"
                 >
                   <option value="">Pilih Kelas</option>
                   {classes.map((kelas) => (
@@ -397,7 +397,7 @@ export default function AddStudentModal({
                   name="VA_SPP"
                   value={form.VA_SPP}
                   onChange={handleChange}
-                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
+                  className="w-full border-2 border-blue-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent transition-all"
                 />
               </div>
 
@@ -410,7 +410,7 @@ export default function AddStudentModal({
                   name="birth_place_date"
                   value={form.birth_place_date}
                   onChange={handleChange}
-                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
+                  className="w-full border-2 border-blue-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent transition-all"
                 />
               </div>
 
@@ -422,7 +422,7 @@ export default function AddStudentModal({
                   name="address"
                   value={form.address}
                   onChange={handleChange}
-                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
+                  className="w-full border-2 border-blue-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent transition-all"
                   rows={3}
                 />
               </div>
@@ -436,7 +436,7 @@ export default function AddStudentModal({
                   name="mother_name"
                   value={form.mother_name}
                   onChange={handleChange}
-                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
+                  className="w-full border-2 border-blue-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent transition-all"
                 />
               </div>
 
@@ -448,7 +448,7 @@ export default function AddStudentModal({
                   name="academic_level"
                   value={form.academic_level}
                   onChange={handleChange}
-                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
+                  className="w-full border-2 border-blue-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent transition-all"
                 >
                   <option value="">Pilih Jenjang</option>
                   <option value="SD">SD</option>
@@ -484,7 +484,7 @@ export default function AddStudentModal({
                   name="level"
                   value={form.level}
                   onChange={handleChange}
-                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
+                  className="w-full border-2 border-blue-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent transition-all"
                 >
                   <option value="">Pilih Level</option>
                   <option value="1">1</option>
@@ -501,7 +501,7 @@ export default function AddStudentModal({
                   name="halaqah_id"
                   value={form.halaqah_id}
                   onChange={handleChange}
-                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
+                  className="w-full border-2 border-blue-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent transition-all"
                 >
                   <option value="">Pilih Halaqah</option>
                   {halaqahs.map((halaqah) => (
@@ -520,7 +520,7 @@ export default function AddStudentModal({
                   name="graduation_status"
                   value={form.graduation_status}
                   onChange={handleChange}
-                  className="w-full border-2 border-emerald-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:border-transparent transition-all"
+                  className="w-full border-2 border-blue-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent transition-all"
                 >
                   <option value="">Pilih Status</option>
                   <option value="Aktif">Aktif</option>
@@ -540,7 +540,7 @@ export default function AddStudentModal({
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-6 py-2 rounded-lg bg-emerald-800 text-white hover:bg-emerald-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2 rounded-lg bg-blue-800 text-white hover:bg-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? "Menyimpan..." : "Simpan"}
                 </button>
