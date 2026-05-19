@@ -10,6 +10,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen">
+      <meta name="google-site-verification" content="cb3Qt_ueE8oLja14ZQdeMoEOfIbbDNY4wEQwRUHxkGk" />
       {/* Navigation */}
       <nav className="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
         <div className="max-w-6xl mx-auto px-4">
